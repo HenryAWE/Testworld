@@ -48,4 +48,9 @@ namespace awe
     {
         SDL_GL_SwapWindow(m_window.GetHandle());
     }
+
+    SDL_GLContext Renderer::GetContext() const noexcept
+    {
+        return m_context;
+    }
 }

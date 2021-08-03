@@ -23,6 +23,8 @@ namespace awe
 
         void Present();
 
+        SDL_GLContext GetContext() const noexcept;
+
     private:
         Window& m_window;
         SDL_GLContext m_context = nullptr;
