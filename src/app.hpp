@@ -1,7 +1,11 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
+#ifndef TESTWORLD_APP_HPP
+#define TESTWORLD_APP_HPP
+
 #include <memory>
+#include "renderer/renderer.hpp"
 #include "window/window.hpp"
 
 
@@ -23,5 +27,8 @@ namespace awe
 
     private:
         std::shared_ptr<Window> m_window;
+        std::shared_ptr<Renderer> m_renderer;
     };
 }
+
+#endif

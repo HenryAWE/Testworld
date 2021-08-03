@@ -24,7 +24,8 @@ project(
     "Testworld"
     VERSION 0.1.0
     DESCRIPTION "A C++/OpenGL project for practicing programing"
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
+add_subdirectory(deps)
 add_subdirectory(src)

@@ -1,6 +1,9 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
+#ifndef TESTWORLD_WINDOW_WINDOW_HPP
+#define TESTWORLD_WINDOW_WINDOW_HPP
+
 #include <SDL.h>
 #include <string>
 
@@ -19,6 +22,8 @@ namespace awe
 
         ~Window() noexcept;
 
+        SDL_Window* GetHandle() const noexcept;
+
     private:
         void CreateWindow(
             const std::string& title,
@@ -32,3 +37,5 @@ namespace awe
         SDL_Window* m_handle = nullptr;
     };
 }
+
+#endif

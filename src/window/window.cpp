@@ -27,6 +27,11 @@ namespace awe
         DestroyWindow();
     }
 
+    SDL_Window* Window::GetHandle() const noexcept
+    {
+        return m_handle;
+    }
+
     void Window::CreateWindow(
         const std::string& title,
         int width,
