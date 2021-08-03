@@ -18,4 +18,5 @@ add_executable(
 
 target_link_libraries(testworld PRIVATE SDL2::SDL2 SDL2::SDL2main)
 target_link_libraries(testworld PRIVATE glad)
+target_link_libraries(testworld PRIVATE glm)
 target_link_libraries(testworld PRIVATE imgui)
