@@ -8,6 +8,7 @@
 #include <SDL.h>
 #include "buffer.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 
 namespace awe
