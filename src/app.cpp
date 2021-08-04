@@ -24,7 +24,8 @@ namespace awe
     {
         m_window = std::make_shared<Window>(
             "Testworld",
-            640, 480
+            640, 480,
+            SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE
         );
         m_renderer = std::make_shared<Renderer>(
             *m_window
@@ -62,6 +63,7 @@ namespace awe
                     break;
 
                 default:
+                    ImGui_ImplSDL2_ProcessEvent(&event);
                     break;
                 }
             }
