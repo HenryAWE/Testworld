@@ -5,6 +5,7 @@
 #define TESTWORLD_RENDERER_RENDERER_HPP
 
 #include <glad/glad.h>
+#include <string>
 #include <SDL.h>
 #include "buffer.hpp"
 #include "shader.hpp"
@@ -28,6 +29,8 @@ namespace awe
         void Present();
 
         SDL_GLContext GetContext() const noexcept;
+
+        std::string RendererInfo();
 
     private:
         Window& m_window;

@@ -31,6 +31,10 @@ namespace awe
             *m_window
         );
         m_renderer->CreateContext();
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            m_renderer->RendererInfo().c_str()
+        );
         if(SDL_GL_SetSwapInterval(1) == -1)
         {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_GL_SetSwapInterval(1) failed");
@@ -49,6 +53,11 @@ namespace awe
 
     void App::Mainloop()
     {
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Begin mainloop"
+        );
+
         bool quit = false;
         while(!quit)
         {
@@ -79,6 +88,11 @@ namespace awe
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             m_renderer->Present();
         }
+
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Quit mainloop"
+        );
     }
 
     void App::Quit()

@@ -5,6 +5,7 @@
 #include "renderer.hpp"
 #include <cassert>
 #include <stdexcept>
+#include <fmt/format.h>
 #include "../window/window.hpp"
 
 
@@ -52,5 +53,18 @@ namespace awe
     SDL_GLContext Renderer::GetContext() const noexcept
     {
         return m_context;
+    }
+
+    std::string Renderer::RendererInfo()
+    {
+        return fmt::format(
+            "OpenGL Information\n"
+            "Vendor: {}\n"
+            "Renderer: {}\n"
+            "Version: {}",
+            glGetString(GL_VENDOR),
+            glGetString(GL_RENDERER),
+            glGetString(GL_VERSION)
+        );
     }
 }
