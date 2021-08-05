@@ -6,4 +6,6 @@ namespace awe
     void InitSDL();
 
     void QuitSDL() noexcept;
+
+    void Prepare(const char* argv0);
 }

@@ -9,6 +9,7 @@
 
 int SDL_main(int argc, char* argv[])
 {
+    awe::Prepare(argv[0]);
     awe::InitSDL();
 
     auto& app = awe::App::GetInstance();
