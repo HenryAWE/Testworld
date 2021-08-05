@@ -49,6 +49,18 @@ namespace awe
         {
             throw std::runtime_error("ImGui_ImplOpenGL3_Init() failed");
         }
+
+        auto& io = ImGui::GetIO();
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "ImGui Information\n"
+            "Version: %s (%d)\n"
+            "Platform: %s\n"
+            "Renderer: %s",
+            IMGUI_VERSION, IMGUI_VERSION_NUM,
+            io.BackendPlatformName,
+            io.BackendRendererName
+        );
     }
 
     void App::Mainloop()
@@ -68,7 +80,10 @@ namespace awe
                 switch(event.type)
                 {
                 case SDL_QUIT:
-                    quit = true;
+                    if(BeforeQuit)
+                        quit = BeforeQuit();
+                    else
+                        quit = true;
                     break;
 
                 default:

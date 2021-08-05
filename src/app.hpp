@@ -4,6 +4,7 @@
 #ifndef TESTWORLD_APP_HPP
 #define TESTWORLD_APP_HPP
 
+#include <functional>
 #include <memory>
 #include <imgui.h>
 #include "renderer/renderer.hpp"
@@ -25,6 +26,8 @@ namespace awe
         void Mainloop();
 
         void Quit();
+
+        std::function<bool()> BeforeQuit;
 
     private:
         std::shared_ptr<Window> m_window;
