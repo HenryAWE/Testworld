@@ -12,3 +12,4 @@ add_library(
 target_include_directories(imgui PUBLIC .)
 target_link_libraries(imgui PRIVATE SDL2::SDL2)
 target_link_libraries(imgui PRIVATE glad)
+target_compile_definitions(imgui PUBLIC IMGUI_DISABLE_OBSOLETE_FUNCTIONS)

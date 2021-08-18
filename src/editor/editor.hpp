@@ -6,5 +6,6 @@
 
 #include <imgui.h>
 #include "viewer.hpp"
+#include "pixelpainter.hpp"
 
 #endif
