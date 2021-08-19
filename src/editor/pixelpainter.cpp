@@ -16,11 +16,11 @@ namespace awe
     {
         std::size_t CalcIndex(
             glm::ivec2 coord,
-            std::size_t side_count
+            glm::ivec2 size
         ) {
-            if(coord[0] >= side_count || coord[1] >= side_count)
+            if(coord[0] >= size[0] || coord[1] >= size[1])
                 return -1;
-            return coord[1] * side_count + coord[0];
+            return coord[1] * size[0] + coord[0];
         }
 
         enum ToolId : int
@@ -52,6 +52,9 @@ namespace awe
 
     void PixelPainter::NewFrame()
     {
+        if(!m_open)
+            return;
+
         auto& io = ImGui::GetIO();
 
         const int flags =
@@ -75,7 +78,52 @@ namespace awe
         MenuBar();
         Toolbox();
         ImGui::SameLine();
-        Canvas();
+        ImGui::BeginChild("##images", ImVec2(0, -22));
+        if(m_bm_data.empty())
+            ImGui::TextDisabled("(empty)");
+        else
+        {
+            if(ImGui::BeginTabBar("##images_tabbar"))
+            {
+                for(int i = 0; i < m_bm_data.size(); ++i)
+                {
+                    ImGui::PushID(i);
+                    bool tabitem_open = true;
+                    if(ImGui::BeginTabItem(m_bm_data[i].name.c_str(), &tabitem_open))
+                    {
+                        Canvas(m_bm_data[i]);
+                        ImGui::EndTabItem();
+                    }
+                    ImGui::PopID();
+                    if(!tabitem_open && !m_bm_data[i].saved)
+                    {
+                        m_popup = [this, i]()
+                        {
+                            ImGui::TextColored(
+                                ImVec4(1, 0, 0, 1),
+                                "\"%s\" is unsaved\n"
+                                "Do you want to close it WITHOUT SAVING it?",
+                                m_bm_data[i].name.c_str()
+                            );
+                            if(ImGui::Button("Confirm"))
+                            {
+                                m_bm_data.erase(m_bm_data.begin() + i);
+                                ImGui::CloseCurrentPopup();
+                                m_popup = std::function<void()>();
+                            }
+                            ImGui::SameLine();
+                            if(ImGui::Button("Cancel"))
+                            {
+                                ImGui::CloseCurrentPopup();
+                                m_popup = std::function<void()>();
+                            }
+                        };
+                    }
+                }
+                ImGui::EndTabBar();
+            }
+        }
+        ImGui::EndChild();
         BottomToolbox();
 
         // Popup window
@@ -95,13 +143,25 @@ namespace awe
         ImGui::End();
     }
 
-    glm::u8vec4 PixelPainter::GetColor(glm::ivec2 coord)
-    {
-        std::size_t index = detailed::CalcIndex(coord, m_side);
+    glm::u8vec4 PixelPainter::GetColor(
+            std::size_t index,
+            glm::ivec2 coord
+    ) {
+        auto& bm = m_bm_data[index];
+        std::size_t data_index = detailed::CalcIndex(coord, bm.size);
         if(index == -1)
             throw std::out_of_range("Out of range");
 
-        return m_bitmap[index];
+        return bm.data[data_index];
+    }
+
+    void PixelPainter::Show() noexcept
+    {
+        m_open = true;
+    }
+    void PixelPainter::Hide() noexcept
+    {
+        m_open = false;
     }
 
     void PixelPainter::MenuBar()
@@ -166,13 +226,12 @@ namespace awe
 
         ImGui::EndChild();
     }
-    void PixelPainter::Canvas()
+    void PixelPainter::Canvas(BitmapData& bm)
     {
         const int flags =
             ImGuiWindowFlags_NoMove;
 
-        ImVec2 size(0.0f, -22.0f);
-        if(!ImGui::BeginChild("##canvas", size, true, flags))
+        if(!ImGui::BeginChild("##canvas", ImVec2(0, 0), true, flags))
         {
             ImGui::EndChild();
             return;
@@ -226,7 +285,12 @@ namespace awe
                     if(ImGui::Button("Confirm"))
                     {
                         NewBitmap(buf, size);
-                        std::memset(buf, 0, 128);
+                        ImGui::CloseCurrentPopup();
+                        m_popup = std::function<void()>();
+                    }
+                    ImGui::SameLine();
+                    if(ImGui::Button("Cancel"))
+                    {
                         ImGui::CloseCurrentPopup();
                         m_popup = std::function<void()>();
                     }
@@ -238,6 +302,12 @@ namespace awe
 
     void PixelPainter::NewBitmap(const std::string& name, glm::ivec2 size)
     {
-        //TODO
+        BitmapData bm;
+        bm.name = name;
+        bm.size = size;
+        bm.saved = false;
+        bm.data.resize(size[0] * size[1]);
+
+        m_bm_data.emplace_back(std::move(bm));
     }
 }

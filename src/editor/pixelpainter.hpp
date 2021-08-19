@@ -20,13 +20,30 @@ namespace awe
 
         void NewFrame();
 
-        glm::u8vec4 GetColor(glm::ivec2 coord);
+        glm::u8vec4 GetColor(
+            std::size_t index,
+            glm::ivec2 coord
+        );
+
+        void Show() noexcept;
+        void Hide() noexcept;
+        [[nodiscard]]
+        constexpr bool IsShow() const noexcept { return m_open; }
 
     private:
+        /* Bitmap data */
+        struct BitmapData
+        {
+            std::string name;
+            std::vector<glm::u8vec4> data;
+            glm::ivec2 size;
+            bool saved;
+        };
+
         /* Children */
         void MenuBar();
         void Toolbox();
-        void Canvas();
+        void Canvas(BitmapData& bm);
         void BottomToolbox();
 
         void MenuBar_File();
@@ -39,10 +56,7 @@ namespace awe
         glm::vec4 m_color[2];
         int m_current_tool_id = 0;
         float m_factor = 1.0f;
-        /* Bitmap data */
-        std::vector<glm::u8vec4> m_bitmap; //RGBA
-        // The total bitmap size will be square of this variable
-        std::size_t m_side = 0;
+        std::vector<BitmapData> m_bm_data; // Data of bitmaps
     };
 }
 
