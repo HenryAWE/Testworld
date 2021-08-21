@@ -23,6 +23,19 @@ namespace awe
         {
             throw std::runtime_error(SDL_GetError());
         }
+
+        SDL_version sdl_ver;
+        SDL_VERSION(&sdl_ver);
+        // runtime version, may be different from the compile-time version
+        SDL_version sdl_ver_rt;
+        SDL_GetVersion(&sdl_ver_rt);
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "SDL version: %d.%d.%d\n"
+            "SDL version (runtime): %d.%d.%d",
+            sdl_ver.major, sdl_ver.major, sdl_ver.patch,
+            sdl_ver_rt.major, sdl_ver_rt.major, sdl_ver_rt.patch
+        );
     }
 
     void QuitSDL() noexcept
