@@ -2,12 +2,16 @@
 // License: The 3-clause BSD License
 
 #include "pixelpainter.hpp"
+#include <filesystem>
 #include <stdexcept>
 #include <imgui.h>
+#include <ImGuiFileDialog.h>
 #define IMGUI_DEFINE_MATH_OPERATORS 1
 #include <imgui_internal.h>
 #include <fmt/core.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <stb_image.h>
+#include <stb_image_write.h>
 
 
 namespace awe
@@ -85,12 +89,14 @@ namespace awe
         {
             if(ImGui::BeginTabBar("##images_tabbar"))
             {
-                for(int i = 0; i < m_bm_data.size(); ++i)
+                std::size_t current = -1;
+                for(std::size_t i = 0; i < m_bm_data.size(); ++i)
                 {
-                    ImGui::PushID(i);
+                    ImGui::PushID(static_cast<int>(i));
                     bool tabitem_open = true;
                     if(ImGui::BeginTabItem(m_bm_data[i].name.c_str(), &tabitem_open))
                     {
+                        current = i;
                         Canvas(m_bm_data[i]);
                         ImGui::EndTabItem();
                     }
@@ -121,6 +127,7 @@ namespace awe
                     }
                 }
                 ImGui::EndTabBar();
+                m_current_bm_idx = current;
             }
         }
         ImGui::EndChild();
@@ -141,6 +148,30 @@ namespace awe
         }
 
         ImGui::End();
+
+        auto filedlg = ImGuiFileDialog::Instance();
+        if(filedlg->Display("#pixelpainter_saveas"))
+        {
+            if(filedlg->IsOk())
+            {
+                if(m_current_bm_idx != -1)
+                {
+                    using std::filesystem::path;
+
+                    auto& bm = m_bm_data[m_current_bm_idx];
+                    auto file =
+                        path(filedlg->GetCurrentPath()) /
+                        path(filedlg->GetCurrentFileName());
+                    stbi_write_bmp(
+                        file.u8string().c_str(),
+                        bm.size[0], bm.size[1],
+                        STBI_rgb_alpha,
+                        bm.data.data()
+                    );
+                }
+            }
+            filedlg->Close();
+        }
     }
 
     glm::u8vec4 PixelPainter::GetColor(
@@ -270,7 +301,7 @@ namespace awe
     {
         if(ImGui::BeginMenu("File"))
         {
-            if(ImGui::MenuItem("New..."))
+            if(ImGui::MenuItem("New...", "Ctrl+N"))
             {
                 m_popup = [this]()
                 {
@@ -296,8 +327,20 @@ namespace awe
                     }
                 };
             }
+
+            if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S", nullptr, !m_bm_data.empty()))
+            {
+                using namespace std::filesystem;
+                ImGuiFileDialog::Instance()->OpenModal(
+                    "#pixelpainter_saveas",
+                    "Save",
+                    ".bmp,.png,.dat",
+                    (current_path() / m_bm_data[m_current_bm_idx].name).u8string()
+                );
+            }
             ImGui::EndMenu();
         }
+        
     }
 
     void PixelPainter::NewBitmap(const std::string& name, glm::ivec2 size)
@@ -306,7 +349,7 @@ namespace awe
         bm.name = name;
         bm.size = size;
         bm.saved = false;
-        bm.data.resize(size[0] * size[1]);
+        bm.data.resize(size[0] * size[1], glm::u8vec4(255));
 
         m_bm_data.emplace_back(std::move(bm));
     }

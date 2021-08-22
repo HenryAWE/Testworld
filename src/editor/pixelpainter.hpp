@@ -57,6 +57,7 @@ namespace awe
         int m_current_tool_id = 0;
         float m_factor = 1.0f;
         std::vector<BitmapData> m_bm_data; // Data of bitmaps
+        std::size_t m_current_bm_idx = -1;
     };
 }
 
