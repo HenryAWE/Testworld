@@ -97,7 +97,7 @@ namespace awe
                     if(ImGui::BeginTabItem(m_bm_data[i].name.c_str(), &tabitem_open))
                     {
                         current = i;
-                        Canvas(m_bm_data[i]);
+                        Canvas(i);
                         ImGui::EndTabItem();
                     }
                     ImGui::PopID();
@@ -149,8 +149,10 @@ namespace awe
 
         ImGui::End();
 
+        const int filedlg_flags = 32 |
+            ImGuiWindowFlags_NoSavedSettings;
         auto filedlg = ImGuiFileDialog::Instance();
-        if(filedlg->Display("#pixelpainter_saveas"))
+        if(filedlg->Display("#pixelpainter_saveas", filedlg_flags, ImVec2(400, 300)))
         {
             if(filedlg->IsOk())
             {
@@ -257,17 +259,24 @@ namespace awe
 
         ImGui::EndChild();
     }
-    void PixelPainter::Canvas(BitmapData& bm)
+    void PixelPainter::Canvas(std::size_t id)
     {
         const int flags =
             ImGuiWindowFlags_NoMove;
 
-        if(!ImGui::BeginChild("##canvas", ImVec2(0, 0), true, flags))
+        if(ImGui::BeginChild("##canvas", ImVec2(0, 0), true, flags))
         {
-            ImGui::EndChild();
-            return;
+            auto& tex = GetCachedTex(id);
+            ImVec2 im_size(
+                static_cast<float>(tex.GetSize()[0]),
+                static_cast<float>(tex.GetSize()[1])
+            );
+            ImGui::Image(
+                reinterpret_cast<void*>((std::ptrdiff_t)tex.GetHandle()),
+                im_size * m_factor
+            );
+            ImGui::Text("test");
         }
-
 
         ImGui::EndChild();
     }
@@ -351,6 +360,24 @@ namespace awe
         bm.saved = false;
         bm.data.resize(size[0] * size[1], glm::u8vec4(255));
 
-        m_bm_data.emplace_back(std::move(bm));
+        m_bm_data.push_back(std::move(bm));
+    }
+
+    Texture& PixelPainter::GetCachedTex(std::size_t id)
+    {
+        auto iter = m_cache.find(id);
+        if(iter != m_cache.end())
+            return iter->second;
+
+        auto& bm = m_bm_data[id];
+        Texture tex;
+        tex.LoadMemory(
+            glm::value_ptr(bm.data[0]),
+            bm.size,
+            true
+        );
+        return m_cache.emplace(
+            std::make_pair(id, std::move(tex))
+        ).first->second;
     }
 }
