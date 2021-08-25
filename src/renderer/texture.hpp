@@ -42,7 +42,8 @@ namespace awe
 
         Texture() = default;
         Texture(Texture&& move) noexcept
-            : m_handle(std::exchange(move.m_handle, 0)) {}
+            : m_handle(std::exchange(move.m_handle, 0)),
+            m_size(std::exchange(move.m_size, glm::ivec2(0))) {}
         Texture(const Texture&) = delete;
 
         ~Texture() noexcept;
@@ -56,6 +57,17 @@ namespace awe
         );
         bool LoadFileEx(
             const std::filesystem::path& file,
+            bool gen_mipmap,
+            TexDescription desc
+        );
+        bool LoadMemory(
+            unsigned char* data,
+            glm::ivec2 size,
+            bool gen_mipmap = true
+        );
+        bool LoadMemoryEx(
+            unsigned char* data,
+            glm::ivec2 size,
             bool gen_mipmap,
             TexDescription desc
         );
