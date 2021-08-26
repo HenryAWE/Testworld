@@ -297,11 +297,20 @@ namespace awe
         );
         ImGui::SameLine();
 
+        if(ImGui::Button("R"))
+        {
+            m_factor = 1.0f;
+        }
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Reset Factor");
+        }
+        ImGui::SameLine();
         ImGui::SetNextItemWidth(120.0f);
         ImGui::SliderFloat(
             "Factor",
             &m_factor,
-            0.1f, 10.0f, "%.01f"
+            0.5f, 25.0f, "%.01f"
         );
         ImGui::EndChild();
     }
@@ -322,7 +331,25 @@ namespace awe
                     );
                     static glm::ivec2 size = { 16, 16 };
                     ImGui::InputInt2("Size", glm::value_ptr(size));
-                    if(ImGui::Button("Confirm"))
+
+                    bool valid = true;
+                    if(buf[0] == '\0')
+                    {
+                        ImGui::TextColored(
+                            ImVec4(1, 0, 0, 1),
+                            "Name cannot be empty"
+                        );
+                        valid = false;
+                    }
+                    if(size[0] > 256 || size[1] > 256)
+                    {
+                        ImGui::TextColored(
+                            ImVec4(1, 0, 0, 1),
+                            "Size cannot be bigger than 256*256"
+                        );
+                        valid = false;
+                    }
+                    if(ImGui::Button("Confirm") && valid)
                     {
                         NewBitmap(buf, size);
                         ImGui::CloseCurrentPopup();
