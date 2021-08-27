@@ -4,6 +4,7 @@
 #ifndef TESTWORLD_EDITOR_PIXELPAINTER_HPP
 #define TESTWORLD_EDITOR_PIXELPAINTER_HPP
 
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <vector>
@@ -42,6 +43,7 @@ namespace awe
             std::vector<glm::u8vec4> data;
             glm::ivec2 size;
             bool saved = false;
+            std::filesystem::path file;
         };
 
         /* Children */
@@ -51,6 +53,8 @@ namespace awe
         void BottomToolbox();
 
         void MenuBar_File();
+
+        void OpenDlg_SaveAs(std::size_t id);
 
         void NewBitmap(const std::string& name, glm::ivec2 size);
 

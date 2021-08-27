@@ -170,6 +170,7 @@ namespace awe
                         STBI_rgb_alpha,
                         bm.data.data()
                     );
+                    bm.file = file;
                 }
             }
             filedlg->Close();
@@ -275,7 +276,8 @@ namespace awe
                 reinterpret_cast<void*>((std::ptrdiff_t)tex.GetHandle()),
                 im_size * m_factor
             );
-            ImGui::Text("test");
+            if(!m_bm_data[id].file.empty())
+                ImGui::TextDisabled("Path: %s", m_bm_data[id].file.u8string().c_str());
         }
 
         ImGui::EndChild();
@@ -337,19 +339,39 @@ namespace awe
                 };
             }
 
+            if(ImGui::MenuItem("Save", "Ctrl+S", nullptr, !m_bm_data.empty()))
+            {
+                auto& bm = m_bm_data[m_current_bm_idx];
+                if(bm.file.empty())
+                    OpenDlg_SaveAs(m_current_bm_idx);
+                else
+                {
+                    stbi_write_bmp(
+                        bm.file.u8string().c_str(),
+                        bm.size[0], bm.size[1],
+                        STBI_rgb_alpha,
+                        bm.data.data()
+                    );
+                }
+            }
             if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S", nullptr, !m_bm_data.empty()))
             {
-                using namespace std::filesystem;
-                ImGuiFileDialog::Instance()->OpenModal(
-                    "#pixelpainter_saveas",
-                    "Save",
-                    ".bmp,.png,.dat",
-                    (current_path() / m_bm_data[m_current_bm_idx].name).u8string()
-                );
+                OpenDlg_SaveAs(m_current_bm_idx);
             }
             ImGui::EndMenu();
         }
         
+    }
+
+    void PixelPainter::OpenDlg_SaveAs(std::size_t id)
+    {
+        using namespace std::filesystem;
+        ImGuiFileDialog::Instance()->OpenModal(
+            "#pixelpainter_saveas",
+            "Save As",
+            ".bmp,.png,.dat",
+            (current_path() / m_bm_data[id].name).u8string()
+        );
     }
 
     void PixelPainter::NewBitmap(const std::string& name, glm::ivec2 size)
