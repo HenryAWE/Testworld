@@ -126,4 +126,47 @@ namespace awe
 
         return true;
     }
+    bool Texture::LoadMemory(
+            unsigned char* data,
+            glm::ivec2 size,
+            bool gen_mipmap
+    ) {
+        TexDescription default_desc;
+        default_desc.s = TexDescription::REPEAT;
+        default_desc.t = TexDescription::REPEAT;
+        default_desc.min = TexDescription::LINEAR;
+        default_desc.mag = TexDescription::LINEAR;
+
+        return LoadMemoryEx(data, size, gen_mipmap, default_desc);
+    }
+    bool Texture::LoadMemoryEx(
+            unsigned char* data,
+            glm::ivec2 size,
+            bool gen_mipmap,
+            TexDescription desc
+    ) {
+        if(!m_handle)
+            Generate();
+
+        glBindTexture(GL_TEXTURE_2D, m_handle);
+        detailed::ApplyDesc(desc, gen_mipmap);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            size[0],
+            size[1],
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            data
+        );
+        if(gen_mipmap)
+            glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        m_size = size;
+
+        return true;
+    }
 }

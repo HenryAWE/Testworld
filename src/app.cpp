@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
+#include "editor/editor.hpp"
 #include "renderer/renderer.hpp"
 
 
