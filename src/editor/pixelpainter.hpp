@@ -63,6 +63,10 @@ namespace awe
 
         Texture& GetCachedTex(std::size_t id);
 
+        void SetPopup(const std::string& title, std::function<void()> callback);
+        void ClearPopup();
+
+        std::string m_popup_title;
         std::function<void()> m_popup;
 
         bool m_open = true;

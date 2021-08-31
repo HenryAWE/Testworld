@@ -111,30 +111,34 @@ namespace awe
                         if(m_bm_data[i].saved)
                         {
                             DestroyBitmap(i);
+                            current = -1; // To avoid bugs
                         }
                         else
                         {
-                            m_popup = [this, i]()
-                            {
-                                ImGui::TextColored(
-                                    ImVec4(1, 0, 0, 1),
-                                    "\"%s\" is unsaved\n"
-                                    "Do you want to close it WITHOUT SAVING it?",
-                                    m_bm_data[i].name.c_str()
-                                );
-                                if(ImGui::Button("Confirm"))
+                            SetPopup(
+                                "WARNING!",
+                                [this, i]()
                                 {
-                                    DestroyBitmap(i);
-                                    ImGui::CloseCurrentPopup();
-                                    m_popup = std::function<void()>();
+                                    ImGui::TextColored(
+                                        ImVec4(1, 0, 0, 1),
+                                        "\"%s\" is unsaved\n"
+                                        "Do you want to close it WITHOUT SAVING it?",
+                                        m_bm_data[i].name.c_str()
+                                    );
+                                    if(ImGui::Button("Confirm"))
+                                    {
+                                        DestroyBitmap(i);
+                                        ImGui::CloseCurrentPopup();
+                                        m_popup = std::function<void()>();
+                                    }
+                                    ImGui::SameLine();
+                                    if(ImGui::Button("Cancel"))
+                                    {
+                                        ImGui::CloseCurrentPopup();
+                                        ClearPopup();
+                                    }
                                 }
-                                ImGui::SameLine();
-                                if(ImGui::Button("Cancel"))
-                                {
-                                    ImGui::CloseCurrentPopup();
-                                    m_popup = std::function<void()>();
-                                }
-                            };
+                            );
                         }
                     }
                 }
@@ -147,12 +151,11 @@ namespace awe
 
         // Popup window
         if(m_popup)
-            ImGui::OpenPopup("##popup");
+            ImGui::OpenPopup(m_popup_title.c_str());
         const int popup_flags =
-            ImGuiWindowFlags_NoTitleBar |
             ImGuiWindowFlags_AlwaysAutoResize |
             ImGuiWindowFlags_NoMove;
-        if(ImGui::BeginPopupModal("##popup", nullptr, popup_flags))
+        if(ImGui::BeginPopupModal(m_popup_title.c_str(), nullptr, popup_flags))
         {
             if(m_popup)
                 m_popup();
@@ -361,7 +364,7 @@ namespace awe
             0.1f, 25.0f, "%.01f"
         );
 
-        if(!m_bm_data.empty())
+        if(!m_bm_data.empty() && m_current_bm_idx != -1)
         {
             auto& img = m_bm_data[m_current_bm_idx];
 
@@ -401,47 +404,50 @@ namespace awe
         {
             if(ImGui::MenuItem("New...", "Ctrl+N"))
             {
-                m_popup = [this]()
-                {
-                    static char buf[128] = "New Bitmap";
-                    ImGui::InputText(
-                        "Name",
-                        buf,
-                        128
-                    );
-                    static glm::ivec2 size = { 16, 16 };
-                    ImGui::InputInt2("Size", glm::value_ptr(size));
+                SetPopup(
+                    "New Bitmap",
+                    [this]()
+                    {
+                        static char buf[128] = "New Bitmap";
+                        ImGui::InputText(
+                            "Name",
+                            buf,
+                            128
+                        );
+                        static glm::ivec2 size = { 16, 16 };
+                        ImGui::InputInt2("Size", glm::value_ptr(size));
 
-                    bool valid = true;
-                    if(buf[0] == '\0')
-                    {
-                        ImGui::TextColored(
-                            ImVec4(1, 0, 0, 1),
-                            "Name cannot be empty"
-                        );
-                        valid = false;
+                        bool valid = true;
+                        if(buf[0] == '\0')
+                        {
+                            ImGui::TextColored(
+                                ImVec4(1, 0, 0, 1),
+                                "Name cannot be empty"
+                            );
+                            valid = false;
+                        }
+                        if(size[0] > 256 || size[1] > 256)
+                        {
+                            ImGui::TextColored(
+                                ImVec4(1, 0, 0, 1),
+                                "Size cannot be bigger than 256*256"
+                            );
+                            valid = false;
+                        }
+                        if(ImGui::Button("Confirm") && valid)
+                        {
+                            NewBitmap(buf, size);
+                            ImGui::CloseCurrentPopup();
+                            ClearPopup();
+                        }
+                        ImGui::SameLine();
+                        if(ImGui::Button("Cancel"))
+                        {
+                            ImGui::CloseCurrentPopup();
+                            ClearPopup();
+                        }
                     }
-                    if(size[0] > 256 || size[1] > 256)
-                    {
-                        ImGui::TextColored(
-                            ImVec4(1, 0, 0, 1),
-                            "Size cannot be bigger than 256*256"
-                        );
-                        valid = false;
-                    }
-                    if(ImGui::Button("Confirm") && valid)
-                    {
-                        NewBitmap(buf, size);
-                        ImGui::CloseCurrentPopup();
-                        m_popup = std::function<void()>();
-                    }
-                    ImGui::SameLine();
-                    if(ImGui::Button("Cancel"))
-                    {
-                        ImGui::CloseCurrentPopup();
-                        m_popup = std::function<void()>();
-                    }
-                };
+                );
             }
             if(ImGui::MenuItem("Open...", "Ctrl+O"))
             {
@@ -535,6 +541,10 @@ namespace awe
         auto iter = m_cache.find(id);
         if(iter != m_cache.end())
             m_cache.erase(iter);
+
+        // Reset index
+        if(m_current_bm_idx == id)
+            m_current_bm_idx = -1;
     }
 
     Texture& PixelPainter::GetCachedTex(std::size_t id)
@@ -559,5 +569,15 @@ namespace awe
         return m_cache.emplace(
             std::make_pair(id, std::move(tex))
         ).first->second;
+    }
+
+    void PixelPainter::SetPopup(const std::string& title, std::function<void()> callback)
+    {
+        m_popup_title = title + "###popup";
+        m_popup = std::move(callback);
+    }
+    void PixelPainter::ClearPopup()
+    {
+        m_popup = std::function<void()>();
     }
 }
