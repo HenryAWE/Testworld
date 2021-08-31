@@ -46,6 +46,11 @@ namespace awe
                     return "";
             }
         }
+
+        inline bool Editable(glm::ivec2 size) noexcept
+        {
+            return !(size[0] > 1024 || size[1] > 1024);
+        }
     }
 
     PixelPainter::PixelPainter()
@@ -101,29 +106,36 @@ namespace awe
                         ImGui::EndTabItem();
                     }
                     ImGui::PopID();
-                    if(!tabitem_open && !m_bm_data[i].saved)
+                    if(!tabitem_open)
                     {
-                        m_popup = [this, i]()
+                        if(m_bm_data[i].saved)
                         {
-                            ImGui::TextColored(
-                                ImVec4(1, 0, 0, 1),
-                                "\"%s\" is unsaved\n"
-                                "Do you want to close it WITHOUT SAVING it?",
-                                m_bm_data[i].name.c_str()
-                            );
-                            if(ImGui::Button("Confirm"))
+                            DestroyBitmap(i);
+                        }
+                        else
+                        {
+                            m_popup = [this, i]()
                             {
-                                m_bm_data.erase(m_bm_data.begin() + i);
-                                ImGui::CloseCurrentPopup();
-                                m_popup = std::function<void()>();
-                            }
-                            ImGui::SameLine();
-                            if(ImGui::Button("Cancel"))
-                            {
-                                ImGui::CloseCurrentPopup();
-                                m_popup = std::function<void()>();
-                            }
-                        };
+                                ImGui::TextColored(
+                                    ImVec4(1, 0, 0, 1),
+                                    "\"%s\" is unsaved\n"
+                                    "Do you want to close it WITHOUT SAVING it?",
+                                    m_bm_data[i].name.c_str()
+                                );
+                                if(ImGui::Button("Confirm"))
+                                {
+                                    DestroyBitmap(i);
+                                    ImGui::CloseCurrentPopup();
+                                    m_popup = std::function<void()>();
+                                }
+                                ImGui::SameLine();
+                                if(ImGui::Button("Cancel"))
+                                {
+                                    ImGui::CloseCurrentPopup();
+                                    m_popup = std::function<void()>();
+                                }
+                            };
+                        }
                     }
                 }
                 ImGui::EndTabBar();
@@ -149,10 +161,10 @@ namespace awe
 
         ImGui::End();
 
-        const int filedlg_flags = 32 |
+        const int uniform_filedlg_flags = 32 |
             ImGuiWindowFlags_NoSavedSettings;
         auto filedlg = ImGuiFileDialog::Instance();
-        if(filedlg->Display("#pixelpainter_saveas", filedlg_flags, ImVec2(400, 300)))
+        if(filedlg->Display("#pixelpainter_saveas", uniform_filedlg_flags, ImVec2(400, 300)))
         {
             if(filedlg->IsOk())
             {
@@ -172,6 +184,19 @@ namespace awe
                     );
                     bm.file = file;
                 }
+            }
+            filedlg->Close();
+        }
+        if(filedlg->Display("#pixelpainter_open", uniform_filedlg_flags, ImVec2(400, 300)))
+        {
+            if(filedlg->IsOk())
+            {
+                using namespace std::filesystem;
+
+                auto file =
+                    path(filedlg->GetCurrentPath()) /
+                    path(filedlg->GetCurrentFileName());
+                OpenBitmap(file);
             }
             filedlg->Close();
         }
@@ -263,6 +288,7 @@ namespace awe
     void PixelPainter::Canvas(std::size_t id)
     {
         const int flags =
+            ImGuiWindowFlags_HorizontalScrollbar |
             ImGuiWindowFlags_NoMove;
 
         if(ImGui::BeginChild("##canvas", ImVec2(0, 0), true, flags))
@@ -278,6 +304,11 @@ namespace awe
             );
             if(!m_bm_data[id].file.empty())
                 ImGui::TextDisabled("Path: %s", m_bm_data[id].file.u8string().c_str());
+            ImVec2 im_canvas_size = ImGui::GetWindowContentRegionMax();
+            m_canvas_size = glm::vec2(
+                im_canvas_size[0],
+                im_canvas_size[1]
+            );
         }
 
         ImGui::EndChild();
@@ -297,7 +328,7 @@ namespace awe
             "Current: %s",
             detailed::GetToolName(m_current_tool_id)
         );
-        ImGui::SameLine();
+        ImGui::SameLine(150.0f, 10.0f);
 
         if(ImGui::Button("R"))
         {
@@ -308,12 +339,59 @@ namespace awe
             ImGui::SetTooltip("Reset Factor");
         }
         ImGui::SameLine();
+        if(ImGui::Button("A") && !m_bm_data.empty())
+        {
+            glm::vec2 factor(m_factor);
+            for(int i : {0, 1})
+            {
+                factor[i] = m_canvas_size[i] / float(m_bm_data[m_current_bm_idx].size[i]);
+                factor[i] = std::clamp(factor[i], 0.1f, 25.0f);
+            }
+            m_factor = std::min(factor[0], factor[1]);
+        }
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("Adjust Factor By Canvas Size");
+        }
+        ImGui::SameLine();
         ImGui::SetNextItemWidth(120.0f);
         ImGui::SliderFloat(
             "Factor",
             &m_factor,
-            0.5f, 25.0f, "%.01f"
+            0.1f, 25.0f, "%.01f"
         );
+
+        if(!m_bm_data.empty())
+        {
+            auto& img = m_bm_data[m_current_bm_idx];
+
+            ImGui::SameLine();
+            if(img.saved)
+            {
+                ImGui::TextColored(
+                    ImVec4(0, 1, 0, 1),
+                    "Saved"
+                );
+            }
+            else
+            {
+                ImGui::TextColored(
+                    ImVec4(1, 1, 0, 1),
+                    "Unsaved"
+                );
+            }
+            ImGui::SameLine();
+            if(!detailed::Editable(img.size))
+            {
+                ImGui::TextColored(
+                    ImVec4(1, 0, 0, 1),
+                    "READ ONLY mode. The size of image is too big (%d * %d)",
+                    img.size[0],
+                    img.size[1]
+                );
+            }
+        }
+
         ImGui::EndChild();
     }
 
@@ -365,7 +443,10 @@ namespace awe
                     }
                 };
             }
-
+            if(ImGui::MenuItem("Open...", "Ctrl+O"))
+            {
+                OpenDlg_Open();
+            }
             if(ImGui::MenuItem("Save", "Ctrl+S", nullptr, !m_bm_data.empty()))
             {
                 auto& bm = m_bm_data[m_current_bm_idx];
@@ -390,14 +471,29 @@ namespace awe
         
     }
 
+    void PixelPainter::OpenDlg_Open(const std::filesystem::path& pt)
+    {
+        ImGuiFileDialog::Instance()->OpenModal(
+            "#pixelpainter_open",
+            "Open",
+            ".bmp,.png,.dat,.jpg",
+            pt.u8string(),
+            1,
+            nullptr,
+            ImGuiFileDialogFlags_DisableCreateDirectoryButton
+        );
+    }
     void PixelPainter::OpenDlg_SaveAs(std::size_t id)
     {
         using namespace std::filesystem;
         ImGuiFileDialog::Instance()->OpenModal(
             "#pixelpainter_saveas",
             "Save As",
-            ".bmp,.png,.dat",
-            (current_path() / m_bm_data[id].name).u8string()
+            ".png,.dat",
+            (current_path() / m_bm_data[id].name).u8string(),
+            1,
+            nullptr,
+            ImGuiFileDialogFlags_ConfirmOverwrite
         );
     }
 
@@ -411,6 +507,35 @@ namespace awe
 
         m_bm_data.push_back(std::move(bm));
     }
+    void PixelPainter::OpenBitmap(const std::filesystem::path& file)
+    {
+        BitmapData bm;
+        bm.saved = true;
+        bm.name = file.filename().u8string();
+        bm.file = file;
+        auto data = stbi_load(
+            bm.file.u8string().c_str(),
+            &bm.size[0], &bm.size[1],
+            nullptr,
+            STBI_rgb_alpha
+        );
+        auto img_size = bm.size[0] * bm.size[1];
+        bm.data.resize(img_size);
+        std::memcpy(bm.data.data(), data, img_size * 4);
+        stbi_image_free(data);
+
+        m_bm_data.push_back(std::move(bm));
+    }
+    void PixelPainter::DestroyBitmap(std::size_t id)
+    {
+        assert(id < m_bm_data.size());
+        m_bm_data.erase(m_bm_data.begin() + id);
+
+        // Clear texture cache
+        auto iter = m_cache.find(id);
+        if(iter != m_cache.end())
+            m_cache.erase(iter);
+    }
 
     Texture& PixelPainter::GetCachedTex(std::size_t id)
     {
@@ -419,11 +544,17 @@ namespace awe
             return iter->second;
 
         auto& bm = m_bm_data[id];
+        TexDescription desc;
+        desc.s = TexDescription::REPEAT;
+        desc.t = TexDescription::REPEAT;
+        desc.min = TexDescription::NEAREST;
+        desc.mag = TexDescription::NEAREST;
         Texture tex;
-        tex.LoadMemory(
+        tex.LoadMemoryEx(
             glm::value_ptr(bm.data[0]),
             bm.size,
-            true
+            true,
+            desc
         );
         return m_cache.emplace(
             std::make_pair(id, std::move(tex))

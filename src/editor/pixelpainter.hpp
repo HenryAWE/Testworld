@@ -54,15 +54,19 @@ namespace awe
 
         void MenuBar_File();
 
+        void OpenDlg_Open(const std::filesystem::path& pt = std::filesystem::current_path());
         void OpenDlg_SaveAs(std::size_t id);
 
         void NewBitmap(const std::string& name, glm::ivec2 size);
+        void OpenBitmap(const std::filesystem::path& file);
+        void DestroyBitmap(std::size_t id);
 
         Texture& GetCachedTex(std::size_t id);
 
         std::function<void()> m_popup;
 
         bool m_open = true;
+        glm::vec2 m_canvas_size = glm::vec2(0);
         glm::vec4 m_color[2];
         int m_current_tool_id = 0;
         float m_factor = 1.0f;
