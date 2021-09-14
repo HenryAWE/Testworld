@@ -5,6 +5,7 @@ find_package(SDL2 CONFIG REQUIRED)
 
 aux_source_directory(editor testworld_editor_src)
 aux_source_directory(renderer testworld_renderer_src)
+aux_source_directory(res testworld_res_src)
 aux_source_directory(sys testworld_sys_src)
 aux_source_directory(window testworld_window_src)
 aux_source_directory(. testworld_src)
@@ -13,6 +14,7 @@ add_executable(
     WIN32
     ${testworld_editor_src}
     ${testworld_renderer_src}
+    ${testworld_res_src}
     ${testworld_sys_src}
     ${testworld_window_src}
     ${testworld_src}
