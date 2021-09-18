@@ -5,6 +5,7 @@ A C++/OpenGL project for practicing programing
 ### Required additional libraries
 - SDL 2
 - libconfig
+- Angelscript
 
 You can install required libraries via [**vcpkg**](https://github.com/Microsoft/vcpkg)  
 For example: `vcpkg install sdl2`  

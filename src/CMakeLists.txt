@@ -2,6 +2,7 @@
 # License: The 3-clause BSD License
 
 find_package(SDL2 CONFIG REQUIRED)
+find_package(Angelscript CONFIG REQUIRED)
 
 aux_source_directory(editor testworld_editor_src)
 aux_source_directory(renderer testworld_renderer_src)
@@ -21,6 +22,7 @@ add_executable(
 )
 
 target_link_libraries(testworld PRIVATE SDL2::SDL2 SDL2::SDL2main)
+target_link_libraries(testworld PRIVATE Angelscript::angelscript)
 target_link_libraries(testworld PRIVATE fmt)
 target_link_libraries(testworld PRIVATE glad)
 target_link_libraries(testworld PRIVATE glm)
