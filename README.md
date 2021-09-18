@@ -6,6 +6,7 @@ A C++/OpenGL project for practicing programing
 - SDL 2
 - libconfig
 - Angelscript
+- PhysicsFS
 
 You can install required libraries via [**vcpkg**](https://github.com/Microsoft/vcpkg)  
 For example: `vcpkg install sdl2`  
