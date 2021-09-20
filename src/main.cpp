@@ -9,7 +9,9 @@
 
 int SDL_main(int argc, char* argv[])
 {
+    awe::Prepare(argv[0]);
     awe::InitSDL();
+    awe::InitPhysfs(argv[0]);
 
     auto& app = awe::App::GetInstance();
     app.CreateWindow();
@@ -18,6 +20,7 @@ int SDL_main(int argc, char* argv[])
 
     app.Quit();
 
+    awe::QuitPhysfs();
     awe::QuitSDL();
     return 0;
 }
