@@ -9,6 +9,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 #endif
+#include <physfs.h>
 
 
 namespace awe
@@ -41,6 +42,31 @@ namespace awe
     void QuitSDL() noexcept
     {
         SDL_Quit();
+    }
+
+    void InitPhysfs(const char* argv0)
+    {
+        if(PHYSFS_init(argv0) == 0)
+        {
+            throw std::runtime_error(PHYSFS_getLastError());
+        }
+
+        PHYSFS_Version physfs_ver;
+        PHYSFS_VERSION(&physfs_ver);
+        // runtime version, may be different from the compile-time version
+        PHYSFS_Version physfs_ver_rt;
+        PHYSFS_getLinkedVersion(&physfs_ver_rt);
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "PhysicsFS version: %d.%d.%d\n"
+            "PhysicsFS version (runtime): %d.%d.%d",
+            physfs_ver.major, physfs_ver.major, physfs_ver.patch,
+            physfs_ver_rt.major, physfs_ver_rt.major, physfs_ver_rt.patch
+        );
+    }
+    void QuitPhysfs() noexcept
+    {
+        PHYSFS_deinit();
     }
 
     void Prepare(const char* argv0)
