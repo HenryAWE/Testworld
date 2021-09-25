@@ -7,5 +7,6 @@
 #include <imgui.h>
 #include "viewer.hpp"
 #include "pixelpainter.hpp"
+#include "vfsviewer.hpp"
 
 #endif
