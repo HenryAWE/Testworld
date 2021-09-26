@@ -33,3 +33,8 @@ target_link_libraries(testworld PRIVATE glad)
 target_link_libraries(testworld PRIVATE glm)
 target_link_libraries(testworld PRIVATE imgui)
 target_link_libraries(testworld PRIVATE stb)
+
+set_target_properties(
+    testworld
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin
+)
