@@ -29,4 +29,5 @@ project(
 )
 
 add_subdirectory(deps)
+add_subdirectory(script)
 add_subdirectory(src)

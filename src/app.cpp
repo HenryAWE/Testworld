@@ -4,11 +4,19 @@
 #include <glad/glad.h>
 #include "app.hpp"
 #include <stdexcept>
+#include <scriptarray/scriptarray.h>
+#include <scriptstdstring/scriptstdstring.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
 #include "editor/editor.hpp"
 #include "renderer/renderer.hpp"
+#include "res/vfs.hpp"
 
+
+void __cdecl print(const std::string& s)
+{
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", s.c_str());
+}
 
 namespace awe
 {
@@ -71,6 +79,27 @@ namespace awe
             "Begin mainloop"
         );
 
+        asIScriptModule* testworld = m_as_engine->GetModule("Testworld");
+        auto preload = testworld->GetFunctionByDecl("void Preload()");
+
+        asIScriptContext* main_ctx = m_as_engine->CreateContext();
+        if(preload)
+        {
+            main_ctx->Prepare(preload);
+            int r = main_ctx->Execute();
+            if(r != asEXECUTION_FINISHED)
+            {
+                if(r == asEXECUTION_EXCEPTION)
+                {
+                    SDL_LogError(
+                        SDL_LOG_CATEGORY_APPLICATION,
+                        "[angelscript] Exception: %s",
+                        main_ctx->GetExceptionString()
+                    );
+                }
+            }
+        }
+
         bool quit = false;
         while(!quit)
         {
@@ -105,10 +134,48 @@ namespace awe
             m_renderer->Present();
         }
 
+        main_ctx->Release();
+
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
             "Quit mainloop"
         );
+    }
+
+    void App::PrepareScriptEnv()
+    {
+        m_as_engine = asCreateScriptEngine();
+        int r = 0;
+        r = m_as_engine->SetMessageCallback(
+            asMETHOD(App, MessageCallback),
+            this,
+            asCALL_THISCALL
+        );
+        RegisterScriptArray(m_as_engine, true);
+        RegisterStdString(m_as_engine);
+        RegisterStdStringUtils(m_as_engine);
+
+        r = m_as_engine->RegisterGlobalFunction(
+            "void print(const string& in)",
+            asFUNCTION(print),
+            asCALL_CDECL
+        );
+        assert(r >= 0);
+
+        m_as_builder = std::make_unique<CScriptBuilder>();
+        m_as_builder->StartNewModule(m_as_engine, "Testworld");
+        r = m_as_builder->AddSectionFromMemory(
+            "preload.as",
+            vfs::GetString("script/preload.as").c_str()
+        );
+        assert(r >= 0);
+        r = m_as_builder->BuildModule();
+        assert(r >= 0);
+    }
+    void App::ClearScriptEnv()
+    {
+        m_as_builder.reset();
+        m_as_engine->ShutDownAndRelease();
     }
 
     void App::Quit()
@@ -119,5 +186,17 @@ namespace awe
         m_imgui_ctx = nullptr;
         m_renderer.reset();
         m_window.reset();
+    }
+
+    void App::MessageCallback(const asSMessageInfo* msg)
+    {
+        SDL_LogError(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "[angelscript] %s (%d : %d)\n%s",
+            msg->section,
+            msg->row,
+            msg->col,
+            msg->message
+        );
     }
 }

@@ -6,6 +6,8 @@
 
 #include <functional>
 #include <memory>
+#include <angelscript.h>
+#include <scriptbuilder/scriptbuilder.h>
 #include <imgui.h>
 #include "renderer/renderer.hpp"
 #include "window/window.hpp"
@@ -25,6 +27,9 @@ namespace awe
 
         void Mainloop();
 
+        void PrepareScriptEnv();
+        void ClearScriptEnv();
+
         void Quit();
 
         std::function<bool()> BeforeQuit;
@@ -33,6 +38,11 @@ namespace awe
         std::shared_ptr<Window> m_window;
         std::shared_ptr<Renderer> m_renderer;
         ImGuiContext* m_imgui_ctx = nullptr;
+
+        asIScriptEngine* m_as_engine;
+        std::unique_ptr<CScriptBuilder> m_as_builder;
+
+        void MessageCallback(const asSMessageInfo* msg);
     };
 }
 

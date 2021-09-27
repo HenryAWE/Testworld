@@ -26,6 +26,7 @@ target_compile_definitions(testworld PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 
 target_link_libraries(testworld PRIVATE SDL2::SDL2 SDL2::SDL2main)
 target_link_libraries(testworld PRIVATE Angelscript::angelscript)
+target_link_libraries(testworld PRIVATE as_addon)
 target_link_libraries(testworld PRIVATE ${PHYSFS_LIBRARY})
 target_include_directories(testworld PRIVATE ${PHYSFS_INCLUDE_DIR})
 target_link_libraries(testworld PRIVATE fmt)
