@@ -11,6 +11,7 @@
 #include "editor/editor.hpp"
 #include "renderer/renderer.hpp"
 #include "res/vfs.hpp"
+#include "script/scriptutil.hpp"
 
 
 void __cdecl print(const std::string& s)
@@ -86,18 +87,7 @@ namespace awe
         if(preload)
         {
             main_ctx->Prepare(preload);
-            int r = main_ctx->Execute();
-            if(r != asEXECUTION_FINISHED)
-            {
-                if(r == asEXECUTION_EXCEPTION)
-                {
-                    SDL_LogError(
-                        SDL_LOG_CATEGORY_APPLICATION,
-                        "[angelscript] Exception: %s",
-                        main_ctx->GetExceptionString()
-                    );
-                }
-            }
+            script::Call(preload, main_ctx);
         }
 
         bool quit = false;
@@ -164,10 +154,7 @@ namespace awe
 
         m_as_builder = std::make_unique<CScriptBuilder>();
         m_as_builder->StartNewModule(m_as_engine, "Testworld");
-        r = m_as_builder->AddSectionFromMemory(
-            "preload.as",
-            vfs::GetString("script/preload.as").c_str()
-        );
+        r = script::AddSectionFromVfs(m_as_builder.get(), "script/preload.as");
         assert(r >= 0);
         r = m_as_builder->BuildModule();
         assert(r >= 0);
