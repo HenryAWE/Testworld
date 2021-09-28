@@ -176,9 +176,9 @@ namespace awe
                     using std::filesystem::path;
 
                     auto& bm = m_bm_data[m_current_bm_idx];
-                    auto file =
-                        path(filedlg->GetCurrentPath()) /
-                        path(filedlg->GetCurrentFileName());
+                    path file =
+                        filedlg->GetCurrentPath() + '/' +
+                        filedlg->GetCurrentFileName();
                     stbi_write_bmp(
                         file.u8string().c_str(),
                         bm.size[0], bm.size[1],
@@ -196,9 +196,9 @@ namespace awe
             {
                 using namespace std::filesystem;
 
-                auto file =
-                    path(filedlg->GetCurrentPath()) /
-                    path(filedlg->GetCurrentFileName());
+                path file =
+                    filedlg->GetCurrentPath() + '/' +
+                    filedlg->GetCurrentFileName();
                 OpenBitmap(file);
             }
             filedlg->Close();
