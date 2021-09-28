@@ -81,14 +81,10 @@ namespace awe
         );
 
         asIScriptModule* testworld = m_as_engine->GetModule("Testworld");
-        auto preload = testworld->GetFunctionByDecl("void Preload()");
 
         asIScriptContext* main_ctx = m_as_engine->CreateContext();
-        if(preload)
-        {
-            main_ctx->Prepare(preload);
-            script::Call(preload, main_ctx);
-        }
+        auto preload = script::GenCallerByDecl<void()>(testworld, "void Preload()", main_ctx);
+        preload();
 
         bool quit = false;
         while(!quit)

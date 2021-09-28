@@ -4,6 +4,7 @@
 #ifndef TESTWORLD_SCRIPT_SCRIPTURIL_HPP
 #define TESTWORLD_SCRIPT_SCRIPTURIL_HPP
 
+#include <functional>
 #include <stdexcept>
 #include <type_traits>
 #include <fmt/core.h>
@@ -139,6 +140,51 @@ namespace awe::script
         CScriptBuilder* builder,
         const std::string& filename
     );
+
+    namespace detailed
+    {
+        template <typename T>
+        class function_traits;
+
+        template <typename R, typename... Args>
+        struct function_traits<std::function<R(Args...)>>
+        {
+            static constexpr std::size_t nargs = sizeof...(Args);
+
+            typedef R result_type;
+
+            struct Caller
+            {
+                asIScriptFunction* func;
+                asIScriptContext* ctx;
+
+                Caller(
+                    asIScriptFunction* func_,
+                    asIScriptContext* ctx_
+                ) noexcept : func(func_), ctx(ctx_) {}
+
+                R operator()(
+                    Args&&... args
+                ) {
+                    return Call<result_type>(func, ctx, std::forward<Args>(args)...);
+                }
+            };
+        };
+    }
+
+    template <typename Func>
+    std::function<Func> GenCallerByDecl(
+        asIScriptModule* mod,
+        const char* decl,
+        asIScriptContext* ctx = asGetActiveContext()
+    ) {
+        auto* func = mod->GetFunctionByDecl(decl);
+        if(!func)
+            return std::function<Func>();
+
+        using T = detailed::function_traits<std::function<Func>>;
+        return T::Caller(func, ctx);
+    }
 }
 
 #endif
