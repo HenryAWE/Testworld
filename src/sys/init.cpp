@@ -88,6 +88,17 @@ namespace awe
                 ec.message()
             );
         }
+#elif defined(__LINUX__)
+        std::error_code ec;
+        current_path(std::filesystem::path(argv0).parent_path(), ec);
+        if(ec)
+        {
+            SDL_LogError(
+                SDL_LOG_CATEGORY_APPLICATION,
+                "Set program execution path failed: %s",
+                ec.message()
+            );
+        }
 #else
 #error "Unimplemented OS-depended code"
 #endif

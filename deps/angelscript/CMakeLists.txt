@@ -12,3 +12,6 @@ add_library(
 )
 target_include_directories(as_addon PUBLIC .)
 target_link_libraries(as_addon PUBLIC Angelscript::angelscript)
+if((${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
+    target_link_libraries(as_addon PUBLIC Threads::Threads)
+endif()

@@ -14,7 +14,7 @@
 #include "script/scriptutil.hpp"
 
 
-void __cdecl print(const std::string& s)
+void TW_CDECL print(const std::string& s)
 {
     SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", s.c_str());
 }

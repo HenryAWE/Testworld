@@ -4,7 +4,7 @@
 # License: The 3-clause BSD License
 
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/;${CMAKE_MODULE_PATH}")
 if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -27,6 +27,12 @@ project(
     DESCRIPTION "A C++/OpenGL project for practicing programing"
     LANGUAGES C CXX
 )
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+    find_package(Threads REQUIRED)
+endif()
 
 add_subdirectory(deps)
 add_subdirectory(script)
