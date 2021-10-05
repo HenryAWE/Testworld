@@ -176,7 +176,7 @@ namespace awe::script
     std::function<Func> GenCallerByDecl(
         asIScriptModule* mod,
         const char* decl,
-        asIScriptContext* ctx = asGetActiveContext()
+        asIScriptContext* ctx
     ) {
         auto* func = mod->GetFunctionByDecl(decl);
         if(!func)

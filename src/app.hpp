@@ -9,6 +9,7 @@
 #include <angelscript.h>
 #include <scriptbuilder/scriptbuilder.h>
 #include <imgui.h>
+#include "editor/editor.hpp"
 #include "renderer/renderer.hpp"
 #include "window/window.hpp"
 
@@ -38,6 +39,8 @@ namespace awe
         std::shared_ptr<Window> m_window;
         std::shared_ptr<Renderer> m_renderer;
         ImGuiContext* m_imgui_ctx = nullptr;
+
+        std::unique_ptr<Editor> m_editor;
 
         asIScriptEngine* m_as_engine;
         std::unique_ptr<CScriptBuilder> m_as_builder;

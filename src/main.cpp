@@ -30,8 +30,8 @@ int SDL_main(int argc, char* argv[])
     }
 
     auto& app = awe::App::GetInstance();
-    app.PrepareScriptEnv();
     app.CreateWindow();
+    app.PrepareScriptEnv();
 
     app.Mainloop();
 

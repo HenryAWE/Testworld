@@ -12,6 +12,7 @@
 #include "renderer/renderer.hpp"
 #include "res/vfs.hpp"
 #include "script/scriptutil.hpp"
+#include "script/register.hpp"
 
 
 void __cdecl print(const std::string& s)
@@ -71,6 +72,9 @@ namespace awe
             io.BackendPlatformName,
             io.BackendRendererName
         );
+
+        // Create ImGui window
+        m_editor = std::make_unique<Editor>();
     }
 
     void App::Mainloop()
@@ -83,8 +87,13 @@ namespace awe
         asIScriptModule* testworld = m_as_engine->GetModule("Testworld");
 
         asIScriptContext* main_ctx = m_as_engine->CreateContext();
-        auto preload = script::GenCallerByDecl<void()>(testworld, "void Preload()", main_ctx);
-        preload();
+        
+        auto Preload = script::GenCallerByDecl<void()>(testworld, "void Preload()", main_ctx);
+        if(Preload) Preload();
+
+        auto EditorBeginMainloop = script::GenCallerByDecl<void()>(testworld, "void EditorBeginMainloop()", main_ctx);
+        if(EditorBeginMainloop) EditorBeginMainloop();
+        auto EditorNewFrame = script::GenCallerByDecl<void()>(testworld, "void EditorNewFrame()", main_ctx);
 
         bool quit = false;
         while(!quit)
@@ -112,6 +121,9 @@ namespace awe
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplSDL2_NewFrame(m_window->GetHandle());
             ImGui::NewFrame();
+
+            m_editor->NewFrame();
+            if(EditorNewFrame) EditorNewFrame();
 
             // Rendering
             ImGui::Render();
@@ -141,6 +153,8 @@ namespace awe
         RegisterStdString(m_as_engine);
         RegisterStdStringUtils(m_as_engine);
 
+        awe::script::RegisterEditor(m_as_engine, m_editor.get());
+
         r = m_as_engine->RegisterGlobalFunction(
             "void print(const string& in)",
             asFUNCTION(print),
@@ -151,6 +165,8 @@ namespace awe
         m_as_builder = std::make_unique<CScriptBuilder>();
         m_as_builder->StartNewModule(m_as_engine, "Testworld");
         r = script::AddSectionFromVfs(m_as_builder.get(), "script/preload.as");
+        assert(r >= 0);
+        r = script::AddSectionFromVfs(m_as_builder.get(), "script/newframe.as");
         assert(r >= 0);
         r = m_as_builder->BuildModule();
         assert(r >= 0);
@@ -163,6 +179,8 @@ namespace awe
 
     void App::Quit()
     {
+        m_editor.reset();
+
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext(m_imgui_ctx);
