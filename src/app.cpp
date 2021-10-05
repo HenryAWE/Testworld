@@ -163,11 +163,14 @@ namespace awe
         assert(r >= 0);
 
         m_as_builder = std::make_unique<CScriptBuilder>();
+        // Build internal script
         m_as_builder->StartNewModule(m_as_engine, "Testworld");
-        r = script::AddSectionFromVfs(m_as_builder.get(), "script/preload.as");
-        assert(r >= 0);
-        r = script::AddSectionFromVfs(m_as_builder.get(), "script/newframe.as");
-        assert(r >= 0);
+        std::vector<std::string> script_srcs;
+        vfs::EnumFiles("script", std::back_inserter(script_srcs));
+        for(const auto& f : script_srcs)
+        {
+            r = script::AddSectionFromVfs(m_as_builder.get(), "script/" + f);
+        }
         r = m_as_builder->BuildModule();
         assert(r >= 0);
     }

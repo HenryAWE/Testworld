@@ -84,4 +84,9 @@ namespace awe::vfs
             data.size()
         );
     }
+
+    bool Exists(const std::string& path)
+    {
+        return PHYSFS_exists(path.c_str());
+    }
 }

@@ -50,6 +50,19 @@ namespace awe::vfs
 
     std::vector<std::byte> GetData(const std::string& filename);
     std::string GetString(const std::string& filename);
+
+    template <typename OutputIt>
+    void EnumFiles(const std::string& path, OutputIt iter)
+    {
+        PHYSFS_EnumFilesCallback cb = [](void* data, const char* dir, const char* file)
+        {
+            auto& iter = *(OutputIt*)data;
+            *iter = std::string(file);
+        };
+        PHYSFS_enumerateFilesCallback(path.c_str(), cb, &iter);
+    }
+
+    bool Exists(const std::string& path);
 }
 
 #endif
