@@ -55,7 +55,7 @@ namespace awe::vfs
 
     std::size_t VfsFile::Read(void* buf, std::size_t count)
     {
-        return PHYSFS_read(m_handle, buf, 1, (PHYSFS_uint32)count);
+        return PHYSFS_readBytes(m_handle, buf, (PHYSFS_uint32)count);
     }
 
     PHYSFS_Stat VfsFile::Stat()
@@ -69,7 +69,7 @@ namespace awe::vfs
     {
         VfsFile file(filename, VfsFile::READ);
         if(!file)
-            throw std::runtime_error(PHYSFS_getLastError());
+            throw std::runtime_error(PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
         auto size = file.Stat().filesize;
         std::vector<std::byte> buf;
         buf.resize(size, std::byte(0));

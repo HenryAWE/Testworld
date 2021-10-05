@@ -10,6 +10,7 @@
 #include <fmt/core.h>
 #include <angelscript.h>
 #include <scriptbuilder/scriptbuilder.h>
+#include "callconv.hpp"
 
 
 namespace awe::script
@@ -183,7 +184,7 @@ namespace awe::script
             return std::function<Func>();
 
         using T = detailed::function_traits<std::function<Func>>;
-        return T::Caller(func, ctx);
+        return typename T::Caller(func, ctx);
     }
 }
 

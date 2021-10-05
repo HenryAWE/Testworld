@@ -48,7 +48,7 @@ namespace awe
     {
         if(PHYSFS_init(argv0) == 0)
         {
-            throw std::runtime_error(PHYSFS_getLastError());
+            throw std::runtime_error(PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
         }
 
         PHYSFS_Version physfs_ver;
@@ -85,7 +85,18 @@ namespace awe
             SDL_LogError(
                 SDL_LOG_CATEGORY_APPLICATION,
                 "Set program execution path failed: %s",
-                ec.message()
+                ec.message().c_str()
+            );
+        }
+#elif defined(__LINUX__)
+        std::error_code ec;
+        current_path(std::filesystem::path(argv0).parent_path(), ec);
+        if(ec)
+        {
+            SDL_LogError(
+                SDL_LOG_CATEGORY_APPLICATION,
+                "Set program execution path failed: %s",
+                ec.message().c_str()
             );
         }
 #else

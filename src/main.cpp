@@ -8,6 +8,9 @@
 #include "sys/init.hpp"
 
 
+#ifndef SDL_main
+#   define SDL_main main
+#endif
 int SDL_main(int argc, char* argv[])
 {
     awe::Prepare(argv[0]);
