@@ -74,7 +74,9 @@ namespace awe
         );
 
         // Create ImGui window
+        m_console = std::make_unique<imgui::Console>();
         m_editor = std::make_unique<Editor>();
+        m_console->Write("Testworld Angelscript Console");
     }
 
     void App::Mainloop()
@@ -121,6 +123,8 @@ namespace awe
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplSDL2_NewFrame(m_window->GetHandle());
             ImGui::NewFrame();
+
+            m_console->NewFrame();
 
             m_editor->NewFrame();
             if(EditorNewFrame) EditorNewFrame();
@@ -173,9 +177,12 @@ namespace awe
         }
         r = m_as_builder->BuildModule();
         assert(r >= 0);
+
+        m_console->SetScriptEngine(m_as_engine, m_as_builder.get());
     }
     void App::ClearScriptEnv()
     {
+        m_console->ReleaseScriptEngine();
         m_as_builder.reset();
         m_as_engine->ShutDownAndRelease();
     }
@@ -183,6 +190,7 @@ namespace awe
     void App::Quit()
     {
         m_editor.reset();
+        m_console.reset();
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();

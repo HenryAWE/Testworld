@@ -9,6 +9,7 @@ add_library(
     scriptstdstring/scriptstdstring.cpp
     scriptstdstring/scriptstdstring_utils.cpp
     scriptarray/scriptarray.cpp
+    scripthelper/scripthelper.cpp
 )
 target_include_directories(as_addon PUBLIC .)
 target_link_libraries(as_addon PUBLIC Angelscript::angelscript)

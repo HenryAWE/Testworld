@@ -11,6 +11,7 @@
 #include <imgui.h>
 #include "editor/editor.hpp"
 #include "renderer/renderer.hpp"
+#include "ui/console.hpp"
 #include "window/window.hpp"
 
 
@@ -46,6 +47,8 @@ namespace awe
         std::unique_ptr<CScriptBuilder> m_as_builder;
 
         void MessageCallback(const asSMessageInfo* msg);
+
+        std::unique_ptr<imgui::Console> m_console;
     };
 }
 

@@ -10,6 +10,7 @@ aux_source_directory(renderer testworld_renderer_src)
 aux_source_directory(res testworld_res_src)
 aux_source_directory(script testworld_script_src)
 aux_source_directory(sys testworld_sys_src)
+aux_source_directory(ui testworld_ui_src)
 aux_source_directory(window testworld_window_src)
 aux_source_directory(. testworld_src)
 add_executable(
@@ -20,6 +21,7 @@ add_executable(
     ${testworld_res_src}
     ${testworld_script_src}
     ${testworld_sys_src}
+    ${testworld_ui_src}
     ${testworld_window_src}
     ${testworld_src}
 )
