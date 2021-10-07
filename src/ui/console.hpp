@@ -16,6 +16,9 @@ namespace awe::imgui
     class Console
     {
     public:
+        Console();
+        ~Console();
+
         void NewFrame();
 
         void Write(std::string_view sv);
@@ -27,7 +30,7 @@ namespace awe::imgui
         bool m_show = true;
         bool m_fixed_mode = true; // false for windowed mode
 
-        char m_input_buf[512];
+        char m_input_buf[512]{};
 
         void OutputRegion();
 

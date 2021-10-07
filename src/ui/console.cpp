@@ -2,11 +2,51 @@
 // License: The 3-clause BSD License
 
 #include "console.hpp"
+#include <SDL.h>
 #include <scripthelper/scripthelper.h>
+#include "../script/callconv.hpp"
 
 
 namespace awe::imgui
 {
+    namespace detailed
+    {
+        static Console* instance = nullptr;
+
+        void TW_CDECL Echo(const std::string& str)
+        {
+            if(!instance)
+                return;
+            instance->Write(str);
+        }
+
+        void TW_CDECL Exit()
+        {
+            SDL_QuitEvent quit{ SDL_QUIT, SDL_GetTicks() };
+            SDL_PushEvent((SDL_Event*)&quit);
+        }
+
+        int RegisterConsoleInterface(asIScriptEngine* engine)
+        {
+            int r = 0;
+            r = engine->RegisterGlobalFunction("void Echo(const string& in)", asFUNCTION(Echo), asCALL_CDECL);
+            if(r < 0) return r;
+            r = engine->RegisterGlobalFunction("void Exit()", asFUNCTION(Exit), asCALL_CDECL);
+            if(r < 0) return r;
+
+            return asSUCCESS;
+        }
+    }
+
+    Console::Console()
+    {
+        detailed::instance = this;
+    }
+    Console::~Console()
+    {
+        detailed::instance = nullptr;
+    }
+
     void Console::NewFrame()
     {
         const int generic_flags =
@@ -67,6 +107,8 @@ namespace awe::imgui
         m_as_engine = engine;
         assert(m_as_engine);
         int r = 0;
+        r = detailed::RegisterConsoleInterface(m_as_engine);
+        if(r < 0) return r;
         r = builder->StartNewModule(m_as_engine, "Console");
         if(r < 0) return r;
         r = builder->BuildModule();

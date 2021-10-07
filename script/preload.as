@@ -3,5 +3,5 @@
 
 void Preload()
 {
-    print("preload script");
+    Echo("preload script");
 }

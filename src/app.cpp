@@ -15,11 +15,6 @@
 #include "script/register.hpp"
 
 
-void TW_CDECL print(const std::string& s)
-{
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", s.c_str());
-}
-
 namespace awe
 {
     App::App() = default;
@@ -159,14 +154,10 @@ namespace awe
 
         awe::script::RegisterEditor(m_as_engine, m_editor.get());
 
-        r = m_as_engine->RegisterGlobalFunction(
-            "void print(const string& in)",
-            asFUNCTION(print),
-            asCALL_CDECL
-        );
+        m_as_builder = std::make_unique<CScriptBuilder>();
+        r = m_console->SetScriptEngine(m_as_engine, m_as_builder.get());
         assert(r >= 0);
 
-        m_as_builder = std::make_unique<CScriptBuilder>();
         // Build internal script
         m_as_builder->StartNewModule(m_as_engine, "Testworld");
         std::vector<std::string> script_srcs;
@@ -177,8 +168,6 @@ namespace awe
         }
         r = m_as_builder->BuildModule();
         assert(r >= 0);
-
-        m_console->SetScriptEngine(m_as_engine, m_as_builder.get());
     }
     void App::ClearScriptEnv()
     {
