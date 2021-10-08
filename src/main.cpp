@@ -6,6 +6,7 @@
 #include <physfs.h>
 #include "app.hpp"
 #include "sys/init.hpp"
+#include "sys/singleinstance.hpp"
 
 
 #ifndef SDL_main
@@ -13,6 +14,9 @@
 #endif
 int SDL_main(int argc, char* argv[])
 {
+    if(!awe::SingleInstance::GetInstance().Acquire())
+        return EXIT_SUCCESS;
+
     awe::Prepare(argv[0]);
     awe::InitSDL();
     awe::InitPhysfs(argv[0]);
