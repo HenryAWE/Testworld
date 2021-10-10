@@ -43,7 +43,7 @@ namespace awe
                     SDL_MESSAGEBOX_ERROR,
                     "Sharing Violation",
                     "testworld.lock is acquired by other process, "
-                    "you probably have already open a Testworld application",
+                    "you probably have already opened a Testworld application",
                     nullptr
                 );
                 break;
@@ -97,7 +97,7 @@ namespace awe
                         SDL_MESSAGEBOX_ERROR,
                         "EWOULDBLOCK",
                         TW_PIDFILE_PATH " is acquired by other process, "
-                        "you probably have already open a Testworld application",
+                        "you probably have already opened a Testworld application",
                         nullptr
                     );
 
