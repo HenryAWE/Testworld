@@ -33,6 +33,8 @@ namespace awe
         glm::vec4 border_color = glm::vec4(0.0f);
         Filter min = LINEAR;
         Filter mag = LINEAR;
+
+        GLint format = GL_RGBA; // internal format
     };
 
     class Texture
@@ -60,6 +62,15 @@ namespace awe
             bool gen_mipmap,
             TexDescription desc
         );
+        bool LoadVfs(
+            const std::string& file,
+            bool gen_mipmap = true
+        );
+        bool LoadVfsEx(
+            const std::string& file,
+            bool gen_mipmap,
+            TexDescription desc
+        );
         bool LoadMemory(
             unsigned char* data,
             glm::ivec2 size,
@@ -71,7 +82,12 @@ namespace awe
             bool gen_mipmap,
             TexDescription desc
         );
-
+        bool LoadFramebuffer(
+            glm::ivec2 size,
+            TexDescription desc,
+            GLenum attachment = GL_COLOR_ATTACHMENT0,
+            GLenum format = GL_RGB
+        );
 
         [[nodiscard]]
         constexpr handle GetHandle() const noexcept { return m_handle; }

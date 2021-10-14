@@ -27,6 +27,13 @@ namespace awe
         DestroyWindow();
     }
 
+    glm::ivec2 Window::GetSize() const
+    {
+        glm::ivec2 size;
+        SDL_GetWindowSize(m_handle, &size[0], &size[1]);
+        return size;
+    }
+
     SDL_Window* Window::GetHandle() const noexcept
     {
         return m_handle;

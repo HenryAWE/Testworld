@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 #include <SDL.h>
+#include <glm/gtc/type_ptr.hpp>
+#include "../res/vfs.hpp"
 
 
 namespace awe
@@ -32,7 +34,7 @@ namespace awe
         const char* vssrc,
         const char* fssrc
     ) {
-         GLuint vert = 0, frag = 0;
+        GLuint vert = 0, frag = 0;
         int status = 0;
         char info[1024] = {};
 
@@ -85,6 +87,15 @@ namespace awe
 
         return status != 0;
     }
+    bool ShaderProgram::LoadVfs(
+        const std::string& vspath,
+        const std::string& fspath
+    ) {
+        return Compile(
+            vfs::GetString(vspath).c_str(),
+            vfs::GetString(fspath).c_str()
+        );
+    }
     bool ShaderProgram::Load(
         const std::filesystem::path& vspath,
         const std::filesystem::path& fspath
@@ -107,5 +118,15 @@ namespace awe
             read(vspath).c_str(),
             read(fspath).c_str()
         );
+    }
+
+    GLint ShaderProgram::UniLoc(const char* name)
+    {
+        return glGetUniformLocation(m_handle, name);
+    }
+
+    void Uniform(GLint loc, const glm::mat4& m)
+    {
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
     }
 }

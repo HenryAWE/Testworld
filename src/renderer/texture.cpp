@@ -4,6 +4,7 @@
 #include "texture.hpp"
 #include <SDL.h>
 #include <stb_image.h>
+#include "../res/vfs.hpp"
 
 
 namespace awe
@@ -109,7 +110,69 @@ namespace awe
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
+            desc.format,
+            width,
+            height,
+            0,
             GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            data
+        );
+        if(gen_mipmap)
+            glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        m_size = glm::ivec2(width, height);
+        stbi_image_free(data);
+
+        return true;
+    }
+    bool Texture::LoadVfs(
+            const std::string& file,
+            bool gen_mipmap
+    ) {
+        TexDescription default_desc;
+        default_desc.s = TexDescription::REPEAT;
+        default_desc.t = TexDescription::REPEAT;
+        default_desc.min = TexDescription::LINEAR;
+        default_desc.mag = TexDescription::LINEAR;
+        return LoadVfsEx(file, gen_mipmap, default_desc);
+    }
+    bool Texture::LoadVfsEx(
+            const std::string& file,
+            bool gen_mipmap,
+            TexDescription desc
+    ) {
+        int width = 0, height = 0;
+        auto buffer = vfs::GetData(file);
+        stbi_uc* data = stbi_load_from_memory(
+            (const stbi_uc*)buffer.data(),
+            buffer.size(),
+            &width,
+            &height,
+            nullptr,
+            STBI_rgb_alpha
+        );
+        if(!data)
+        {
+            SDL_LogError(
+                SDL_LOG_CATEGORY_APPLICATION,
+                "Load texture \"%s\" failed: %s",
+                file.c_str(),
+                stbi_failure_reason()
+            );
+            return false;
+        }
+
+        if(!m_handle)
+            Generate();
+
+        glBindTexture(GL_TEXTURE_2D, m_handle);
+        detailed::ApplyDesc(desc, gen_mipmap);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            desc.format,
             width,
             height,
             0,
@@ -153,7 +216,7 @@ namespace awe
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
-            GL_RGBA,
+            desc.format,
             size[0],
             size[1],
             0,
@@ -164,6 +227,41 @@ namespace awe
         if(gen_mipmap)
             glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        m_size = size;
+
+        return true;
+    }
+    bool Texture::LoadFramebuffer(
+        glm::ivec2 size,
+        TexDescription desc,
+        GLenum attachment,
+        GLenum format
+    ) {
+        if(!m_handle)
+            Generate();
+
+        glBindTexture(GL_TEXTURE_2D, m_handle);
+        detailed::ApplyDesc(desc, false);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            desc.format,
+            size[0],
+            size[1],
+            0,
+            format,
+            GL_UNSIGNED_BYTE,
+            nullptr
+        );
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            attachment,
+            GL_TEXTURE_2D,
+            m_handle,
+            0
+        );
 
         m_size = size;
 

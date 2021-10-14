@@ -6,6 +6,7 @@
 
 #include <SDL.h>
 #include <string>
+#include <glm/vec2.hpp>
 
 
 namespace awe
@@ -21,6 +22,8 @@ namespace awe
         );
 
         ~Window() noexcept;
+
+        glm::ivec2 GetSize() const;
 
         SDL_Window* GetHandle() const noexcept;
 

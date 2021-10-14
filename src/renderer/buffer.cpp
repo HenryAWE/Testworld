@@ -43,4 +43,42 @@ namespace awe
         glDeleteVertexArrays(1, &m_handle);
         m_handle = 0;
     }
+
+    Framebuffer::~Framebuffer() noexcept
+    {
+        Destroy();
+    }
+
+    void Framebuffer::Generate()
+    {
+        if(m_handle)
+            return;
+        glGenFramebuffers(1, &m_handle);
+    }
+    void Framebuffer::Destroy() noexcept
+    {
+        if(!m_handle)
+            return;
+        glDeleteFramebuffers(1, &m_handle);
+        m_handle = 0;
+    }
+
+    Renderbuffer::~Renderbuffer() noexcept
+    {
+        Destroy();
+    }
+
+    void Renderbuffer::Generate()
+    {
+        if(m_handle)
+            return;
+        glGenRenderbuffers(1, &m_handle);
+    }
+    void Renderbuffer::Destroy() noexcept
+    {
+        if(!m_handle)
+            return;
+        glDeleteFramebuffers(1, &m_handle);
+        m_handle = 0;
+    }
 }

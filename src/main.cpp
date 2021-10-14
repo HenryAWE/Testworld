@@ -27,13 +27,33 @@ int SDL_main(int argc, char* argv[])
         "app",
         true
     );
-    if(fs::exists("script.pak"))
+    const std::string packages[] =
     {
-        PHYSFS_mount(
-            "script.pak",
-            "script",
-            true
-        );
+        "resource",
+        "script",
+        "shader"
+    };
+    for(auto& i : packages)
+    {
+        auto name = i + ".pak";
+        if(fs::exists(name))
+        {
+            int r = PHYSFS_mount(
+                name.c_str(),
+                i.c_str(),
+                true
+            );
+            if(!r)
+            {
+                SDL_LogError(
+                    SDL_LOG_CATEGORY_APPLICATION,
+                    "Failed to mount \"%s\" to \"%s\": %s",
+                    name.c_str(),
+                    i.c_str(),
+                    PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+                );
+            }
+        }
     }
 
     auto& app = awe::App::GetInstance();

@@ -57,6 +57,54 @@ namespace awe
     private:
         handle m_handle = 0;
     };
+
+    class Framebuffer
+    {
+    public:
+        typedef GLuint handle;
+
+        Framebuffer() noexcept = default;
+        Framebuffer(Framebuffer&& move) noexcept
+            : m_handle(std::exchange(move.m_handle, 0)) {}
+        Framebuffer(const Buffer&) = delete;
+
+        ~Framebuffer() noexcept;
+
+        void Generate();
+        void Destroy() noexcept;
+
+        [[nodiscard]]
+        constexpr handle GetHandle() const noexcept { return m_handle; }
+        [[nodiscard]]
+        constexpr operator handle() const noexcept { return m_handle; }
+
+    private:
+        handle m_handle = 0;
+    };
+
+    class Renderbuffer
+    {
+    public:
+        typedef GLuint handle;
+
+        Renderbuffer() noexcept = default;
+        Renderbuffer(Renderbuffer&& move) noexcept
+            : m_handle(std::exchange(move.m_handle, 0)) {}
+        Renderbuffer(const Buffer&) = delete;
+
+        ~Renderbuffer() noexcept;
+
+        void Generate();
+        void Destroy() noexcept;
+
+        [[nodiscard]]
+        constexpr handle GetHandle() const noexcept { return m_handle; }
+        [[nodiscard]]
+        constexpr operator handle() const noexcept { return m_handle; }
+
+    private:
+        handle m_handle = 0;
+    };
 }
 
 #endif

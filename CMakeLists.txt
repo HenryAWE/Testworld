@@ -35,5 +35,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_subdirectory(deps)
+add_subdirectory(resource)
 add_subdirectory(script)
+add_subdirectory(shader)
 add_subdirectory(src)
