@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 #include <SDL.h>
 #include <angelscript.h>
+#include "../sys/misc.hpp"
 
 
 namespace awe
@@ -31,17 +32,17 @@ namespace awe
         }
         ImGui::End();
 
-        if(m_px_painter)
-            m_px_painter->NewFrame();
+        if(m_img_painter)
+            m_img_painter->NewFrame();
         if(m_infowin)
             InfoWin();
     }
 
-    PixelPainter& Editor::GetPixelPainter()
+    ImageViewer& Editor::GetPixelPainter()
     {
-        if(!m_px_painter)
-            m_px_painter = std::make_unique<PixelPainter>();
-        return *m_px_painter;
+        if(!m_img_painter)
+            m_img_painter = std::make_unique<ImageViewer>();
+        return *m_img_painter;
     }
 
     void Editor::ShowInfo()
@@ -76,6 +77,8 @@ namespace awe
         {
             if(ImGui::MenuItem("Information"))
                 m_infowin = true;
+            if(ImGui::MenuItem("Homepage"))
+                OpenUrl("https://github.com/HenryAWE/Testworld");
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();

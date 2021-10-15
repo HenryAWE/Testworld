@@ -50,6 +50,13 @@ namespace awe
 
         ~Texture() noexcept;
 
+        Texture& operator=(Texture&& move) noexcept
+        {
+            m_handle = std::exchange(move.m_handle, 0);
+            m_size = std::exchange(move.m_size, glm::ivec2(0));
+            return *this;
+        }
+
         void Generate();
         void Destroy() noexcept;
 

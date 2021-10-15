@@ -8,7 +8,7 @@
 #include <optional>
 #include <imgui.h>
 #include "viewer.hpp"
-#include "pixelpainter.hpp"
+#include "imageviewer.hpp"
 #include "vfsviewer.hpp"
 
 
@@ -19,7 +19,7 @@ namespace awe
     public:
         void NewFrame();
 
-        PixelPainter& GetPixelPainter();
+        ImageViewer& GetPixelPainter();
 
         void ShowInfo();
 
@@ -30,7 +30,7 @@ namespace awe
         bool m_infowin = false;
 
         std::unique_ptr<TextViewer> m_text_viewer;
-        std::unique_ptr<PixelPainter> m_px_painter;
+        std::unique_ptr<ImageViewer> m_img_painter;
         std::unique_ptr<VfsViewer> m_vfs_viewer;
 
         std::optional<std::string> m_info;
