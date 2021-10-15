@@ -7,6 +7,8 @@
 #   define WIN32_LEAN_AND_MEAN 1
 #   include <Windows.h>
 #   include <shellapi.h>
+#elif defined(__LINUX__)
+#   include <stdlib.h>
 #endif
 
 
@@ -44,6 +46,11 @@ namespace awe
             NULL,
             SW_SHOWNORMAL
         );
+    }
+#elif defined(__LINUX__)
+    void OpenUrl(const std::string& url)
+    {
+        system(("xdg-open " + url).c_str());
     }
 #else
     void OpenUrl(const std::string& url) {}
