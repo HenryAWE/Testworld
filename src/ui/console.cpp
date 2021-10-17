@@ -13,14 +13,14 @@ namespace awe::imgui
     {
         static Console* instance = nullptr;
 
-        void TW_CDECL Echo(const std::string& str)
+        void TW_AS_API Echo(const std::string& str)
         {
             if(!instance)
                 return;
             instance->Write(str);
         }
 
-        void TW_CDECL Exit()
+        void TW_AS_API Exit()
         {
             SDL_QuitEvent quit{ SDL_QUIT, SDL_GetTicks() };
             SDL_PushEvent((SDL_Event*)&quit);
@@ -29,9 +29,9 @@ namespace awe::imgui
         int RegisterConsoleInterface(asIScriptEngine* engine)
         {
             int r = 0;
-            r = engine->RegisterGlobalFunction("void Echo(const string& in)", asFUNCTION(Echo), asCALL_CDECL);
+            r = engine->RegisterGlobalFunction("void Echo(const string& in)", asFUNCTION(Echo), TW_AS_APICALL);
             if(r < 0) return r;
-            r = engine->RegisterGlobalFunction("void Exit()", asFUNCTION(Exit), asCALL_CDECL);
+            r = engine->RegisterGlobalFunction("void Exit()", asFUNCTION(Exit), TW_AS_APICALL);
             if(r < 0) return r;
 
             return asSUCCESS;

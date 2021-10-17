@@ -14,4 +14,7 @@
 #   define TW_CDECL
 #endif
 
+#define TW_AS_API TW_CDECL
+#define TW_AS_APICALL asCALL_CDECL
+
 #endif
