@@ -180,6 +180,7 @@ namespace awe
         RegisterStdString(m_as_engine);
         RegisterStdStringUtils(m_as_engine);
 
+        script::RegisterObject(m_as_engine);
         awe::script::RegisterEditor(m_as_engine, m_editor.get());
 
         m_as_builder = std::make_unique<CScriptBuilder>();

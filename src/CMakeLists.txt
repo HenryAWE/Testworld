@@ -6,6 +6,7 @@ find_package(Angelscript CONFIG REQUIRED)
 find_package(PhysFS REQUIRED)
 
 aux_source_directory(editor testworld_editor_src)
+aux_source_directory(object testworld_object_src)
 aux_source_directory(renderer testworld_renderer_src)
 aux_source_directory(res testworld_res_src)
 aux_source_directory(script testworld_script_src)
@@ -17,6 +18,7 @@ add_executable(
     testworld
     WIN32
     ${testworld_editor_src}
+    ${testworld_object_src}
     ${testworld_renderer_src}
     ${testworld_res_src}
     ${testworld_script_src}

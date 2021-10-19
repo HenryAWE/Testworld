@@ -11,6 +11,7 @@
 namespace awe::script
 {
     void RegisterEditor(asIScriptEngine* engine, Editor* editor);
+    void RegisterObject(asIScriptEngine* engine);
 }
 
 

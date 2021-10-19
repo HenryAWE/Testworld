@@ -2,7 +2,9 @@
 // License: The 3-clause BSD License
 
 #include "register.hpp"
+#include "callconv.hpp"
 #include "../editor/editor.hpp"
+#include "../object/object.hpp"
 
 
 namespace awe::script
@@ -25,6 +27,26 @@ namespace awe::script
         );
         CHECK_R(r);
         r = engine->RegisterGlobalProperty("Editor editor", editor);
+        CHECK_R(r);
+    }
+
+    void TW_CDECL ObjectCtor(void* mem)
+    {
+        new(mem) Object();
+    }
+    void TW_CDECL ObjectDtor(void* mem)
+    {
+        ((Object*)mem)->~Object();
+    }
+    void RegisterObject(asIScriptEngine* engine)
+    {
+        int r = 0;
+        asDWORD flags =asOBJ_VALUE | asOBJ_APP_CLASS_CD;
+        r = engine->RegisterObjectType("Object", sizeof(Object), flags);
+        CHECK_R(r);
+        r = engine->RegisterObjectBehaviour("Object", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(ObjectCtor), asCALL_CDECL_OBJLAST);
+        CHECK_R(r);
+        r = engine->RegisterObjectBehaviour("Object", asBEHAVE_DESTRUCT, "void f()", asFUNCTION(ObjectDtor), asCALL_CDECL_OBJLAST);
         CHECK_R(r);
     }
 }
