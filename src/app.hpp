@@ -10,6 +10,7 @@
 #include <scriptbuilder/scriptbuilder.h>
 #include <imgui.h>
 #include "editor/editor.hpp"
+#include "lang/lang.hpp"
 #include "renderer/renderer.hpp"
 #include "ui/console.hpp"
 #include "window/window.hpp"
@@ -27,6 +28,8 @@ namespace awe
 
         void CreateWindow();
 
+        void LoadLanguagePak(const std::string& pakname = "en-US");
+
         void Mainloop();
 
         void PrepareScriptEnv();
@@ -34,12 +37,16 @@ namespace awe
 
         void Quit();
 
+        LangPak& GetLanguagePak();
+
         std::function<bool()> BeforeQuit;
 
     private:
         std::shared_ptr<Window> m_window;
         std::shared_ptr<Renderer> m_renderer;
         ImGuiContext* m_imgui_ctx = nullptr;
+
+        LangPak m_lang;
 
         std::unique_ptr<Editor> m_editor;
 

@@ -1,0 +1,11 @@
+{
+    "lang" :
+    {
+        "name" : "English (United States)",
+        "enname" : "English (United States)",
+        "id" : "en-US",
+        "font" : "SourceSans3-Regular.ttf",
+        "range" : "Default",
+        "size" : 26.0
+    }
+}

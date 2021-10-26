@@ -78,8 +78,18 @@ namespace awe
         m_console->Write("Testworld Angelscript Console");
     }
 
+    void App::LoadLanguagePak(const std::string& pakname)
+    {
+        bool loaded = m_lang.Load(pakname);
+        if(!loaded && pakname != "en-US")
+            m_lang.Load("en-US");
+        
+    }
+
     void App::Mainloop()
     {
+        auto& io = ImGui::GetIO();
+
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
             "Begin mainloop"
@@ -133,11 +143,15 @@ namespace awe
             ImGui::NewFrame();
 
             m_console->NewFrame();
+            ImGui::ShowDemoWindow();
 
             m_editor->NewFrame();
             if(EditorNewFrame) EditorNewFrame();
 
             // Rendering
+            auto drawsize = m_renderer->GetDrawableSize();
+            for(int i : { 0, 1 })
+                io.DisplayFramebufferScale[i] = float(drawsize[i]) / io.DisplaySize[i];
             ImGui::Render();
             auto& fbo = m_renderer->GetFramebuffer();
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -149,6 +163,7 @@ namespace awe
             m_renderer->DrawTexture(test_tex, m);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+            glViewport(0, 0, drawsize[0], drawsize[1]);
             glClear(GL_COLOR_BUFFER_BIT);
             glUseProgram(screen_sh);
             m_renderer->DrawTexture(m_renderer->GetScreenTexture(), glm::mat4(1), true);
@@ -216,6 +231,11 @@ namespace awe
         m_imgui_ctx = nullptr;
         m_renderer.reset();
         m_window.reset();
+    }
+
+    LangPak& App::GetLanguagePak()
+    {
+        return m_lang;
     }
 
     void App::MessageCallback(const asSMessageInfo* msg)

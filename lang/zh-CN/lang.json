@@ -1,0 +1,11 @@
+{
+    "lang" :
+    {
+        "name" : "简体中文",
+        "enname" : "Simplified Chinese",
+        "id" : "zh-CN",
+        "font" : "SourceHanSansHWSC-Regular.otf",
+        "range" : "SimpChinese",
+        "size" : 26.0
+    }
+}

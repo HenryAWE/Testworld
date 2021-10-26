@@ -6,6 +6,7 @@ find_package(Angelscript CONFIG REQUIRED)
 find_package(PhysFS REQUIRED)
 
 aux_source_directory(editor testworld_editor_src)
+aux_source_directory(lang testworld_lang_src)
 aux_source_directory(object testworld_object_src)
 aux_source_directory(renderer testworld_renderer_src)
 aux_source_directory(res testworld_res_src)
@@ -18,6 +19,7 @@ add_executable(
     testworld
     WIN32
     ${testworld_editor_src}
+    ${testworld_lang_src}
     ${testworld_object_src}
     ${testworld_renderer_src}
     ${testworld_res_src}
@@ -48,6 +50,7 @@ target_link_libraries(testworld PRIVATE fmt)
 target_link_libraries(testworld PRIVATE glad)
 target_link_libraries(testworld PRIVATE glm)
 target_link_libraries(testworld PRIVATE imgui)
+target_link_libraries(testworld PRIVATE rapidjson)
 target_link_libraries(testworld PRIVATE stb)
 
 set_target_properties(

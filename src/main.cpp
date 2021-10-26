@@ -7,6 +7,7 @@
 #include "app.hpp"
 #include "sys/init.hpp"
 #include "sys/singleinstance.hpp"
+#include "res/vfs.hpp"
 
 
 #ifndef SDL_main
@@ -14,12 +15,13 @@
 #endif
 int SDL_main(int argc, char* argv[])
 {
-    if(!awe::SingleInstance::GetInstance().Acquire())
+    using namespace awe;
+    if(!SingleInstance::GetInstance().Acquire())
         return EXIT_SUCCESS;
 
-    awe::Prepare(argv[0]);
-    awe::InitSDL();
-    awe::InitPhysfs(argv[0]);
+    Prepare(argv[0]);
+    InitSDL();
+    InitPhysfs(argv[0]);
 
     namespace fs = std::filesystem;
     PHYSFS_mount(
@@ -56,8 +58,15 @@ int SDL_main(int argc, char* argv[])
         }
     }
 
-    auto& app = awe::App::GetInstance();
+    std::string arg1 = argc > 1 ? argv[1] : "en-US";
+
+    auto& app = App::GetInstance();
+    app.LoadLanguagePak(arg1);
     app.CreateWindow();
+    auto& fonts = ImGui::GetIO().Fonts;
+    app.GetLanguagePak().AddFont();
+    fonts->AddFontDefault();
+    fonts->Build();
     app.PrepareScriptEnv();
 
     app.Mainloop();
@@ -65,7 +74,7 @@ int SDL_main(int argc, char* argv[])
     app.ClearScriptEnv();
     app.Quit();
 
-    awe::QuitPhysfs();
-    awe::QuitSDL();
+    QuitPhysfs();
+    QuitSDL();
     return 0;
 }
