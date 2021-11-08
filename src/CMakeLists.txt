@@ -30,7 +30,10 @@ add_executable(
     ${testworld_src}
 )
 
-target_compile_definitions(testworld PRIVATE _CRT_SECURE_NO_WARNINGS=1)
+if(MSVC)
+    target_compile_definitions(testworld PRIVATE _CRT_SECURE_NO_WARNINGS=1)
+    target_compile_definitions(testworld PRIVATE _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS=1)
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     target_link_libraries(testworld PRIVATE ${SDL2_LIBRARIES})

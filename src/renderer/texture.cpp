@@ -147,7 +147,7 @@ namespace awe
         auto buffer = vfs::GetData(file);
         stbi_uc* data = stbi_load_from_memory(
             (const stbi_uc*)buffer.data(),
-            buffer.size(),
+            (int)buffer.size(),
             &width,
             &height,
             nullptr,

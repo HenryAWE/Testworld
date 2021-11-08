@@ -56,6 +56,8 @@ namespace awe
         m_id = detailed::GetString(lang["id"]);
         if(lang.HasMember("font"))
             m_font = GetFullpath(detailed::GetString(lang["font"]));
+
+        return true;
     }
 
     std::string LangPak::GetFullpath(const std::string& file)
@@ -77,7 +79,7 @@ namespace awe
         ImFontConfig cfg{};
         // Avoid double deletion
         cfg.FontDataOwnedByAtlas = false;
-        
+
         auto ftdata = vfs::GetData(GetFontVfsPath());
         auto& fonts = ImGui::GetIO().Fonts;
 
