@@ -125,6 +125,14 @@ namespace awe
         return glGetUniformLocation(m_handle, name);
     }
 
+    void Uniform(GLint loc, GLint v)
+    {
+        glUniform1i(loc, v);
+    }
+    void Uniform(GLint loc, GLfloat v)
+    {
+        glUniform1f(loc, v);
+    }
     void Uniform(GLint loc, const glm::mat4& m)
     {
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));

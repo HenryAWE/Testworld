@@ -35,6 +35,7 @@ namespace awe
         Filter mag = LINEAR;
 
         GLint format = GL_RGBA; // internal format
+        GLint type = GL_RGBA; // data format
     };
 
     class Texture

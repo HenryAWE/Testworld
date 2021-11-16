@@ -7,6 +7,9 @@
 in vec2 coord;
 out vec4 frag;
 uniform sampler2D tex;
+uniform sampler2D perlin;
+uniform int use_perlin;
+uniform float off_factor;
 
 vec3 Grayscale(vec3 col)
 {
@@ -16,6 +19,9 @@ vec3 Grayscale(vec3 col)
 
 void main()
 {
-    frag = texture(tex, coord);
-    frag.rgb = Grayscale(frag.rgb);
+    vec2 offset = vec2(0.0f);
+    if(use_perlin == 1)
+        offset = vec2(texture(perlin, coord).r - 0.5f) * off_factor;
+    frag = texture(tex, coord + offset);
+    frag.rgb = (Grayscale(frag.rgb) + frag.rgb) / 2.0f;
 }
