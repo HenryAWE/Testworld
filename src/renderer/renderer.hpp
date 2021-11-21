@@ -59,11 +59,15 @@ namespace awe
         Framebuffer m_fbo;
         Renderbuffer m_rbo;
         Texture m_screen_tex;
+        void InitScreenData();
+        void ReleaseScreenData();
 
         VertexArray m_rect_vao;
         Buffer m_rect_vbo;
         Buffer m_rect_ebo;
         ShaderProgram m_rect_shader;
+        void InitRectData();
+        void ReleaseRectData();
     };
 }
 

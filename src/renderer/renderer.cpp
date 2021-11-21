@@ -138,6 +138,18 @@ namespace awe
 
     void Renderer::InitData()
     {
+        InitScreenData();
+        InitRectData();
+
+    }
+    void Renderer::ReleaseData()
+    {
+        ReleaseRectData();
+        ReleaseScreenData();
+    }
+
+    void Renderer::InitScreenData()
+    {
         const auto size = GetDrawableSize();
 
         m_fbo.Generate();
@@ -179,9 +191,17 @@ namespace awe
             );
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    void Renderer::ReleaseScreenData()
+    {
+        m_fbo.Destroy();
+        m_rbo.Destroy();
+        m_screen_tex.Destroy();
+    }
 
+    void Renderer::InitRectData()
+    {
         // rectangle data for drawing texture
-
         const float vertices[] =
         {
             1.0f, 1.0f,     1.0f, 1.0f,
@@ -189,7 +209,6 @@ namespace awe
             -1.0f, -1.0f,   0.0f, 0.0f,
             -1.0f, 1.0f,    0.0f, 1.0f
         };
-
         const unsigned int indices[] = {
             0, 1, 3, // first triangle
             1, 2, 3  // second triangle
@@ -240,7 +259,7 @@ namespace awe
 
         glBindVertexArray(0);
     }
-    void Renderer::ReleaseData()
+    void Renderer::ReleaseRectData()
     {
         m_rect_vao.Destroy();
         m_rect_ebo.Destroy();
