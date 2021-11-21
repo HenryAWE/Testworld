@@ -5,6 +5,7 @@
 #include "renderer.hpp"
 #include <cassert>
 #include <stdexcept>
+#include <vector>
 #include <fmt/format.h>
 #include "../window/window.hpp"
 
@@ -77,6 +78,37 @@ namespace awe
         );
     }
 
+    Texture Renderer::GeneratePerlinTexture2D(float p, int size)
+    {
+        auto Fill = [p](int x, int y)->unsigned
+        {
+            float val = graphic::PerlinNoise<float>(p, (float)x, (float)y);
+            return unsigned char(256 * val);
+        };
+        std::vector<unsigned char> buf;
+        buf.resize(size * size);
+        for(int i = 0; i < size; ++i)
+        {
+            for(int j = 0; j < size; ++j)
+            {
+                buf[i * size + j] = Fill(i, j);
+            }
+        }
+        Texture tex;
+        TexDescription desc;
+        desc.format = GL_RED;
+        desc.type = GL_RED;
+        tex.LoadMemoryEx(
+            buf.data(),
+            glm::ivec2(size),
+            true,
+            desc
+        );
+        assert(glGetError() == GL_NO_ERROR);
+
+        return std::move(tex);
+    }
+
     Framebuffer& Renderer::GetFramebuffer()
     {
         return m_fbo;
@@ -105,6 +137,18 @@ namespace awe
     }
 
     void Renderer::InitData()
+    {
+        InitScreenData();
+        InitRectData();
+
+    }
+    void Renderer::ReleaseData()
+    {
+        ReleaseRectData();
+        ReleaseScreenData();
+    }
+
+    void Renderer::InitScreenData()
     {
         const auto size = GetDrawableSize();
 
@@ -147,9 +191,17 @@ namespace awe
             );
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    void Renderer::ReleaseScreenData()
+    {
+        m_fbo.Destroy();
+        m_rbo.Destroy();
+        m_screen_tex.Destroy();
+    }
 
+    void Renderer::InitRectData()
+    {
         // rectangle data for drawing texture
-
         const float vertices[] =
         {
             1.0f, 1.0f,     1.0f, 1.0f,
@@ -157,7 +209,6 @@ namespace awe
             -1.0f, -1.0f,   0.0f, 0.0f,
             -1.0f, 1.0f,    0.0f, 1.0f
         };
-
         const unsigned int indices[] = {
             0, 1, 3, // first triangle
             1, 2, 3  // second triangle
@@ -208,7 +259,7 @@ namespace awe
 
         glBindVertexArray(0);
     }
-    void Renderer::ReleaseData()
+    void Renderer::ReleaseRectData()
     {
         m_rect_vao.Destroy();
         m_rect_ebo.Destroy();

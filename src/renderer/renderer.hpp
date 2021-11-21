@@ -11,6 +11,7 @@
 #include "buffer.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "noise.hpp"
 
 
 namespace awe
@@ -34,6 +35,10 @@ namespace awe
         glm::ivec2 GetDrawableSize() const;
         std::string RendererInfo();
 
+        // Utilities
+
+        Texture GeneratePerlinTexture2D(float p = 0.5f, int size = 256);
+
         // Rendering
 
         Framebuffer& GetFramebuffer();
@@ -54,11 +59,15 @@ namespace awe
         Framebuffer m_fbo;
         Renderbuffer m_rbo;
         Texture m_screen_tex;
+        void InitScreenData();
+        void ReleaseScreenData();
 
         VertexArray m_rect_vao;
         Buffer m_rect_vbo;
         Buffer m_rect_ebo;
         ShaderProgram m_rect_shader;
+        void InitRectData();
+        void ReleaseRectData();
     };
 }
 

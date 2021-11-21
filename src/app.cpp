@@ -112,10 +112,13 @@ namespace awe
         screen_sh.Generate();
         screen_sh.LoadVfs("shader/rect2D.vs", "shader/screen.fs");
 
+        auto perlin = m_renderer->GeneratePerlinTexture2D(0.5f, 256);
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         bool quit = false;
+        float t = 0.0f;
         while(!quit)
         {
             // Event processing
@@ -165,12 +168,33 @@ namespace awe
 
             glViewport(0, 0, drawsize[0], drawsize[1]);
             glClear(GL_COLOR_BUFFER_BIT);
+            assert(glGetError() == GL_NO_ERROR);
             glUseProgram(screen_sh);
+            Uniform(screen_sh.UniLoc("tex"), 0);
+            assert(glGetError() == GL_NO_ERROR);
+            Uniform(screen_sh.UniLoc("perlin"), 1);
+            assert(glGetError() == GL_NO_ERROR);
+            Uniform(screen_sh.UniLoc("use_perlin"), 1);
+            Uniform(screen_sh.UniLoc("off_factor"), 0.1f * sin(t += io.DeltaTime));
+            assert(glGetError() == GL_NO_ERROR);
+            glActiveTexture(GL_TEXTURE0 + 1);
+            glBindTexture(GL_TEXTURE_2D, perlin);
             m_renderer->DrawTexture(m_renderer->GetScreenTexture(), glm::mat4(1), true);
+
+            glActiveTexture(GL_TEXTURE0);
             glUseProgram(screen_sh);
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             m_renderer->Present();
+            int err = glGetError();
+            if(err != GL_NO_ERROR)
+            {
+                SDL_LogError(
+                    SDL_LOG_CATEGORY_APPLICATION,
+                    "GL Error (%x): ",
+                    err
+                );
+            }
             assert(glGetError() == GL_NO_ERROR);
         }
 

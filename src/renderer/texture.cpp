@@ -45,6 +45,24 @@ namespace awe
             if(wrap_s == GL_CLAMP_TO_BORDER || wrap_t == GL_CLAMP_TO_BORDER)
                 glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &desc.border_color[0]);
         }
+        void TexImage(
+            void* data,
+            int width,
+            int height,
+            const TexDescription& desc
+        ) {
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                desc.format,
+                width,
+                height,
+                0,
+                desc.type,
+                GL_UNSIGNED_BYTE,
+                data
+            );
+        }
     }
 
     Texture::~Texture() noexcept
@@ -169,17 +187,7 @@ namespace awe
 
         glBindTexture(GL_TEXTURE_2D, m_handle);
         detailed::ApplyDesc(desc, gen_mipmap);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            desc.format,
-            width,
-            height,
-            0,
-            GL_RGBA,
-            GL_UNSIGNED_BYTE,
-            data
-        );
+        detailed::TexImage(data, width, height, desc);
         if(gen_mipmap)
             glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -213,17 +221,7 @@ namespace awe
 
         glBindTexture(GL_TEXTURE_2D, m_handle);
         detailed::ApplyDesc(desc, gen_mipmap);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            desc.format,
-            size[0],
-            size[1],
-            0,
-            GL_RGBA,
-            GL_UNSIGNED_BYTE,
-            data
-        );
+        detailed::TexImage(data, size[0], size[1], desc);
         if(gen_mipmap)
             glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);

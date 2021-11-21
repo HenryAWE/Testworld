@@ -53,6 +53,8 @@ namespace awe
         handle m_handle = 0;
     };
 
+    void Uniform(GLint loc, GLint v);
+    void Uniform(GLint loc, GLfloat v);
     void Uniform(GLint loc, const glm::mat4& m);
 }
 
