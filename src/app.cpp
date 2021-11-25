@@ -126,8 +126,6 @@ namespace awe
         if(EditorBeginMainloop) EditorBeginMainloop();
         auto EditorNewFrame = script::GenCallerByDecl<void()>(testworld, "void EditorNewFrame()", main_ctx);
 
-        Texture test_tex;
-        test_tex.LoadVfs("resource/awesomeface.png");
         ShaderProgram screen_sh;
         screen_sh.Generate();
         screen_sh.LoadVfs("shader/rect2D.vs", "shader/screen.fs");
@@ -138,7 +136,6 @@ namespace awe
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         bool quit = false;
-        float t = 0.0f;
         while(!quit)
         {
             // Event processing
@@ -166,7 +163,6 @@ namespace awe
             ImGui::NewFrame();
 
             m_console->NewFrame();
-            ImGui::ShowDemoWindow();
 
             m_editor->NewFrame();
             if(EditorNewFrame) EditorNewFrame();
@@ -180,29 +176,13 @@ namespace awe
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT);
-            glm::mat4 m(1);
-            m = glm::scale(m, glm::vec3(0.5f));
-            m = glm::rotate(m, glm::radians(45.0f), glm::vec3(0, 0, 1));
-            m_renderer->DrawTexture(test_tex, m);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glViewport(0, 0, drawsize[0], drawsize[1]);
             glClear(GL_COLOR_BUFFER_BIT);
-            assert(glGetError() == GL_NO_ERROR);
             glUseProgram(screen_sh);
-            Uniform(screen_sh.UniLoc("tex"), 0);
-            assert(glGetError() == GL_NO_ERROR);
-            Uniform(screen_sh.UniLoc("perlin"), 1);
-            assert(glGetError() == GL_NO_ERROR);
-            Uniform(screen_sh.UniLoc("use_perlin"), 1);
-            Uniform(screen_sh.UniLoc("off_factor"), 0.1f * sin(t += io.DeltaTime));
-            assert(glGetError() == GL_NO_ERROR);
-            glActiveTexture(GL_TEXTURE0 + 1);
-            glBindTexture(GL_TEXTURE_2D, perlin);
             m_renderer->DrawTexture(m_renderer->GetScreenTexture(), glm::mat4(1), true);
-
-            glActiveTexture(GL_TEXTURE0);
-            glUseProgram(screen_sh);
+            glUseProgram(0);
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             m_renderer->Present();
