@@ -5,15 +5,12 @@
 #include "app.hpp"
 #include <stdexcept>
 #include <stb_image.h> // set flip
-#include <scriptarray/scriptarray.h>
-#include <scriptstdstring/scriptstdstring.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
 #include "editor/editor.hpp"
 #include "graphic/renderer.hpp"
 #include "res/vfs.hpp"
-#include "script/scriptutil.hpp"
-#include "script/register.hpp"
+#include "script/script.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 
@@ -215,9 +212,8 @@ namespace awe
             this,
             asCALL_THISCALL
         );
-        RegisterScriptArray(m_as_engine, true);
-        RegisterStdString(m_as_engine);
-        RegisterStdStringUtils(m_as_engine);
+
+        script::InitScriptEnv(m_as_engine);
 
         script::RegisterObject(m_as_engine);
         awe::script::RegisterEditor(m_as_engine, m_editor.get());
@@ -240,6 +236,7 @@ namespace awe
     void App::ClearScriptEnv()
     {
         m_console->ReleaseScriptEngine();
+        script::ClearScriptEnv(m_as_engine);
         m_as_builder.reset();
         m_as_engine->ShutDownAndRelease();
     }

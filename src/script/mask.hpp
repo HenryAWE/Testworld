@@ -9,9 +9,9 @@ namespace awe::script
 {
     enum ModuleMask : int
     {
-        Default = 1,
-        Editor = 1 << 1,
-        Resource = 1 << 2
+        MODULE_Default = 1,
+        MODULE_Editor = 1 << 1,
+        MODULE_Resource = 1 << 2
     };
 }
 
