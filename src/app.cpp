@@ -10,7 +10,7 @@
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
 #include "editor/editor.hpp"
-#include "renderer/renderer.hpp"
+#include "graphic/renderer.hpp"
 #include "res/vfs.hpp"
 #include "script/scriptutil.hpp"
 #include "script/register.hpp"

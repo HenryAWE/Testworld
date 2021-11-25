@@ -11,7 +11,7 @@
 #include <tuple>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
-#include "../renderer/texture.hpp"
+#include "../graphic/texture.hpp"
 
 
 namespace awe

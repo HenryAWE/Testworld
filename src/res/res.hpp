@@ -6,7 +6,7 @@
 
 #include <map>
 #include <optional>
-#include "../renderer/renderer.hpp"
+#include "../graphic/renderer.hpp"
 
 
 namespace awe

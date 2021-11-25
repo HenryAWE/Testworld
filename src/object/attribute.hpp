@@ -7,7 +7,7 @@
 
 #include <string>
 #include <glm/vec2.hpp>
-#include "../renderer/texture.hpp"
+#include "../graphic/texture.hpp"
 
 
 namespace awe::attribute

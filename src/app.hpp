@@ -11,7 +11,7 @@
 #include <imgui.h>
 #include "editor/editor.hpp"
 #include "lang/lang.hpp"
-#include "renderer/renderer.hpp"
+#include "graphic/renderer.hpp"
 #include "ui/console.hpp"
 #include "window/window.hpp"
 
