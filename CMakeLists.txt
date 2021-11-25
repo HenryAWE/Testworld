@@ -12,7 +12,8 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     message(STATUS "Use vcpkg toolchain from $ENV{VCPKG_ROOT}")
 endif()
 
-# Compile options
+# Compiler options
+# Use C++ 17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Force UTF-8 on MSVC
@@ -27,12 +28,6 @@ project(
     DESCRIPTION "A C++/OpenGL project for practicing programing"
     LANGUAGES C CXX
 )
-
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-    find_package(Threads REQUIRED)
-endif()
 
 add_subdirectory(deps)
 add_subdirectory(lang)
