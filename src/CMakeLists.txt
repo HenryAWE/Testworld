@@ -10,6 +10,7 @@ endif()
 find_package(SDL2 REQUIRED)
 find_package(Angelscript CONFIG REQUIRED)
 find_package(PhysFS REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 # Source list
 # Program entry
@@ -32,6 +33,9 @@ list(APPEND testworld_src ${testworld_script_src})
 # System
 aux_source_directory(sys testworld_sys_src)
 list(APPEND testworld_src ${testworld_sys_src})
+# Command line interface
+aux_source_directory(cli testworld_cli_src)
+list(APPEND testworld_src ${testworld_cli_src})
 # User interface
 aux_source_directory(ui testworld_ui_src)
 list(APPEND testworld_src ${testworld_ui_src})
@@ -57,6 +61,7 @@ endif()
 
 target_link_libraries(testworld PRIVATE SDL2::Core SDL2::Entry)
 target_link_libraries(testworld PRIVATE Angelscript::angelscript)
+target_link_libraries(testworld PRIVATE Boost::program_options)
 target_link_libraries(testworld PRIVATE as_addon)
 target_link_libraries(testworld PRIVATE ${PHYSFS_LIBRARY})
 target_include_directories(testworld PRIVATE ${PHYSFS_INCLUDE_DIR})
