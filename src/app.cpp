@@ -25,7 +25,7 @@ namespace awe
         return instance;
     }
 
-    void App::CreateWindow()
+    void App::Initialize()
     {
         m_window = std::make_shared<Window>(
             "Testworld",
@@ -73,6 +73,29 @@ namespace awe
         m_console = std::make_unique<imgui::Console>();
         m_editor = std::make_unique<Editor>();
         m_console->Write("Testworld Angelscript Console");
+
+        // ImGui fonts
+        auto& fonts = io.Fonts;
+        GetLanguagePak().AddFont();
+        fonts->AddFontDefault();
+        fonts->Build();
+
+        PrepareScriptEnv();
+    }
+
+    void App::Deinitialize()
+    {
+        ClearScriptEnv();
+
+        m_editor.reset();
+        m_console.reset();
+
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext(m_imgui_ctx);
+        m_imgui_ctx = nullptr;
+        m_renderer.reset();
+        m_window.reset();
     }
 
     void App::LoadLanguagePak(const std::string& pakname)
@@ -215,7 +238,6 @@ namespace awe
 
         script::InitScriptEnv(m_as_engine);
 
-        script::RegisterObject(m_as_engine);
         awe::script::RegisterEditor(m_as_engine, m_editor.get());
 
         m_as_builder = std::make_unique<CScriptBuilder>();
@@ -239,19 +261,6 @@ namespace awe
         script::ClearScriptEnv(m_as_engine);
         m_as_builder.reset();
         m_as_engine->ShutDownAndRelease();
-    }
-
-    void App::Quit()
-    {
-        m_editor.reset();
-        m_console.reset();
-
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext(m_imgui_ctx);
-        m_imgui_ctx = nullptr;
-        m_renderer.reset();
-        m_window.reset();
     }
 
     LangPak& App::GetLanguagePak()

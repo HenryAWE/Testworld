@@ -62,17 +62,11 @@ int SDL_main(int argc, char* argv[])
 
     auto& app = App::GetInstance();
     app.LoadLanguagePak(arg1);
-    app.CreateWindow();
-    auto& fonts = ImGui::GetIO().Fonts;
-    app.GetLanguagePak().AddFont();
-    fonts->AddFontDefault();
-    fonts->Build();
-    app.PrepareScriptEnv();
+    app.Initialize();
 
     app.Mainloop();
 
-    app.ClearScriptEnv();
-    app.Quit();
+    app.Deinitialize();
 
     QuitPhysfs();
     QuitSDL();

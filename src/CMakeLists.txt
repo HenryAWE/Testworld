@@ -7,7 +7,6 @@ find_package(PhysFS REQUIRED)
 
 aux_source_directory(editor testworld_editor_src)
 aux_source_directory(lang testworld_lang_src)
-aux_source_directory(object testworld_object_src)
 aux_source_directory(graphic testworld_graphic_src)
 aux_source_directory(res testworld_res_src)
 aux_source_directory(script testworld_script_src)
@@ -20,7 +19,6 @@ add_executable(
     WIN32
     ${testworld_editor_src}
     ${testworld_lang_src}
-    ${testworld_object_src}
     ${testworld_graphic_src}
     ${testworld_res_src}
     ${testworld_script_src}

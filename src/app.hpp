@@ -26,22 +26,23 @@ namespace awe
 
         static App& GetInstance();
 
-        void CreateWindow();
+        void Initialize();
+        void Deinitialize();
 
         void LoadLanguagePak(const std::string& pakname = "en-US");
 
         void Mainloop();
 
-        void PrepareScriptEnv();
-        void ClearScriptEnv();
 
-        void Quit();
 
         LangPak& GetLanguagePak();
 
         std::function<bool()> BeforeQuit;
 
     private:
+        void PrepareScriptEnv();
+        void ClearScriptEnv();
+
         std::shared_ptr<Window> m_window;
         std::shared_ptr<Renderer> m_renderer;
         ImGuiContext* m_imgui_ctx = nullptr;
