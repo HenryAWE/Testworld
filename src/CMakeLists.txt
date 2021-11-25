@@ -17,15 +17,15 @@ aux_source_directory(. testworld_src)
 # Editor
 aux_source_directory(editor testworld_editor_src)
 list(APPEND testworld_src ${testworld_editor_src})
-# Language
-aux_source_directory(lang testworld_lang_src)
-list(APPEND testworld_src ${testworld_lang_src})
+
 # Graphic
 aux_source_directory(graphic testworld_graphic_src)
 list(APPEND testworld_src ${testworld_graphic_src})
 # Resource management
 aux_source_directory(res testworld_res_src)
 list(APPEND testworld_src ${testworld_res_src})
+aux_source_directory(res/lang testworld_lang_src)
+list(APPEND testworld_src ${testworld_lang_src})
 # Scripting
 aux_source_directory(script testworld_script_src)
 list(APPEND testworld_src ${testworld_script_src})

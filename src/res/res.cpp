@@ -2,11 +2,53 @@
 // License: The 3-clause BSD License
 
 #include "res.hpp"
+#include <filesystem>
 
 
-
-namespace awe
+namespace awe::res
 {
+    void Initialize()
+    {
+        namespace fs = std::filesystem;
+        PHYSFS_mount(
+            fs::current_path().u8string().c_str(),
+            "app",
+            true
+        );
+        const std::string packages[] =
+        {
+            "resource",
+            "script",
+            "shader"
+        };
+        for(auto& i : packages)
+        {
+            auto name = i + ".pak";
+            if(fs::exists(name))
+            {
+                int r = PHYSFS_mount(
+                    name.c_str(),
+                    i.c_str(),
+                    true
+                );
+                if(!r)
+                {
+                    SDL_LogError(
+                        SDL_LOG_CATEGORY_APPLICATION,
+                        "Failed to mount \"%s\" to \"%s\": %s",
+                        name.c_str(),
+                        i.c_str(),
+                        PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+                    );
+                }
+            }
+        }
+    }
+    void Deinitialize()
+    {
+        // empty
+    }
+
     ResourceManager::ResourceManager() = default;
     ResourceManager::~ResourceManager()
     {

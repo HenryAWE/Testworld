@@ -7,10 +7,14 @@
 #include <map>
 #include <optional>
 #include "../graphic/renderer.hpp"
+#include "vfs.hpp"
 
 
-namespace awe
+namespace awe::res
 {
+    void Initialize();
+    void Deinitialize();
+
     class ResourceManager
     {
     public:

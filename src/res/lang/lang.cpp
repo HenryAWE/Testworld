@@ -6,7 +6,7 @@
 #include <fmt/core.h>
 #include <imgui.h>
 #include <rapidjson/document.h>
-#include "../res/vfs.hpp"
+#include "../vfs.hpp"
 
 
 namespace awe

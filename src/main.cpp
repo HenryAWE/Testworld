@@ -7,7 +7,7 @@
 #include "app.hpp"
 #include "sys/init.hpp"
 #include "sys/singleinstance.hpp"
-#include "res/vfs.hpp"
+#include "res/res.hpp"
 
 
 #ifndef SDL_main
@@ -23,41 +23,7 @@ int SDL_main(int argc, char* argv[])
     InitSDL();
     InitPhysfs(argv[0]);
 
-    namespace fs = std::filesystem;
-    PHYSFS_mount(
-        fs::current_path().u8string().c_str(),
-        "app",
-        true
-    );
-    const std::string packages[] =
-    {
-        "resource",
-        "script",
-        "shader"
-    };
-    for(auto& i : packages)
-    {
-        auto name = i + ".pak";
-        if(fs::exists(name))
-        {
-            int r = PHYSFS_mount(
-                name.c_str(),
-                i.c_str(),
-                true
-            );
-            if(!r)
-            {
-                SDL_LogError(
-                    SDL_LOG_CATEGORY_APPLICATION,
-                    "Failed to mount \"%s\" to \"%s\": %s",
-                    name.c_str(),
-                    i.c_str(),
-                    PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
-                );
-            }
-        }
-    }
-
+    res::Initialize();
     std::string arg1 = argc > 1 ? argv[1] : "en-US";
 
     auto& app = App::GetInstance();
@@ -67,6 +33,8 @@ int SDL_main(int argc, char* argv[])
     app.Mainloop();
 
     app.Deinitialize();
+
+    res::Deinitialize();
 
     QuitPhysfs();
     QuitSDL();
