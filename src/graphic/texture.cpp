@@ -7,7 +7,7 @@
 #include "../res/vfs.hpp"
 
 
-namespace awe
+namespace awe::graphic
 {
     namespace detailed
     {

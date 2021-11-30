@@ -4,7 +4,7 @@
 #include "buffer.hpp"
 
 
-namespace awe
+namespace awe::graphic
 {
     Buffer::~Buffer() noexcept
     {

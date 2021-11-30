@@ -61,16 +61,16 @@ namespace awe::res
         return instance;
     }
 
-    Texture& ResourceManager::AddTexture(
+    graphic::Texture& ResourceManager::AddTexture(
         const std::string& name,
-        Texture&& tex
+        graphic::Texture&& tex
     ) {
         return m_tex.emplace(
             name,
             std::move(tex)
         ).first->second;
     }
-    Texture* ResourceManager::GetTexturePtr(const std::string& name)
+    graphic::Texture* ResourceManager::GetTexturePtr(const std::string& name)
     {
         auto iter = m_tex.find(name);
         if(iter == m_tex.end())
@@ -78,7 +78,7 @@ namespace awe::res
         else
             return &iter->second;
     }
-    std::map<std::string, Texture>& ResourceManager::GetTextures()
+    std::map<std::string, graphic::Texture>& ResourceManager::GetTextures()
     {
         return m_tex;
     }

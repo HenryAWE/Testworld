@@ -10,7 +10,7 @@
 #include <glm/matrix.hpp>
 
 
-namespace awe
+namespace awe::graphic
 {
     class ShaderProgram
     {

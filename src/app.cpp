@@ -33,7 +33,7 @@ namespace awe
         );
 
         stbi_set_flip_vertically_on_load(true);
-        m_renderer = std::make_shared<Renderer>(
+        m_renderer = std::make_shared<graphic::Renderer>(
             *m_window
         );
         m_renderer->CreateContext();
@@ -119,7 +119,7 @@ namespace awe
         if(EditorBeginMainloop) EditorBeginMainloop();
         auto EditorNewFrame = script::GenCallerByDecl<void()>(testworld, "void EditorNewFrame()", main_ctx);
 
-        ShaderProgram screen_sh;
+        graphic::ShaderProgram screen_sh;
         screen_sh.Generate();
         screen_sh.LoadVfs("shader/rect2D.vs", "shader/screen.fs");
 

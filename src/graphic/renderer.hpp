@@ -15,9 +15,11 @@
 
 
 namespace awe
-{
+{ // Forward declaration
     class Window;
-
+}
+namespace awe::graphic
+{
     /* OpenGL Renderer */
     class Renderer
     {

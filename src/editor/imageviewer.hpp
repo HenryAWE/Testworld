@@ -45,7 +45,7 @@ namespace awe
         struct BitmapData
         {
             std::string name;
-            Texture tex;
+            graphic::Texture tex;
             std::filesystem::path file;
 
             BitmapData(const std::filesystem::path& file_);

@@ -11,7 +11,7 @@
 #include "../window/window.hpp"
 
 
-namespace awe
+namespace awe::graphic
 {
     Renderer::Renderer(Window& window)
         : m_window(window) {}

@@ -11,7 +11,7 @@
 #include <glm/vec4.hpp>
 
 
-namespace awe
+namespace awe::graphic
 {
     struct TexDescription
     {

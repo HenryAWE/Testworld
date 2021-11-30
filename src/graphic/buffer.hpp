@@ -8,7 +8,7 @@
 #include <utility>
 
 
-namespace awe
+namespace awe::graphic
 {
     class Buffer
     {
