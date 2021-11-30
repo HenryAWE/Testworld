@@ -10,6 +10,29 @@
 
 namespace awe
 {
+    Editor::Editor()
+    {
+        // Build title bar
+        m_titlebar.AddText("Editor");
+        m_titlebar.AddSeparator();
+        auto& file = m_titlebar.AddMenu("File");
+        file.AddMenuItem("Quit").Connect([]{
+            SDL_QuitEvent quit{SDL_QUIT, SDL_GetTicks()};
+            SDL_PushEvent((SDL_Event*)&quit);
+        });
+        auto& window = m_titlebar.AddMenu("Window");
+        window.AddMenuItem("Image Viewer").Connect([this]{
+            GetPixelPainter().Show();
+        });
+        auto& help = m_titlebar.AddMenu("Help");
+        help.AddMenuItem("Information").Connect([this]{
+            m_infowin = true;
+        });
+        help.AddMenuItem("Homepage").Connect(
+            std::bind(OpenUrl, "https://github.com/HenryAWE/Testworld")
+        );
+    }
+
     void Editor::NewFrame()
     {
         auto& io = ImGui::GetIO();
@@ -54,33 +77,7 @@ namespace awe
     {
         if(!ImGui::BeginMenuBar())
             return;
-        ImGui::Text("Editor");
-        ImGui::Separator();
-        if(ImGui::BeginMenu("File"))
-        {
-            if(ImGui::MenuItem("Quit"))
-            {
-                SDL_QuitEvent quit{SDL_QUIT, SDL_GetTicks()};
-                SDL_PushEvent((SDL_Event*)&quit);
-            }
-            ImGui::EndMenu();
-        }
-        if(ImGui::BeginMenu("Window"))
-        {
-            if(ImGui::MenuItem("Pixel Painter"))
-            {
-                GetPixelPainter().Show();
-            }
-            ImGui::EndMenu();
-        }
-        if(ImGui::BeginMenu("Help"))
-        {
-            if(ImGui::MenuItem("Information"))
-                m_infowin = true;
-            if(ImGui::MenuItem("Homepage"))
-                OpenUrl("https://github.com/HenryAWE/Testworld");
-            ImGui::EndMenu();
-        }
+        m_titlebar.Run();
         ImGui::EndMenuBar();
     }
 

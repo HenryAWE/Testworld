@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 #include <imgui.h>
+#include "../ui/imgui.hpp"
 #include "viewer.hpp"
 #include "imageviewer.hpp"
 #include "vfsviewer.hpp"
@@ -17,6 +18,8 @@ namespace awe
     class Editor
     {
     public:
+        Editor();
+
         void NewFrame();
 
         ImageViewer& GetPixelPainter();
@@ -25,6 +28,7 @@ namespace awe
 
     private:
         void TitleBar();
+        ui::ImGuiBuilder m_titlebar;
 
         void InfoWin();
         bool m_infowin = false;
