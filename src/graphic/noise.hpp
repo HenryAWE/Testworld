@@ -1,8 +1,8 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
-#ifndef TESTWORLD_RENDERER_NOISE_HPP
-#define TESTWORLD_RENDERER_NOISE_HPP
+#ifndef TESTWORLD_GRAPHIC_NOISE_HPP
+#define TESTWORLD_GRAPHIC_NOISE_HPP
 
 #include <cmath>
 

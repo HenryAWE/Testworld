@@ -1,8 +1,8 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
-#ifndef TESTWORLD_RENDERER_RENDERER_HPP
-#define TESTWORLD_RENDERER_RENDERER_HPP
+#ifndef TESTWORLD_GRAPHIC_RENDERER_HPP
+#define TESTWORLD_GRAPHIC_RENDERER_HPP
 
 #include <glad/glad.h>
 #include <string>
