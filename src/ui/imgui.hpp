@@ -58,7 +58,40 @@ namespace awe::ui
             void Run(ImGuiBuilder& builder) override;
         };
 
+        class MenuItem : public WidgetBase
+        {
+            std::function<void()> m_callback;
+        public:
+            using WidgetBase::WidgetBase;
+
+            MenuItem& Connect(std::function<void()> f);
+        protected:
+            void Run(ImGuiBuilder& builder) override;
+        };
+        class Menu : public WidgetBase
+        {
+            std::list<std::unique_ptr<WidgetBase>> m_widgets;
+        public:
+            using WidgetBase::WidgetBase;
+
+            MenuItem& AddMenuItem(
+                const std::string& name,
+                const std::string& id = std::string()
+            );
+            Menu& AddMenu(
+                const std::string& name,
+                const std::string& id = std::string()
+            );
+
+        protected:
+            void Run(ImGuiBuilder& builder) override;
+        };
+
         Button& AddButton(
+            const std::string& name,
+            const std::string& id = std::string()
+        );
+        Menu& AddMenu(
             const std::string& name,
             const std::string& id = std::string()
         );
