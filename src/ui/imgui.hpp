@@ -123,6 +123,7 @@ namespace awe::ui
             const std::string& name,
             const std::string& id = std::string()
         );
+        void AddSeparator();
         WidgetBase& AddCustomWidget(
             std::unique_ptr<WidgetBase> widget
         );

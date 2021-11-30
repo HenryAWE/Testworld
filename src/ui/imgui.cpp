@@ -123,6 +123,24 @@ namespace awe::ui
         ));
         return *static_cast<Menu*>(m_widgets.back().get());
     }
+    void ImGuiBuilder::AddSeparator()
+    {
+        class SeparatorImpl final : public WidgetBase
+        {
+        public:
+            SeparatorImpl()
+                : WidgetBase(std::string(), std::string()) {}
+
+        protected:
+            void Run(ImGuiBuilder& builder) override
+            {
+                ImGui::Separator();
+            }
+        };
+        m_widgets.emplace_back(
+            std::make_unique<SeparatorImpl>()
+        );
+    }
     ImGuiBuilder::WidgetBase& ImGuiBuilder::AddCustomWidget(
         std::unique_ptr<WidgetBase> widget
     ) {
