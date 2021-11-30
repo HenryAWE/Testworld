@@ -17,6 +17,7 @@ namespace awe::ui
 {
     class ImGuiBuilder
     {
+    public:
         class WidgetBase
         {
             friend class ImGuiBuilder;
@@ -43,7 +44,6 @@ namespace awe::ui
         protected:
             virtual void Run(ImGuiBuilder& builder) = 0;
         };
-    public:
         // Static text
         class Text : public WidgetBase
         {
@@ -122,6 +122,9 @@ namespace awe::ui
         Menu& AddMenu(
             const std::string& name,
             const std::string& id = std::string()
+        );
+        WidgetBase& AddCustomWidget(
+            std::unique_ptr<WidgetBase> widget
         );
 
         void Run();

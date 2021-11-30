@@ -123,6 +123,14 @@ namespace awe::ui
         ));
         return *static_cast<Menu*>(m_widgets.back().get());
     }
+    ImGuiBuilder::WidgetBase& ImGuiBuilder::AddCustomWidget(
+        std::unique_ptr<WidgetBase> widget
+    ) {
+        m_widgets.emplace_back(
+            std::move(widget)
+        );
+        return *m_widgets.back();
+    }
 
     void ImGuiBuilder::Run()
     {
