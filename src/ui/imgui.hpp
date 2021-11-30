@@ -44,6 +44,30 @@ namespace awe::ui
             virtual void Run(ImGuiBuilder& builder) = 0;
         };
     public:
+        // Static text
+        class Text : public WidgetBase
+        {
+            std::string m_text;
+        public:
+            Text(
+                const std::string& text,
+                const std::string& id
+            );
+
+            Text& SetText(std::string text)
+            {
+                m_text.swap(text);
+                return *this;
+            }
+            [[nodiscard]]
+            constexpr const std::string& GetText() noexcept
+            {
+                return m_text;
+            }
+
+        protected:
+            void Run(ImGuiBuilder& builder) override;
+        };
         class Button : public WidgetBase
         {
             friend class ImGuiBuilder;
@@ -87,6 +111,10 @@ namespace awe::ui
             void Run(ImGuiBuilder& builder) override;
         };
 
+        Text& AddText(
+            const std::string& text,
+            const std::string& id = std::string()
+        );
         Button& AddButton(
             const std::string& name,
             const std::string& id = std::string()

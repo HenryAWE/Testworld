@@ -19,6 +19,19 @@ namespace awe::ui
         }
     }
 
+    ImGuiBuilder::Text::Text(
+        const std::string& text,
+        const std::string& id = std::string()
+    ) : WidgetBase(std::string(), id),
+        m_text(text) {}
+    void ImGuiBuilder::Text::Run(ImGuiBuilder& builder)
+    {
+        ImGui::TextUnformatted(
+            m_text.c_str(),
+            m_text.c_str() + m_text.length()
+        );
+    }
+
     ImGuiBuilder::Button& ImGuiBuilder::Button::Connect(std::function<void()> f)
     {
         m_callback.swap(f);
@@ -80,6 +93,16 @@ namespace awe::ui
         ImGui::EndMenu();
     }
 
+    ImGuiBuilder::Text& ImGuiBuilder::AddText(
+        const std::string& text,
+        const std::string& id
+    ) {
+        m_widgets.emplace_back(std::make_unique<Text>(
+            text,
+            id
+        ));
+        return *static_cast<Text*>(m_widgets.back().get());
+    }
     ImGuiBuilder::Button& ImGuiBuilder::AddButton(
         const std::string& name,
         const std::string& id
