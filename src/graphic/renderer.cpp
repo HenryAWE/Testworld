@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <vector>
 #include <fmt/format.h>
+#include <imgui_impl_opengl3.h>
 #include "../window/window.hpp"
 
 
@@ -49,14 +50,48 @@ namespace awe
         m_context = nullptr;
     }
 
+    bool Renderer::SetVSync(bool enable)
+    {
+        int result = SDL_GL_SetSwapInterval(enable);
+        if(result != 0)
+        {
+            SDL_LogError(
+                SDL_LOG_CATEGORY_APPLICATION,
+                "SDL_GL_SetSwapInterval(1) failed: %s",
+                SDL_GetError()
+            );
+            return false;
+        }
+
+        return true;
+    }
+    bool Renderer::IsVSyncEnabled() noexcept
+    {
+        return SDL_GL_GetSwapInterval() != 0;
+    }
     void Renderer::Present()
     {
         SDL_GL_SwapWindow(m_window.GetHandle());
     }
 
-    SDL_GLContext Renderer::GetContext() const noexcept
+    void Renderer::InitImGuiImpl()
     {
-        return m_context;
+        if(!ImGui_ImplOpenGL3_Init("#version 330 core"))
+        {
+            throw std::runtime_error("ImGui_ImplOpenGL3_Init() failed");
+        }
+    }
+    void Renderer::ShutdownImGuiImpl()
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+    }
+    void Renderer::ImGuiImplNewFrame()
+    {
+        ImGui_ImplOpenGL3_NewFrame();
+    }
+    void Renderer::ImGuiImplRenderDrawData()
+    {
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     glm::ivec2 Renderer::GetDrawableSize() const

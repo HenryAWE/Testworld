@@ -25,12 +25,34 @@ namespace awe
         Renderer(Window& window);
         ~Renderer() noexcept;
 
+        // Context management
+
         void CreateContext();
         void DestroyContext() noexcept;
+        [[nodiscard]]
+        constexpr SDL_GLContext GetContext() const noexcept
+        {
+            return m_context;
+        }
 
+        // Display controlling
+
+        /*
+            Enable or disable the vertical synchronization
+            return false if the underlying function fails
+        */
+        bool SetVSync(bool enable = true);
+        bool IsVSyncEnabled() noexcept;
         void Present();
 
-        SDL_GLContext GetContext() const noexcept;
+        // ImGui helpers
+
+        void InitImGuiImpl();
+        void ShutdownImGuiImpl();
+        void ImGuiImplNewFrame();
+        void ImGuiImplRenderDrawData();
+
+        // Information of renderer
 
         glm::ivec2 GetDrawableSize() const;
         std::string RendererInfo();

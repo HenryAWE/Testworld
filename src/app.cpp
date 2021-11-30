@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <stb_image.h> // set flip
 #include <imgui_impl_sdl.h>
-#include <imgui_impl_opengl3.h>
 #include "editor/editor.hpp"
 #include "graphic/renderer.hpp"
 #include "res/vfs.hpp"
@@ -42,20 +41,14 @@ namespace awe
             SDL_LOG_CATEGORY_APPLICATION,
             m_renderer->RendererInfo().c_str()
         );
-        if(SDL_GL_SetSwapInterval(1) == -1)
-        {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_GL_SetSwapInterval(1) failed");
-        }
+        m_renderer->SetVSync();
 
         m_imgui_ctx = ImGui::CreateContext();
         if(!ImGui_ImplSDL2_InitForOpenGL(m_window->GetHandle(), m_renderer->GetContext()))
         {
             throw std::runtime_error("ImGui_ImplSDL2_InitForOpenGL() failed");
         }
-        if(!ImGui_ImplOpenGL3_Init("#version 330 core"))
-        {
-            throw std::runtime_error("ImGui_ImplOpenGL3_Init() failed");
-        }
+        m_renderer->InitImGuiImpl();
 
         auto& io = ImGui::GetIO();
         SDL_LogInfo(
@@ -90,7 +83,7 @@ namespace awe
         m_editor.reset();
         m_console.reset();
 
-        ImGui_ImplOpenGL3_Shutdown();
+        m_renderer->ShutdownImGuiImpl();
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext(m_imgui_ctx);
         m_imgui_ctx = nullptr;
@@ -158,7 +151,7 @@ namespace awe
             }
 
             // UI Processing
-            ImGui_ImplOpenGL3_NewFrame();
+            m_renderer->ImGuiImplNewFrame();
             ImGui_ImplSDL2_NewFrame(m_window->GetHandle());
             ImGui::NewFrame();
 
@@ -184,7 +177,7 @@ namespace awe
             m_renderer->DrawTexture(m_renderer->GetScreenTexture(), glm::mat4(1), true);
             glUseProgram(0);
 
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            m_renderer->ImGuiImplRenderDrawData();
             m_renderer->Present();
             int err = glGetError();
             if(err != GL_NO_ERROR)
