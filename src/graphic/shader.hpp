@@ -12,6 +12,42 @@
 
 namespace awe::graphic
 {
+    class Shader
+    {
+    public:
+        typedef GLuint handle;
+
+        Shader() = default;
+        Shader(Shader&& move) noexcept
+            : m_handle(std::exchange(move.m_handle, 0)),
+            m_type(std::exchange(move.m_type, 0)) {}
+        Shader(const Shader&) = delete;
+
+        ~Shader() noexcept;
+
+        void Generate(GLenum type);
+        void Destroy() noexcept;
+
+        bool Compile(
+            const char* src,
+            std::string* log = nullptr
+        );
+
+        [[nodiscard]]
+        constexpr GLenum GetType() const noexcept { return m_type; }
+
+        [[nodiscard]]
+        constexpr handle GetHandle() const noexcept { return m_handle; }
+        [[nodiscard]]
+        constexpr operator handle() const noexcept { return m_handle; }
+
+    private:
+        GLenum m_type = 0;
+        handle m_handle = 0;
+
+        void GetLog(std::string* log);
+    };
+
     class ShaderProgram
     {
     public:
@@ -51,6 +87,8 @@ namespace awe::graphic
 
     private:
         handle m_handle = 0;
+
+        void GetLog(std::string* log);
     };
 
     void Uniform(GLint loc, GLint v);
