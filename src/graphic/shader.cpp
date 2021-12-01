@@ -31,17 +31,19 @@ namespace awe::graphic
     }
 
     bool Shader::Compile(
-        const char* src,
+        std::string_view src,
         std::string* log
     ) {
         if(!m_handle)
             return false;
 
+        const GLchar* srcptr = src.data();
+        GLint length = static_cast<GLint>(src.length());
         glShaderSource(
             m_handle,
             1,
-            &src,
-            nullptr
+            &srcptr,
+            &length
         );
         glCompileShader(m_handle);
         int status = 0;
@@ -117,8 +119,8 @@ namespace awe::graphic
     }
 
     bool ShaderProgram::Compile(
-        const char* vssrc,
-        const char* fssrc
+        std::string_view vssrc,
+        std::string_view fssrc
     ) {
         Shader shaders[2]; // Vertex and fragment shaders
         shaders[0].Generate(GL_VERTEX_SHADER);

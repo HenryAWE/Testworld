@@ -29,7 +29,7 @@ namespace awe::graphic
         void Destroy() noexcept;
 
         bool Compile(
-            const char* src,
+            std::string_view src,
             std::string* log = nullptr
         );
 
@@ -70,8 +70,8 @@ namespace awe::graphic
         );
 
         bool Compile(
-            const char* vssrc,
-            const char* fssrc
+            std::string_view vssrc,
+            std::string_view fssrc
         );
         bool LoadVfs(
             const std::string& vspath,
