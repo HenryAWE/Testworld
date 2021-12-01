@@ -89,38 +89,16 @@ namespace awe::graphic
         m_handle = 0;
     }
 
-    bool ShaderProgram::Compile(
-        const char* vssrc,
-        const char* fssrc
+    bool ShaderProgram::Link(
+        Shader* shaders,
+        size_t count,
+        std::string* log
     ) {
-        Shader vert;
-        vert.Generate(GL_VERTEX_SHADER);
-        if(std::string log; !vert.Compile(vssrc, &log))
-        {
-            SDL_LogError(
-                SDL_LOG_CATEGORY_APPLICATION,
-                "Vertex shader error:\n%s",
-                log.c_str()
-            );
-            return false;
-        }
-
-        Shader frag;
-        frag.Generate(GL_FRAGMENT_SHADER);
-        if(std::string log; !frag.Compile(fssrc, &log))
-        {
-            SDL_LogError(
-                SDL_LOG_CATEGORY_APPLICATION,
-                "Fragment shader error:\n%s",
-                log.c_str()
-            );
-            return false;
-        }
-
+        assert(shaders);
         if(!m_handle)
             Generate();
-        glAttachShader(m_handle, vert);
-        glAttachShader(m_handle, frag);
+        for(size_t i = 0; i < count; ++i)
+            glAttachShader(m_handle, shaders[i]);
         glLinkProgram(m_handle);
         int status = 0;
         glGetProgramiv(m_handle, GL_LINK_STATUS, &status);
@@ -132,9 +110,41 @@ namespace awe::graphic
                 "Link error:\n%s",
                 log.c_str()
             );
+            return false;
         }
 
-        return status != 0;
+        return true;
+    }
+
+    bool ShaderProgram::Compile(
+        const char* vssrc,
+        const char* fssrc
+    ) {
+        Shader shaders[2]; // Vertex and fragment shaders
+        shaders[0].Generate(GL_VERTEX_SHADER);
+        if(std::string log; !shaders[0].Compile(vssrc, &log))
+        {
+            SDL_LogError(
+                SDL_LOG_CATEGORY_APPLICATION,
+                "Vertex shader error:\n%s",
+                log.c_str()
+            );
+            return false;
+        }
+        shaders[1].Generate(GL_FRAGMENT_SHADER);
+        if(std::string log; !shaders[1].Compile(fssrc, &log))
+        {
+            SDL_LogError(
+                SDL_LOG_CATEGORY_APPLICATION,
+                "Fragment shader error:\n%s",
+                log.c_str()
+            );
+            return false;
+        }
+
+        if(!m_handle)
+            Generate();
+        return Link(shaders, 2);
     }
     bool ShaderProgram::LoadVfs(
         const std::string& vspath,

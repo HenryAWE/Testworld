@@ -63,6 +63,12 @@ namespace awe::graphic
         void Generate();
         void Destroy() noexcept;
 
+        bool Link(
+            Shader* shaders,
+            size_t count = 1,
+            std::string* log = nullptr
+        );
+
         bool Compile(
             const char* vssrc,
             const char* fssrc
