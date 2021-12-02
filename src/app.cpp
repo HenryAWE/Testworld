@@ -119,9 +119,11 @@ namespace awe
         if(EditorBeginMainloop) EditorBeginMainloop();
         auto EditorNewFrame = script::GenCallerByDecl<void()>(testworld, "void EditorNewFrame()", main_ctx);
 
-        graphic::ShaderProgram screen_sh;
-        screen_sh.Generate();
-        screen_sh.LoadVfs("shader/rect2D.vs", "shader/screen.fs");
+        graphic::ShaderBuilder shbuilder;
+        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/rect2D.vs");
+        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/screen.fs");
+        graphic::ShaderProgram screen_sh = shbuilder.Build().first;
+        shbuilder.Clear();
 
         auto perlin = m_renderer->GeneratePerlinTexture2D(0.5f, 256);
 
