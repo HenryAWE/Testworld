@@ -9,7 +9,7 @@
 #include <SDL.h>
 #include <glm/matrix.hpp>
 #include "buffer.hpp"
-#include "shader.hpp"
+#include "shaderbuilder.hpp"
 #include "texture.hpp"
 #include "noise.hpp"
 
