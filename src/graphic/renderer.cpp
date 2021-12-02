@@ -431,3 +431,10 @@ namespace awe::graphic
             << std::endl;
     }
 }
+
+// Prefer high-performance graphic cards on Windows
+// https://stackoverflow.com/questions/6036292/select-a-graphic-device-in-windows-opengl
+#ifdef _WIN32
+extern "C" __declspec(dllexport) int32_t NvOptimusEnablement = 0x00000001;
+extern "C" __declspec(dllexport) int32_t AmdPowerXpressRequestHighPerformance = 0x00000001;
+#endif
