@@ -26,7 +26,12 @@ namespace awe
 
         static App& GetInstance();
 
-        void Initialize();
+        struct AppInitData
+        {
+            bool ogl_debug = false;
+        };
+
+        void Initialize(const AppInitData& initdata);
         void Deinitialize();
 
         void LoadLanguagePak(const std::string& pakname = "en-US");

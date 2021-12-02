@@ -24,7 +24,7 @@ namespace awe
         return instance;
     }
 
-    void App::Initialize()
+    void App::Initialize(const AppInitData& initdata)
     {
         m_window = std::make_shared<Window>(
             "Testworld",
@@ -36,7 +36,8 @@ namespace awe
         m_renderer = std::make_shared<graphic::Renderer>(
             *m_window
         );
-        m_renderer->CreateContext();
+        m_renderer->CreateContext(initdata.ogl_debug);
+        m_renderer->AttachDebugCallback();
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
             m_renderer->RendererInfo().c_str()
@@ -65,6 +66,7 @@ namespace awe
         // Create ImGui window
         m_console = std::make_unique<imgui::Console>();
         m_editor = std::make_unique<Editor>();
+        m_console->Write(m_renderer->RendererInfo());
         m_console->Write("Testworld Angelscript Console");
 
         // ImGui fonts

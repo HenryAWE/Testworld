@@ -57,9 +57,11 @@ int SDL_main(int argc, char* argv[])
         cli.GetVal<std::string>("language") :
         "en-US";
 
+    App::AppInitData initdata;
+    initdata.ogl_debug = cli.Exists("opengl-debug");
     auto& app = App::GetInstance();
     app.LoadLanguagePak(lang);
-    app.Initialize();
+    app.Initialize(initdata);
 
     app.Mainloop();
 

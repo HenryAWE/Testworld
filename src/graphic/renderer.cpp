@@ -176,6 +176,13 @@ namespace awe::graphic
             << "  Renderer: " << glGetString(GL_RENDERER) << endl
             << "  Version: " << glGetString(GL_VERSION) << endl;
 
+        ss << "Context" << endl;
+        GLint flags = 0;
+        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+        ss
+            << "  Flags: " << fmt::format("0x{0:08X} (0b{0:b})", flags) << endl
+            << "  Debug Context: " << (IsDebugContext() ? "true" : "false") << endl;
+
         ss << "Extensions" << endl;
         ss
             << "  ARB_debug_output = " << GLAD_GL_ARB_debug_output;

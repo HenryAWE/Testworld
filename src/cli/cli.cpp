@@ -31,7 +31,8 @@ namespace awe::cli
             po::options_description desc("Allowed Options");
             desc.add_options()
                 ("help", "Get help message")
-                ("language,L", po::value<std::string>(), "Program language");
+                ("language,L", po::value<std::string>(), "Program language")
+                ("opengl-debug", "Enable OpenGL debug context");
 
             return desc;
         }
