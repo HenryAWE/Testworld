@@ -5,6 +5,8 @@
 #include "renderer.hpp"
 #include <cassert>
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 #include <vector>
 #include <fmt/format.h>
 #include <imgui_impl_opengl3.h>
@@ -14,7 +16,18 @@
 namespace awe::graphic
 {
     Renderer::Renderer(Window& window)
-        : m_window(window) {}
+        : m_window(window)
+    {
+        namespace ph = std::placeholders;
+        DebugOutputFilter = std::bind(
+            &Renderer::DefaultDebugOutputFilter,
+            this,
+            ph::_1,
+            ph::_2,
+            ph::_3,
+            ph::_4
+        );
+    }
 
     Renderer::~Renderer() noexcept
     {
@@ -22,12 +35,15 @@ namespace awe::graphic
             DestroyContext();
     }
 
-    void Renderer::CreateContext()
+    void Renderer::CreateContext(bool debug)
     {
         assert(!m_context);
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        if(debug)
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         m_context = SDL_GL_CreateContext(m_window.GetHandle());
         if(!m_context)
         {
@@ -48,6 +64,55 @@ namespace awe::graphic
         assert(m_context);
         SDL_GL_DeleteContext(m_context);
         m_context = nullptr;
+    }
+    bool Renderer::IsDebugContext()
+    {
+        int flags = 0;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &flags);
+        return flags & SDL_GL_CONTEXT_DEBUG_FLAG;
+    }
+    void Renderer::AttachDebugCallback()
+    {
+        // The debug extension is not supported by driver or context
+        if(!GLAD_GL_ARB_debug_output || !IsDebugContext())
+            return;
+
+        GLDEBUGPROCARB debugproc = [](
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity, 
+            GLsizei length,
+            const GLchar *message,
+            const void *user
+        ) {
+         try {
+                Renderer* renderer = (Renderer*)user;
+                renderer->DebugOutput(
+                    source,
+                    type,
+                    id,
+                    severity,
+                    std::string_view(message, length)
+                );
+            } catch(...) {}
+        };
+        glDebugMessageCallbackARB(
+            debugproc,
+            this
+        );
+    }
+    bool Renderer::DefaultDebugOutputFilter(
+        GLenum source,
+        GLenum type,
+        GLuint id,
+        GLenum severity
+    ) {
+        if(severity == GL_DEBUG_SEVERITY_HIGH_ARB ||
+            severity == GL_DEBUG_SEVERITY_MEDIUM_ARB)
+            return false;
+
+        return true;
     }
 
     bool Renderer::SetVSync(bool enable)
@@ -102,15 +167,20 @@ namespace awe::graphic
     }
     std::string Renderer::RendererInfo()
     {
-        return fmt::format(
-            "OpenGL Information\n"
-            "Vendor: {}\n"
-            "Renderer: {}\n"
-            "Version: {}",
-            glGetString(GL_VENDOR),
-            glGetString(GL_RENDERER),
-            glGetString(GL_VERSION)
-        );
+        using namespace std;
+        stringstream ss;
+
+        ss << "OpenGL Information" << endl;
+        ss
+            << "  Vendor: " << glGetString(GL_VENDOR) << endl
+            << "  Renderer: " << glGetString(GL_RENDERER) << endl
+            << "  Version: " << glGetString(GL_VERSION) << endl;
+
+        ss << "Extensions" << endl;
+        ss
+            << "  ARB_debug_output = " << GLAD_GL_ARB_debug_output;
+
+        return ss.str();
     }
 
     Texture Renderer::GeneratePerlinTexture2D(float p, int size)
@@ -300,5 +370,64 @@ namespace awe::graphic
         m_rect_ebo.Destroy();
         m_rect_vbo.Destroy();
         m_rect_shader.Destroy();
+    }
+
+    void Renderer::DebugOutput(
+        GLenum source,
+        GLenum type,
+        GLuint id,
+        GLenum severity, 
+        std::string_view message
+    ) {
+        if(DebugOutputFilter && DebugOutputFilter(source, type, id, severity))
+            return;
+
+        const char* source_str;
+        switch(source)
+        {
+            case GL_DEBUG_SOURCE_API_ARB: source_str = "API"; break;
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB: source_str = "window system"; break;
+            case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: source_str = "shader compiler"; break;
+            case GL_DEBUG_SOURCE_THIRD_PARTY_ARB: source_str = "third party"; break;
+            case GL_DEBUG_SOURCE_APPLICATION_ARB: source_str = "application"; break;
+            default:
+            case GL_DEBUG_SOURCE_OTHER_ARB: source_str = "other"; break;
+        };
+        const char* type_str;
+        switch(type)
+        {
+            case GL_DEBUG_TYPE_ERROR_ARB: type_str = "error"; break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: type_str = "deprecated behavior"; break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: type_str = "undefined behavior"; break;
+            case GL_DEBUG_TYPE_PORTABILITY_ARB: type_str = "portablility"; break;
+            case GL_DEBUG_TYPE_PERFORMANCE_ARB: type_str = "performance"; break;
+            default:
+            case GL_DEBUG_TYPE_OTHER_ARB: type_str = "other"; break;
+        };
+        const char* severity_str;
+        switch(severity)
+        {
+            case GL_DEBUG_SEVERITY_HIGH_ARB: severity_str = "high"; break;
+            case GL_DEBUG_SEVERITY_MEDIUM_ARB: severity_str = "medium"; break;
+            case GL_DEBUG_SEVERITY_LOW_ARB: severity_str = "low"; break;
+            default: severity_str = "other"; break; // Unknown severity
+        };
+
+        std::ostream& os = std::cerr;
+        os
+            << "OpenGL debug output "
+            << fmt::format(
+                "ID:{} "
+                "[{}(0x{:X})]"
+                "[{}(0x{:X})]"
+                "[{}(0x{:X})]",
+                id,
+                source_str, source,
+                type_str, type,
+                severity_str, severity
+            )
+            << ":\n"
+            << message
+            << std::endl;
     }
 }

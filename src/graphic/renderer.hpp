@@ -5,6 +5,7 @@
 #define TESTWORLD_GRAPHIC_RENDERER_HPP
 
 #include <glad/glad.h>
+#include <functional>
 #include <string>
 #include <SDL.h>
 #include <glm/matrix.hpp>
@@ -29,13 +30,29 @@ namespace awe::graphic
 
         // Context management
 
-        void CreateContext();
+        void CreateContext(bool debug = false);
         void DestroyContext() noexcept;
         [[nodiscard]]
         constexpr SDL_GLContext GetContext() const noexcept
         {
             return m_context;
         }
+        bool IsDebugContext();
+        void AttachDebugCallback();
+        bool DefaultDebugOutputFilter(
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity
+        );
+        // Return true to ignore the current debug output message
+        std::function<bool(
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity
+        )> DebugOutputFilter;
+
 
         // Display controlling
 
@@ -92,6 +109,14 @@ namespace awe::graphic
         ShaderProgram m_rect_shader;
         void InitRectData();
         void ReleaseRectData();
+
+        void DebugOutput(
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity, 
+            std::string_view message
+        );
     };
 }
 
