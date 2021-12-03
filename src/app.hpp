@@ -44,7 +44,7 @@ namespace awe
         void PrepareScriptEnv();
         void ClearScriptEnv();
 
-        std::shared_ptr<Window> m_window;
+        std::shared_ptr<window::Window> m_window;
         std::shared_ptr<graphic::Renderer> m_renderer;
         ImGuiContext* m_imgui_ctx = nullptr;
 

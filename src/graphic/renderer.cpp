@@ -15,7 +15,7 @@
 
 namespace awe::graphic
 {
-    Renderer::Renderer(Window& window)
+    Renderer::Renderer(window::Window& window)
         : m_window(window)
     {
         namespace ph = std::placeholders;

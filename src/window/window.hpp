@@ -7,10 +7,14 @@
 #include <SDL.h>
 #include <string>
 #include <glm/vec2.hpp>
+#include "../sys/init.hpp"
 
 
-namespace awe
+namespace awe::window
 {
+    void Initialize(const AppInitData& initdata);
+    void Deinitialize() noexcept;
+
     class Window
     {
     public:

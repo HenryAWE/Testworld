@@ -15,7 +15,7 @@
 #include "noise.hpp"
 
 
-namespace awe
+namespace awe::window
 { // Forward declaration
     class Window;
 }
@@ -25,7 +25,7 @@ namespace awe::graphic
     class Renderer
     {
     public:
-        Renderer(Window& window);
+        Renderer(window::Window& window);
         ~Renderer() noexcept;
 
         // Context management
@@ -91,7 +91,7 @@ namespace awe::graphic
         );
 
     private:
-        Window& m_window;
+        window::Window& m_window;
         SDL_GLContext m_context = nullptr;
 
         void InitData();

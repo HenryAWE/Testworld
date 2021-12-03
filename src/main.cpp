@@ -49,12 +49,11 @@ int SDL_main(int argc, char* argv[])
         return EXIT_SUCCESS;
 
     Prepare(argv[0]);
-    InitSDL();
-
     AppInitData initdata(
         argc, argv,
         cli.Exists("opengl-debug") // ogl_debug
     );
+    window::Initialize(initdata);
     res::Initialize(initdata);
     std::string lang = cli.Exists("language") ?
         cli.GetVal<std::string>("language") :
@@ -69,7 +68,7 @@ int SDL_main(int argc, char* argv[])
     app.Deinitialize();
 
     res::Deinitialize();
+    window::Deinitialize();
 
-    QuitSDL();
     return 0;
 }

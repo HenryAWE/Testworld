@@ -14,36 +14,6 @@
 
 namespace awe
 {
-    void InitSDL()
-    {
-        constexpr int required_subsystems =
-            SDL_INIT_AUDIO |
-            SDL_INIT_VIDEO;
-
-        if(SDL_Init(required_subsystems) < 0)
-        {
-            throw std::runtime_error(SDL_GetError());
-        }
-
-        SDL_version sdl_ver;
-        SDL_VERSION(&sdl_ver);
-        // runtime version, may be different from the compile-time version
-        SDL_version sdl_ver_rt;
-        SDL_GetVersion(&sdl_ver_rt);
-        SDL_LogInfo(
-            SDL_LOG_CATEGORY_APPLICATION,
-            "SDL version: %d.%d.%d\n"
-            "SDL version (runtime): %d.%d.%d",
-            sdl_ver.major, sdl_ver.major, sdl_ver.patch,
-            sdl_ver_rt.major, sdl_ver_rt.major, sdl_ver_rt.patch
-        );
-    }
-
-    void QuitSDL() noexcept
-    {
-        SDL_Quit();
-    }
-
     void Prepare(const char* argv0)
     {
 #ifdef _WIN32

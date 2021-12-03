@@ -26,7 +26,7 @@ namespace awe
 
     void App::Initialize(const AppInitData& initdata)
     {
-        m_window = std::make_shared<Window>(
+        m_window = std::make_shared<window::Window>(
             "Testworld",
             640, 480,
             SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE

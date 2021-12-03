@@ -20,10 +20,6 @@ namespace awe
         ogl_debug(ogl_debug_) {}
     };
 
-    void InitSDL();
-
-    void QuitSDL() noexcept;
-
     void Prepare(const char* argv0);
 }
 
