@@ -1,6 +1,9 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
+#ifndef TESTWORLD_SYS_INIT_HPP
+#define TESTWORLD_SYS_INIT_HPP
+
 namespace awe
 {
     void InitSDL();
@@ -13,3 +16,5 @@ namespace awe
 
     void Prepare(const char* argv0);
 }
+
+#endif
