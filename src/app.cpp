@@ -32,7 +32,6 @@ namespace awe
             SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE
         );
 
-        stbi_set_flip_vertically_on_load(true);
         m_renderer = std::make_shared<graphic::Renderer>(
             *m_window
         );

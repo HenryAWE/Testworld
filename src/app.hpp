@@ -9,6 +9,7 @@
 #include <angelscript.h>
 #include <scriptbuilder/scriptbuilder.h>
 #include <imgui.h>
+#include "sys/init.hpp"
 #include "editor/editor.hpp"
 #include "res/lang/lang.hpp"
 #include "graphic/renderer.hpp"
@@ -25,11 +26,6 @@ namespace awe
         ~App();
 
         static App& GetInstance();
-
-        struct AppInitData
-        {
-            bool ogl_debug = false;
-        };
 
         void Initialize(const AppInitData& initdata);
         void Deinitialize();

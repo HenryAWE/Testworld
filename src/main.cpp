@@ -50,15 +50,16 @@ int SDL_main(int argc, char* argv[])
 
     Prepare(argv[0]);
     InitSDL();
-    InitPhysfs(argv[0]);
 
-    res::Initialize();
+    AppInitData initdata(
+        argc, argv,
+        cli.Exists("opengl-debug") // ogl_debug
+    );
+    res::Initialize(initdata);
     std::string lang = cli.Exists("language") ?
         cli.GetVal<std::string>("language") :
         "en-US";
 
-    App::AppInitData initdata;
-    initdata.ogl_debug = cli.Exists("opengl-debug");
     auto& app = App::GetInstance();
     app.LoadLanguagePak(lang);
     app.Initialize(initdata);
@@ -69,7 +70,6 @@ int SDL_main(int argc, char* argv[])
 
     res::Deinitialize();
 
-    QuitPhysfs();
     QuitSDL();
     return 0;
 }

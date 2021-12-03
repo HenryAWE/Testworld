@@ -6,13 +6,14 @@
 
 #include <map>
 #include <optional>
+#include "../sys/init.hpp"
 #include "../graphic/renderer.hpp"
 #include "vfs.hpp"
 
 
 namespace awe::res
 {
-    void Initialize();
+    void Initialize(const AppInitData& initdata);
     void Deinitialize();
 
     class ResourceManager

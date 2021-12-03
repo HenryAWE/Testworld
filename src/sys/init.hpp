@@ -6,13 +6,23 @@
 
 namespace awe
 {
+    struct AppInitData
+    {
+        int argc = 0;
+        char** argv = nullptr;
+        bool ogl_debug = false;
+
+        AppInitData(
+            int argc_, char* argv_[],
+            bool ogl_debug_
+        ) noexcept :
+        argc(argc_), argv(argv_),
+        ogl_debug(ogl_debug_) {}
+    };
+
     void InitSDL();
 
     void QuitSDL() noexcept;
-
-    // WARNING: Special data is required by PhysFS on Android. Pay attention when porting to Android
-    void InitPhysfs(const char* argv0 = nullptr);
-    void QuitPhysfs() noexcept;
 
     void Prepare(const char* argv0);
 }
