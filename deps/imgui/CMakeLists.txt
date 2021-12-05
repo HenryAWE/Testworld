@@ -2,8 +2,10 @@
 # License: The 3-clause BSD License
 
 find_package(SDL2 REQUIRED)
+find_package(freetype CONFIG REQUIRED)
 
 aux_source_directory(. imgui_src)
+list(APPEND imgui_src "misc/freetype/imgui_freetype.cpp")
 add_library(
     imgui
     STATIC
@@ -15,6 +17,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 else()
     target_link_libraries(imgui PRIVATE SDL2::Core)
 endif()
+target_link_libraries(imgui PRIVATE freetype)
 target_link_libraries(imgui PRIVATE glad)
 target_compile_definitions(imgui PUBLIC IMGUI_DISABLE_OBSOLETE_FUNCTIONS)
 target_compile_definitions(imgui PRIVATE _CRT_SECURE_NO_WARNINGS)
