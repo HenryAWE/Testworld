@@ -9,6 +9,7 @@
 #include <string>
 #include <SDL.h>
 #include <glm/matrix.hpp>
+#include "../sys/init.hpp"
 #include "buffer.hpp"
 #include "shaderbuilder.hpp"
 #include "texture.hpp"
@@ -21,6 +22,9 @@ namespace awe::window
 }
 namespace awe::graphic
 {
+    void Initialize(const AppInitData& initdata);
+    void Deinitialize();
+
     /* OpenGL Renderer */
     class Renderer
     {

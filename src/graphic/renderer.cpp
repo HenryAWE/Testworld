@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <fmt/format.h>
 #include <imgui_impl_opengl3.h>
 #include "../window/window.hpp"
@@ -15,6 +17,31 @@
 
 namespace awe::graphic
 {
+    namespace detailed
+    {
+        FT_Library ftlib = nullptr;
+    }
+
+    void Initialize(const AppInitData& initdata)
+    {
+        FT_Error err;
+        err = FT_Init_FreeType(&detailed::ftlib);
+        if(err)
+        {
+            std::string errinfo = fmt::format(
+                "FT_Init_FreeType() failed ({}): {}",
+                err,
+                FT_Error_String(err)
+            );
+            throw std::runtime_error(errinfo);
+        }
+    }
+    void Deinitialize()
+    {
+        FT_Done_FreeType(detailed::ftlib);
+        detailed::ftlib = nullptr;
+    }
+
     Renderer::Renderer(window::Window& window)
         : m_window(window)
     {
