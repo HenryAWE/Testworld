@@ -10,6 +10,7 @@
 #include <SDL.h>
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
+#include "glutil.hpp"
 #include "buffer.hpp"
 #include "shaderbuilder.hpp"
 #include "texture.hpp"

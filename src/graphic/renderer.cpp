@@ -201,7 +201,13 @@ namespace awe::graphic
         ss
             << "  Vendor: " << glGetString(GL_VENDOR) << endl
             << "  Renderer: " << glGetString(GL_RENDERER) << endl
-            << "  Version: " << glGetString(GL_VERSION) << endl;
+            << "  Version: " << glGetString(GL_VERSION) << endl
+            << "  Shading Language: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+
+        ss << "Driver Support" << endl;
+        ss
+            << "  Max Texture Size: " << glutil::GetInteger(GL_MAX_TEXTURE_SIZE) << endl
+            << "  Max Texture Image Unit: " << glutil::GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) << endl;
 
         ss << "Context" << endl;
         GLint flags = 0;
