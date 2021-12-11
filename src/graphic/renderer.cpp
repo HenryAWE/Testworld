@@ -267,6 +267,13 @@ namespace awe::graphic
         const glm::mat4& matrix,
         bool custom_shader
     ) {
+        DrawTexture(tex.GetHandle(), matrix, custom_shader);
+    }
+    void Renderer::DrawTexture(
+        GLuint tex,
+        const glm::mat4& matrix,
+        bool custom_shader
+    ) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex);
         if(!custom_shader) glUseProgram(m_rect_shader);

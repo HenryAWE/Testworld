@@ -13,6 +13,7 @@
 #include "glutil.hpp"
 #include "buffer.hpp"
 #include "shaderbuilder.hpp"
+#include "fontbuilder.hpp"
 #include "texture.hpp"
 #include "noise.hpp"
 
@@ -89,6 +90,11 @@ namespace awe::graphic
 
         Framebuffer& GetFramebuffer();
         Texture& GetScreenTexture();
+        void DrawTexture(
+            GLuint tex,
+            const glm::mat4& matrix = glm::mat4(1),
+            bool custom_shader = false
+        );
         void DrawTexture(
             const Texture& tex,
             const glm::mat4& matrix = glm::mat4(1),
