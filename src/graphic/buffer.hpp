@@ -42,7 +42,7 @@ namespace awe::graphic
         VertexArray() noexcept = default;
         VertexArray(VertexArray&& move) noexcept
             : m_handle(std::exchange(move.m_handle, 0)) {}
-        VertexArray(const Buffer&) = delete;
+        VertexArray(const VertexArray&) = delete;
 
         ~VertexArray() noexcept;
 
@@ -66,7 +66,7 @@ namespace awe::graphic
         Framebuffer() noexcept = default;
         Framebuffer(Framebuffer&& move) noexcept
             : m_handle(std::exchange(move.m_handle, 0)) {}
-        Framebuffer(const Buffer&) = delete;
+        Framebuffer(const Framebuffer&) = delete;
 
         ~Framebuffer() noexcept;
 
@@ -90,7 +90,7 @@ namespace awe::graphic
         Renderbuffer() noexcept = default;
         Renderbuffer(Renderbuffer&& move) noexcept
             : m_handle(std::exchange(move.m_handle, 0)) {}
-        Renderbuffer(const Buffer&) = delete;
+        Renderbuffer(const Renderbuffer&) = delete;
 
         ~Renderbuffer() noexcept;
 
