@@ -33,64 +33,64 @@ namespace awe::graphic
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         }
-    }
 
-    class TexBuilder
-    {
-        std::vector<std::byte> m_data;
-        unsigned int m_size;
-        unsigned int m_max_height = 0;
-        glm::uvec2 m_offset = glm::uvec2(0);
-    public:
-        TexBuilder(unsigned int size)
-            : m_size(size)
+        class TexBuilder
         {
-            m_data.resize(size * size);
-        }
-
-        std::byte& Index(glm::uvec2 idx)
-        {
-            return m_data[idx[1] * m_size + idx[0]];
-        }
-
-        /*
-        Return a pair of glm::uvec2 and boolean value.
-        If the Boolean value is false, a new bitmap is required.
-        If the Boolean value is true, the glm::vec2 will be the offset of the written bitmap in the bigger bitmap
-        */
-        std::pair<glm::uvec2, bool> Write(unsigned int width, unsigned int height, const std::byte* data)
-        {
-            glm::uvec2 remained = glm::uvec2(m_size) - m_offset;
-            if(remained[1] < height) // No enough space
-                return std::pair(m_offset, false);
-            if(remained[0] < width)
+            std::vector<std::byte> m_data;
+            unsigned int m_size;
+            unsigned int m_max_height = 0;
+            glm::uvec2 m_offset = glm::uvec2(0);
+        public:
+            TexBuilder(unsigned int size)
+                : m_size(size)
             {
-                m_offset[0] = 0;
-                m_offset[1] += m_max_height;
-                if(m_offset[1] > m_size || m_size - m_offset[1] < height)
-                    return std::pair(m_offset, false); // No enough space
+                m_data.resize(size * size);
             }
-            for(unsigned int i = 0; i < width; ++i)
+
+            std::byte& Index(glm::uvec2 idx)
             {
-                for(unsigned int j = 0; j < height; ++j)
+                return m_data[idx[1] * m_size + idx[0]];
+            }
+
+            /*
+            Return a pair of glm::uvec2 and boolean value.
+            If the Boolean value is false, a new bitmap is required.
+            If the Boolean value is true, the glm::vec2 will be the offset of the written bitmap in the bigger bitmap
+            */
+            std::pair<glm::uvec2, bool> Write(unsigned int width, unsigned int height, const std::byte* data)
+            {
+                glm::uvec2 remained = glm::uvec2(m_size) - m_offset;
+                if(remained[1] < height) // No enough space
+                    return std::pair(m_offset, false);
+                if(remained[0] < width)
                 {
-                    unsigned int data_idx = j * width + i;
-                    Index(glm::uvec2(i, j) + m_offset) = data[data_idx];
+                    m_offset[0] = 0;
+                    m_offset[1] += m_max_height;
+                    if(m_offset[1] > m_size || m_size - m_offset[1] < height)
+                        return std::pair(m_offset, false); // No enough space
                 }
+                for(unsigned int i = 0; i < width; ++i)
+                {
+                    for(unsigned int j = 0; j < height; ++j)
+                    {
+                        unsigned int data_idx = j * width + i;
+                        Index(glm::uvec2(i, j) + m_offset) = data[data_idx];
+                    }
+                }
+
+                glm::uvec2 offset = m_offset;
+                m_offset[0] += width;
+                m_max_height = std::max(m_max_height, height);
+                return std::pair(m_offset, true);
             }
 
-            glm::uvec2 offset = m_offset;
-            m_offset[0] += width;
-            m_max_height = std::max(m_max_height, height);
-            return std::pair(m_offset, true);
-        }
+            [[nodiscard]]
+            constexpr unsigned int Size() noexcept { return m_size; }
 
-        [[nodiscard]]
-        constexpr unsigned int Size() noexcept { return m_size; }
-
-        [[nodiscard]]
-        std::byte* Data() noexcept { return m_data.data(); }
-    };
+            [[nodiscard]]
+            std::byte* Data() noexcept { return m_data.data(); }
+        };
+    }
 
     FontRenderer::FontRenderer() = default;
 
@@ -140,7 +140,7 @@ namespace awe::graphic
     {
         AddTexture();
 
-        TexBuilder builder(1024);
+        detailed::TexBuilder builder(1024);
         for(char32_t c = begin; c < end; ++c)
         {
             if(!LoadChar(c))
