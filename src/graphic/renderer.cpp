@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include "renderer.hpp"
 #include <cassert>
+#include <optional>
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
@@ -20,6 +21,7 @@ namespace awe::graphic
     namespace detailed
     {
         FT_Library ftlib = nullptr;
+        std::optional<ShaderProgram> text_shader;
     }
 
     void Initialize(const AppInitData& initdata)
@@ -40,6 +42,18 @@ namespace awe::graphic
     {
         FT_Done_FreeType(detailed::ftlib);
         detailed::ftlib = nullptr;
+    }
+
+    void LoadResource()
+    {
+        ShaderBuilder shbuilder;
+        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/text.vs");
+        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/text.fs");
+        detailed::text_shader.emplace(shbuilder.Build().first);
+    }
+    void UnloadResource() noexcept
+    {
+        detailed::text_shader.reset();
     }
 
     Renderer::Renderer(window::Window& window)

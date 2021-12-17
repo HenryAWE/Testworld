@@ -63,9 +63,11 @@ int SDL_main(int argc, char* argv[])
     auto& app = App::GetInstance();
     app.LoadLanguagePak(lang);
     app.Initialize(initdata);
+    graphic::LoadResource();
 
     app.Mainloop();
 
+    graphic::UnloadResource();
     app.Deinitialize();
 
     res::Deinitialize();

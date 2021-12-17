@@ -27,6 +27,9 @@ namespace awe::graphic
     void Initialize(const AppInitData& initdata);
     void Deinitialize();
 
+    void LoadResource();
+    void UnloadResource() noexcept;
+
     /* OpenGL Renderer */
     class Renderer
     {
