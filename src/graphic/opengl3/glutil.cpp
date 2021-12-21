@@ -4,7 +4,7 @@
 #include "glutil.hpp"
 
 
-namespace awe::graphic::glutil
+namespace awe::graphic::opengl3
 {
     GLint GetInteger(GLenum pname)
     {

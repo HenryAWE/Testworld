@@ -4,7 +4,7 @@
 #include "buffer.hpp"
 
 
-namespace awe::graphic
+namespace awe::graphic::opengl3
 {
     Buffer::~Buffer() noexcept
     {

@@ -123,7 +123,7 @@ namespace awe
         graphic::ShaderBuilder shbuilder;
         shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/rect2D.vs");
         shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/screen.fs");
-        graphic::ShaderProgram screen_sh = shbuilder.Build().first;
+        graphic::opengl3::ShaderProgram screen_sh = shbuilder.Build().first;
         shbuilder.Clear();
 
         auto perlin = m_renderer->GeneratePerlinTexture2D(0.5f, 256);

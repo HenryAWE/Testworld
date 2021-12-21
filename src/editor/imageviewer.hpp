@@ -11,7 +11,7 @@
 #include <tuple>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
-#include "../graphic/texture.hpp"
+#include "../graphic/opengl3/texture.hpp"
 
 
 namespace awe
@@ -45,7 +45,7 @@ namespace awe
         struct BitmapData
         {
             std::string name;
-            graphic::Texture tex;
+            graphic::opengl3::Texture tex;
             std::filesystem::path file;
 
             BitmapData(const std::filesystem::path& file_);

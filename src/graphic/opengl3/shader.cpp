@@ -6,10 +6,10 @@
 #include <sstream>
 #include <SDL.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "../res/vfs.hpp"
+#include "../../res/vfs.hpp"
 
 
-namespace awe::graphic
+namespace awe::graphic::opengl3
 {
     Shader::~Shader() noexcept
     {

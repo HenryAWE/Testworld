@@ -16,7 +16,7 @@ namespace awe::graphic
     {
         extern FT_Library ftlib;
 
-        extern std::optional<ShaderProgram> text_shader;
+        extern std::optional<opengl3::ShaderProgram> text_shader;
 
         void UpdateTexture(glm::uvec2 size, std::byte* data)
         {
@@ -380,7 +380,7 @@ namespace awe::graphic
     void TextMesh::Draw(const glm::mat4& matrix)
     {
         glUseProgram(*detailed::text_shader);
-        Uniform(detailed::text_shader->UniLoc("matrix"), matrix);
+        opengl3::Uniform(detailed::text_shader->UniLoc("matrix"), matrix);
         for(auto& section : m_sections)
         {
             std::array<int, 16> tex_arr{0};
@@ -393,7 +393,7 @@ namespace awe::graphic
             for(int i = 0; i < 16; ++i)
             {
                 char tex_i[] = { 't', 'e', 'x', '[', '0' + (char)i, ']', '\0' };
-                Uniform(detailed::text_shader->UniLoc(tex_i), tex_arr[i]);
+                opengl3::Uniform(detailed::text_shader->UniLoc(tex_i), tex_arr[i]);
             }
             glBindVertexArray(section.vao);
             glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(section.count * 6));

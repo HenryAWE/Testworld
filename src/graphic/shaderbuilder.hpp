@@ -6,7 +6,7 @@
 
 #include <utility>
 #include <vector>
-#include "shader.hpp"
+#include "opengl3/shader.hpp"
 
 
 namespace awe::graphic
@@ -23,7 +23,7 @@ namespace awe::graphic
             const std::string& path
         );
 
-        std::pair<ShaderProgram, bool> Build();
+        std::pair<opengl3::ShaderProgram, bool> Build();
 
         void Clear() noexcept;
 
@@ -31,7 +31,7 @@ namespace awe::graphic
         constexpr const std::string& GetLastLog() noexcept { return m_log; }
 
     private:
-        std::vector<Shader> m_shaders;
+        std::vector<opengl3::Shader> m_shaders;
         std::string m_log;
     };
 }

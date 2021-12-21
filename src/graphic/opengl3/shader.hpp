@@ -1,8 +1,8 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
-#ifndef TESTWORLD_GRAPHIC_SHADER_HPP
-#define TESTWORLD_GRAPHIC_SHADER_HPP
+#ifndef TESTWORLD_GRAPHIC_OPENGL3_SHADER_HPP
+#define TESTWORLD_GRAPHIC_OPENGL3_SHADER_HPP
 
 #include <glad/glad.h>
 #include <filesystem>
@@ -10,7 +10,7 @@
 #include <glm/matrix.hpp>
 
 
-namespace awe::graphic
+namespace awe::graphic::opengl3
 {
     class Shader
     {

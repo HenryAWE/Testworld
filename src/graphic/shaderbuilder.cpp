@@ -11,7 +11,7 @@ namespace awe::graphic
         GLenum type,
         std::string_view src
     ) {
-        Shader sh;
+        opengl3::Shader sh;
         sh.Generate(type);
         if(!sh.Compile(src, &m_log))
             return false;
@@ -30,9 +30,9 @@ namespace awe::graphic
         );
     }
 
-    std::pair<ShaderProgram, bool> ShaderBuilder::Build()
+    std::pair<opengl3::ShaderProgram, bool> ShaderBuilder::Build()
     {
-        ShaderProgram sh;
+        opengl3::ShaderProgram sh;
         bool result = sh.Link(
             m_shaders.data(),
             m_shaders.size(),

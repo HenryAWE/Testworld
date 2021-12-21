@@ -4,10 +4,10 @@
 #include "texture.hpp"
 #include <SDL.h>
 #include <stb_image.h>
-#include "../res/vfs.hpp"
+#include "../../res/vfs.hpp"
 
 
-namespace awe::graphic
+namespace awe::graphic::opengl3
 {
     namespace detailed
     {

@@ -1,8 +1,8 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
-#ifndef TESTWORLD_GRAPHIC_TEXTURE_HPP
-#define TESTWORLD_GRAPHIC_TEXTURE_HPP
+#ifndef TESTWORLD_GRAPHIC_OPENGL3_TEXTURE_HPP
+#define TESTWORLD_GRAPHIC_OPENGL3_TEXTURE_HPP
 
 #include <glad/glad.h>
 #include <filesystem>
@@ -11,7 +11,7 @@
 #include <glm/vec4.hpp>
 
 
-namespace awe::graphic
+namespace awe::graphic::opengl3
 {
     struct TexDescription
     {

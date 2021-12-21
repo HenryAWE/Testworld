@@ -21,7 +21,7 @@ namespace awe::graphic
     namespace detailed
     {
         FT_Library ftlib = nullptr;
-        std::optional<ShaderProgram> text_shader;
+        std::optional<opengl3::ShaderProgram> text_shader;
     }
 
     void Initialize(const AppInitData& initdata)
@@ -220,8 +220,8 @@ namespace awe::graphic
 
         ss << "Driver Support" << endl;
         ss
-            << "  Max Texture Size: " << glutil::GetInteger(GL_MAX_TEXTURE_SIZE) << endl
-            << "  Max Texture Image Unit: " << glutil::GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) << endl;
+            << "  Max Texture Size: " << opengl3::GetInteger(GL_MAX_TEXTURE_SIZE) << endl
+            << "  Max Texture Image Unit: " << opengl3::GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) << endl;
 
         ss << "Context" << endl;
         GLint flags = 0;
@@ -253,8 +253,8 @@ namespace awe::graphic
                 buf[i * size + j] = Fill(i, j);
             }
         }
-        Texture tex;
-        TexDescription desc;
+        opengl3::Texture tex;
+        opengl3::TexDescription desc;
         desc.format = GL_RED;
         desc.type = GL_RED;
         tex.LoadMemoryEx(
@@ -294,7 +294,7 @@ namespace awe::graphic
         glBindVertexArray(m_rect_vao);
 
         GLint uniloc = m_rect_shader.UniLoc("matrix");
-        if(uniloc != -1) Uniform(uniloc, matrix);
+        if(uniloc != -1) opengl3::Uniform(uniloc, matrix);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
@@ -324,7 +324,7 @@ namespace awe::graphic
         m_screen_tex.Generate();
         m_fbo.Generate();
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-        TexDescription screnn_desc{};
+        opengl3::TexDescription screnn_desc{};
         screnn_desc.format = GL_RGB;
         m_screen_tex.LoadFramebuffer(
             size,

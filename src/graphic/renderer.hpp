@@ -10,11 +10,11 @@
 #include <SDL.h>
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
-#include "glutil.hpp"
-#include "buffer.hpp"
+#include "opengl3/glutil.hpp"
+#include "opengl3/buffer.hpp"
 #include "shaderbuilder.hpp"
 #include "fontbuilder.hpp"
-#include "texture.hpp"
+#include "opengl3/texture.hpp"
 #include "noise.hpp"
 
 
@@ -24,6 +24,11 @@ namespace awe::window
 }
 namespace awe::graphic
 {
+    using opengl3::Texture;
+    using opengl3::Buffer;
+    using opengl3::Framebuffer;
+    using opengl3::Renderbuffer;
+
     void Initialize(const AppInitData& initdata);
     void Deinitialize();
 
@@ -87,19 +92,19 @@ namespace awe::graphic
 
         // Utilities
 
-        Texture GeneratePerlinTexture2D(float p = 0.5f, int size = 256);
+        opengl3::Texture GeneratePerlinTexture2D(float p = 0.5f, int size = 256);
 
         // Rendering
 
-        Framebuffer& GetFramebuffer();
-        Texture& GetScreenTexture();
+        opengl3::Framebuffer& GetFramebuffer();
+        opengl3::Texture& GetScreenTexture();
         void DrawTexture(
             GLuint tex,
             const glm::mat4& matrix = glm::mat4(1),
             bool custom_shader = false
         );
         void DrawTexture(
-            const Texture& tex,
+            const opengl3::Texture& tex,
             const glm::mat4& matrix = glm::mat4(1),
             bool custom_shader = false
         );
@@ -117,10 +122,10 @@ namespace awe::graphic
         void InitScreenData();
         void ReleaseScreenData();
 
-        VertexArray m_rect_vao;
-        Buffer m_rect_vbo;
-        Buffer m_rect_ebo;
-        ShaderProgram m_rect_shader;
+        opengl3::VertexArray m_rect_vao;
+        opengl3::Buffer m_rect_vbo;
+        opengl3::Buffer m_rect_ebo;
+        opengl3::ShaderProgram m_rect_shader;
         void InitRectData();
         void ReleaseRectData();
 

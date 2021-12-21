@@ -14,7 +14,7 @@
 #include FT_FREETYPE_H
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
-#include "buffer.hpp"
+#include "opengl3/buffer.hpp"
 
 
 namespace awe::graphic
@@ -34,8 +34,8 @@ namespace awe::graphic
 
         struct MeshSection
         {
-            VertexArray vao;
-            Buffer vbo;
+            opengl3::VertexArray vao;
+            opengl3::Buffer vbo;
             std::size_t count = 0; // Character count
             std::array<GLuint, 16> tex; // These handles do not hold the ownerships of the textures
         };

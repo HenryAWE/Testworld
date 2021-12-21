@@ -1,14 +1,14 @@
 // Author: HenryAWE
 // License: The 3-clause BSD License
 
-#ifndef TESTWORLD_GRAPHIC_BUFFER_HPP
-#define TESTWORLD_GRAPHIC_BUFFER_HPP
+#ifndef TESTWORLD_GRAPHIC_OPENGL3_BUFFER_HPP
+#define TESTWORLD_GRAPHIC_OPENGL3_BUFFER_HPP
 
 #include <glad/glad.h>
 #include <utility>
 
 
-namespace awe::graphic
+namespace awe::graphic::opengl3
 {
     class Buffer
     {
