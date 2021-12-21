@@ -15,7 +15,6 @@
 #include "shaderbuilder.hpp"
 #include "fontbuilder.hpp"
 #include "opengl3/texture.hpp"
-#include "noise.hpp"
 
 
 namespace awe::window
@@ -89,10 +88,6 @@ namespace awe::graphic
 
         glm::ivec2 GetDrawableSize() const;
         std::string RendererInfo();
-
-        // Utilities
-
-        opengl3::Texture GeneratePerlinTexture2D(float p = 0.5f, int size = 256);
 
         // Rendering
 

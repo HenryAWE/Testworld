@@ -237,37 +237,6 @@ namespace awe::graphic
         return ss.str();
     }
 
-    Texture Renderer::GeneratePerlinTexture2D(float p, int size)
-    {
-        auto Fill = [p](int x, int y)->unsigned
-        {
-            float val = graphic::PerlinNoise<float>(p, (float)x, (float)y);
-            return unsigned char(256 * val);
-        };
-        std::vector<unsigned char> buf;
-        buf.resize(size * size);
-        for(int i = 0; i < size; ++i)
-        {
-            for(int j = 0; j < size; ++j)
-            {
-                buf[i * size + j] = Fill(i, j);
-            }
-        }
-        opengl3::Texture tex;
-        opengl3::TexDescription desc;
-        desc.format = GL_RED;
-        desc.type = GL_RED;
-        tex.LoadMemoryEx(
-            buf.data(),
-            glm::ivec2(size),
-            true,
-            desc
-        );
-        assert(glGetError() == GL_NO_ERROR);
-
-        return std::move(tex);
-    }
-
     Framebuffer& Renderer::GetFramebuffer()
     {
         return m_fbo;

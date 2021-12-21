@@ -126,8 +126,6 @@ namespace awe
         graphic::opengl3::ShaderProgram screen_sh = shbuilder.Build().first;
         shbuilder.Clear();
 
-        auto perlin = m_renderer->GeneratePerlinTexture2D(0.5f, 256);
-
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
