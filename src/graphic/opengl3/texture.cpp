@@ -46,22 +46,30 @@ namespace awe::graphic::opengl3
                 glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &desc.border_color[0]);
         }
         void TexImage(
-            void* data,
-            int width,
-            int height,
+            const common::Image<4>& image,
             const TexDescription& desc
         ) {
             glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
                 desc.format,
-                width,
-                height,
+                image.Size()[0],
+                image.Size()[1],
                 0,
                 desc.type,
                 GL_UNSIGNED_BYTE,
-                data
+                image.Data()
             );
+        }
+
+        TexDescription DefaultDesc() noexcept
+        {
+            TexDescription default_desc;
+            default_desc.s = TexDescription::REPEAT;
+            default_desc.t = TexDescription::REPEAT;
+            default_desc.min = TexDescription::LINEAR;
+            default_desc.mag = TexDescription::LINEAR;
+            return default_desc;
         }
     }
 
@@ -89,27 +97,15 @@ namespace awe::graphic::opengl3
             const std::filesystem::path& file,
             bool gen_mipmap
     ) {
-        TexDescription default_desc;
-        default_desc.s = TexDescription::REPEAT;
-        default_desc.t = TexDescription::REPEAT;
-        default_desc.min = TexDescription::LINEAR;
-        default_desc.mag = TexDescription::LINEAR;
-        return LoadFileEx(file, gen_mipmap, default_desc);
+        return LoadFileEx(file, gen_mipmap, detailed::DefaultDesc());
     }
     bool Texture::LoadFileEx(
             const std::filesystem::path& file,
             bool gen_mipmap,
             TexDescription desc
     ) {
-        int width = 0, height = 0;
-        stbi_uc* data = stbi_load(
-            file.u8string().c_str(),
-            &width,
-            &height,
-            nullptr,
-            STBI_rgb_alpha
-        );
-        if(!data)
+        common::Image image;
+        if(!image.Load(file))
         {
             SDL_LogError(
                 SDL_LOG_CATEGORY_APPLICATION,
@@ -125,23 +121,12 @@ namespace awe::graphic::opengl3
 
         glBindTexture(GL_TEXTURE_2D, m_handle);
         detailed::ApplyDesc(desc, gen_mipmap);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            desc.format,
-            width,
-            height,
-            0,
-            GL_RGBA,
-            GL_UNSIGNED_BYTE,
-            data
-        );
+        detailed::TexImage(image, desc);
         if(gen_mipmap)
             glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        m_size = glm::ivec2(width, height);
-        stbi_image_free(data);
+        m_size = image.Size();
 
         return true;
     }
@@ -149,29 +134,15 @@ namespace awe::graphic::opengl3
             const std::string& file,
             bool gen_mipmap
     ) {
-        TexDescription default_desc;
-        default_desc.s = TexDescription::REPEAT;
-        default_desc.t = TexDescription::REPEAT;
-        default_desc.min = TexDescription::LINEAR;
-        default_desc.mag = TexDescription::LINEAR;
-        return LoadVfsEx(file, gen_mipmap, default_desc);
+        return LoadVfsEx(file, gen_mipmap, detailed::DefaultDesc());
     }
     bool Texture::LoadVfsEx(
             const std::string& file,
             bool gen_mipmap,
             TexDescription desc
     ) {
-        int width = 0, height = 0;
-        auto buffer = vfs::GetData(file);
-        stbi_uc* data = stbi_load_from_memory(
-            (const stbi_uc*)buffer.data(),
-            (int)buffer.size(),
-            &width,
-            &height,
-            nullptr,
-            STBI_rgb_alpha
-        );
-        if(!data)
+        common::Image image;
+        if(!image.Load(vfs::GetData(file)))
         {
             SDL_LogError(
                 SDL_LOG_CATEGORY_APPLICATION,
@@ -187,46 +158,12 @@ namespace awe::graphic::opengl3
 
         glBindTexture(GL_TEXTURE_2D, m_handle);
         detailed::ApplyDesc(desc, gen_mipmap);
-        detailed::TexImage(data, width, height, desc);
+        detailed::TexImage(image, desc);
         if(gen_mipmap)
             glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        m_size = glm::ivec2(width, height);
-        stbi_image_free(data);
-
-        return true;
-    }
-    bool Texture::LoadMemory(
-            unsigned char* data,
-            glm::ivec2 size,
-            bool gen_mipmap
-    ) {
-        TexDescription default_desc;
-        default_desc.s = TexDescription::REPEAT;
-        default_desc.t = TexDescription::REPEAT;
-        default_desc.min = TexDescription::LINEAR;
-        default_desc.mag = TexDescription::LINEAR;
-
-        return LoadMemoryEx(data, size, gen_mipmap, default_desc);
-    }
-    bool Texture::LoadMemoryEx(
-            unsigned char* data,
-            glm::ivec2 size,
-            bool gen_mipmap,
-            TexDescription desc
-    ) {
-        if(!m_handle)
-            Generate();
-
-        glBindTexture(GL_TEXTURE_2D, m_handle);
-        detailed::ApplyDesc(desc, gen_mipmap);
-        detailed::TexImage(data, size[0], size[1], desc);
-        if(gen_mipmap)
-            glGenerateMipmap(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        m_size = size;
+        m_size = image.Size();
 
         return true;
     }

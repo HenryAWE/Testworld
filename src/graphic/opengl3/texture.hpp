@@ -9,6 +9,7 @@
 #include <utility>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
+#include "../common/image.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -76,17 +77,6 @@ namespace awe::graphic::opengl3
         );
         bool LoadVfsEx(
             const std::string& file,
-            bool gen_mipmap,
-            TexDescription desc
-        );
-        bool LoadMemory(
-            unsigned char* data,
-            glm::ivec2 size,
-            bool gen_mipmap = true
-        );
-        bool LoadMemoryEx(
-            unsigned char* data,
-            glm::ivec2 size,
             bool gen_mipmap,
             TexDescription desc
         );

@@ -47,11 +47,12 @@ namespace awe::graphic::common
         };
     }
 
-    template <typename Format = std::byte, uint8_t Channel = 4>
+    template <uint8_t Channel = 4>
     class Image : public detailed::ImageBase
     {
     public:
-        typedef Format DataType;
+        typedef std::byte DataType;
+        typedef const DataType ConstDataType;
 
         static constexpr uint8_t CHANNEL = Channel;
 
@@ -71,9 +72,9 @@ namespace awe::graphic::common
         }
 
         [[nodiscard]]
-        DataType* Data() noexcept
+        ConstDataType* Data() const noexcept
         {
-            return static_cast<DataType*>(RawData());
+            return static_cast<ConstDataType*>(RawData());
         }
     };
 }

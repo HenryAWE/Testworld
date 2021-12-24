@@ -58,6 +58,7 @@ namespace awe::graphic::common
         {
             stbi_image_free(m_raw_data);
             m_raw_data = nullptr;
+            m_size = glm::ivec2(0);
         }
     }
 }
