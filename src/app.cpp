@@ -34,8 +34,7 @@ namespace awe
         );
 
         m_renderer = graphic::CreateRenderer(initdata, *m_window);
-        m_renderer->CreateContext(initdata.ogl_debug);
-        m_renderer->AttachDebugCallback();
+        m_renderer->Initialize();
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
             m_renderer->RendererInfo().c_str()
@@ -43,7 +42,7 @@ namespace awe
         m_renderer->SetVSync();
 
         m_imgui_ctx = ImGui::CreateContext();
-        if(!ImGui_ImplSDL2_InitForOpenGL(m_window->GetHandle(), m_renderer->GetContext()))
+        if(!ImGui_ImplSDL2_InitForOpenGL(m_window->GetHandle(), SDL_GL_GetCurrentContext()))
         {
             throw std::runtime_error("ImGui_ImplSDL2_InitForOpenGL() failed");
         }
@@ -168,18 +167,9 @@ namespace awe
             for(int i : { 0, 1 })
                 io.DisplayFramebufferScale[i] = float(drawsize[i]) / io.DisplaySize[i];
             ImGui::Render();
-            auto& fbo = m_renderer->GetFramebuffer();
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            glClearColor(0, 0, 0, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
-            m_renderer->DrawTexture(tex);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glViewport(0, 0, drawsize[0], drawsize[1]);
             glClear(GL_COLOR_BUFFER_BIT);
-            glUseProgram(screen_sh);
-            m_renderer->DrawTexture(m_renderer->GetScreenTexture(), glm::mat4(1), true);
-            glUseProgram(0);
 
             m_renderer->ImGuiImplRenderDrawData();
             m_renderer->Present();

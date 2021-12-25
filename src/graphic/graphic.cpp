@@ -11,6 +11,9 @@ namespace awe::graphic
         const AppInitData& initdata,
         window::Window& window
     ) {
-        return std::make_unique<opengl3::Renderer>(window);
+        return std::make_unique<opengl3::Renderer>(
+            window,
+            initdata
+        );
     }
 }

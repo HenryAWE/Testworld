@@ -41,30 +41,9 @@ namespace awe::graphic
         Renderer(window::Window& window);
         virtual ~Renderer() noexcept;
 
-        // Context management
-
-        void CreateContext(bool debug = false);
-        void DestroyContext() noexcept;
-        [[nodiscard]]
-        constexpr SDL_GLContext GetContext() const noexcept
-        {
-            return m_context;
-        }
-        bool IsDebugContext();
-        void AttachDebugCallback();
-        bool DefaultDebugOutputFilter(
-            GLenum source,
-            GLenum type,
-            GLuint id,
-            GLenum severity
-        );
-        // Return true to ignore the current debug output message
-        std::function<bool(
-            GLenum source,
-            GLenum type,
-            GLuint id,
-            GLenum severity
-        )> DebugOutputFilter;
+        virtual bool Initialize() = 0;
+        virtual void Deinitialize() noexcept = 0;
+        virtual bool IsInitialized() noexcept = 0;
 
 
         // Display controlling
@@ -89,48 +68,8 @@ namespace awe::graphic
         std::string RendererInfo();
         virtual std::string GetRendererName() = 0;
 
-        // Rendering
-
-        opengl3::Framebuffer& GetFramebuffer();
-        opengl3::Texture& GetScreenTexture();
-        void DrawTexture(
-            GLuint tex,
-            const glm::mat4& matrix = glm::mat4(1),
-            bool custom_shader = false
-        );
-        void DrawTexture(
-            const opengl3::Texture& tex,
-            const glm::mat4& matrix = glm::mat4(1),
-            bool custom_shader = false
-        );
-
-    private:
+    protected:
         window::Window& m_window;
-        SDL_GLContext m_context = nullptr;
-
-        void InitData();
-        void ReleaseData();
-
-        Framebuffer m_fbo;
-        Renderbuffer m_rbo;
-        Texture m_screen_tex;
-        void InitScreenData();
-        void ReleaseScreenData();
-
-        opengl3::VertexArray m_rect_vao;
-        opengl3::Buffer m_rect_vbo;
-        opengl3::Buffer m_rect_ebo;
-        opengl3::ShaderProgram m_rect_shader;
-        void InitRectData();
-        void ReleaseRectData();
-
-        void DebugOutput(
-            GLenum source,
-            GLenum type,
-            GLuint id,
-            GLenum severity, 
-            std::string_view message
-        );
     };
 }
 
