@@ -39,7 +39,7 @@ namespace awe::graphic
     {
     public:
         Renderer(window::Window& window);
-        ~Renderer() noexcept;
+        virtual ~Renderer() noexcept;
 
         // Context management
 
@@ -81,13 +81,13 @@ namespace awe::graphic
 
         void InitImGuiImpl();
         void ShutdownImGuiImpl();
-        void ImGuiImplNewFrame();
         void ImGuiImplRenderDrawData();
 
         // Information of renderer
 
         glm::ivec2 GetDrawableSize() const;
         std::string RendererInfo();
+        virtual std::string GetRendererName() = 0;
 
         // Rendering
 

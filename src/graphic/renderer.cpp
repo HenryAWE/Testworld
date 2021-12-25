@@ -47,8 +47,8 @@ namespace awe::graphic
     void LoadResource()
     {
         ShaderBuilder shbuilder;
-        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/text.vs");
-        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/text.fs");
+        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/opengl3/text.vs");
+        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/opengl3/text.fs");
         detailed::text_shader.emplace(shbuilder.Build().first);
     }
     void UnloadResource() noexcept
@@ -190,10 +190,6 @@ namespace awe::graphic
     void Renderer::ShutdownImGuiImpl()
     {
         ImGui_ImplOpenGL3_Shutdown();
-    }
-    void Renderer::ImGuiImplNewFrame()
-    {
-        ImGui_ImplOpenGL3_NewFrame();
     }
     void Renderer::ImGuiImplRenderDrawData()
     {

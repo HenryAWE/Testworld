@@ -7,10 +7,11 @@
 #include <stb_image.h> // set flip
 #include <imgui_impl_sdl.h>
 #include "editor/editor.hpp"
-#include "graphic/renderer.hpp"
+#include "graphic/graphic.hpp"
 #include "res/vfs.hpp"
 #include "script/script.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui_impl_opengl3.h>
 
 
 namespace awe
@@ -32,9 +33,7 @@ namespace awe
             SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE
         );
 
-        m_renderer = std::make_shared<graphic::Renderer>(
-            *m_window
-        );
+        m_renderer = graphic::CreateRenderer(initdata, *m_window);
         m_renderer->CreateContext(initdata.ogl_debug);
         m_renderer->AttachDebugCallback();
         SDL_LogInfo(
@@ -121,15 +120,19 @@ namespace awe
         auto EditorNewFrame = script::GenCallerByDecl<void()>(testworld, "void EditorNewFrame()", main_ctx);
 
         graphic::ShaderBuilder shbuilder;
-        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/rect2D.vs");
-        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/screen.fs");
+        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/opengl3/rect2D.vs");
+        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/opengl3/screen.fs");
         graphic::opengl3::ShaderProgram screen_sh = shbuilder.Build().first;
         shbuilder.Clear();
+
+        graphic::opengl3::Texture tex;
+        tex.LoadFile(R"(C:\Users\Henry\Pictures\Default.jpg)");
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         bool quit = false;
+        ImGui_ImplOpenGL3_CreateDeviceObjects();
         while(!quit)
         {
             // Event processing
@@ -152,7 +155,6 @@ namespace awe
             }
 
             // UI Processing
-            m_renderer->ImGuiImplNewFrame();
             ImGui_ImplSDL2_NewFrame(m_window->GetHandle());
             ImGui::NewFrame();
 
@@ -170,6 +172,7 @@ namespace awe
             glBindFramebuffer(GL_FRAMEBUFFER, fbo);
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT);
+            m_renderer->DrawTexture(tex);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glViewport(0, 0, drawsize[0], drawsize[1]);
