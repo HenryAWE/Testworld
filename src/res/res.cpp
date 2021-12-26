@@ -95,26 +95,4 @@ namespace awe::res
         static ResourceManager instance;
         return instance;
     }
-
-    graphic::Texture& ResourceManager::AddTexture(
-        const std::string& name,
-        graphic::Texture&& tex
-    ) {
-        return m_tex.emplace(
-            name,
-            std::move(tex)
-        ).first->second;
-    }
-    graphic::Texture* ResourceManager::GetTexturePtr(const std::string& name)
-    {
-        auto iter = m_tex.find(name);
-        if(iter == m_tex.end())
-            return nullptr;
-        else
-            return &iter->second;
-    }
-    std::map<std::string, graphic::Texture>& ResourceManager::GetTextures()
-    {
-        return m_tex;
-    }
 }

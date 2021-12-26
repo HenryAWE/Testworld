@@ -31,17 +31,7 @@ namespace awe::graphic
             glm::ivec2 bearing;
             unsigned int advance;
         };
-
-        struct MeshSection
-        {
-            opengl3::VertexArray vao;
-            opengl3::Buffer vbo;
-            std::size_t count = 0; // Character count
-            std::array<GLuint, 16> tex; // These handles do not hold the ownerships of the textures
-        };
     }
-
-    class TextMesh;
 
     class FontRenderer
     {
@@ -66,8 +56,6 @@ namespace awe::graphic
         [[nodiscard]]
         GLuint GetFontAtlas(std::size_t index) const { return m_textures[index]; }
 
-        TextMesh GenerateMesh(glm::vec2 pos, std::u32string_view sv);
-
     private:
         FT_Face m_face = nullptr;
         std::vector<std::byte> m_memdata; // Used when the font is loaded from memory buffer
@@ -78,25 +66,6 @@ namespace awe::graphic
 
         GLuint AddTexture();
         void ClearTexture() noexcept;
-    };
-
-    class TextMesh
-    {
-        friend class FontRenderer;
-    public:
-        TextMesh();
-        TextMesh(TextMesh&& move) noexcept;
-        TextMesh(const TextMesh&) = delete;
-        explicit TextMesh(std::vector<detailed::MeshSection> sections);
-
-        // Static method
-        // Set the proper blending mode of OpenGL
-        static void SetBlendMode();
-        // Remark: Call SetBlendMode() first
-        void Draw(const glm::mat4& matrix);
-
-    private:
-        std::vector<detailed::MeshSection> m_sections;
     };
 }
 

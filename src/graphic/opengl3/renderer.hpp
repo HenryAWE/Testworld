@@ -5,9 +5,12 @@
 #define TESTWORLD_GRAPHIC_OPENGL3_RENDERER_HPP
 
 #include <glad/glad.h>
-#include "glutil.hpp"
-#include "../../sys/init.hpp"
 #include "../renderer.hpp"
+#include <atomic>
+#include <condition_variable>
+#include <boost/lockfree/queue.hpp>
+#include "../../sys/init.hpp"
+#include "glutil.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -51,13 +54,35 @@ namespace awe::graphic::opengl3
             GLenum severity
         )> DebugOutputFilter;
 
+        void BeginMainloop() override;
+        void QuitMainloop() override;
+
+        void Present() override;
+
     private:
+        bool m_initialized = false;
+
         void CreateContext(bool debug = false);
         void DestroyContext() noexcept;
 
-        bool m_initialized = false;
+        std::string RendererInfo();
+
         SDL_GLContext m_context = nullptr;
         bool m_debug = false;
+
+        // Thread safety: Can only be called in the main thread
+        bool DetachThread();
+        // Thread safety: Can only be called in the rendering thread
+        void RendererMain();
+        // Thread safety: Can be called in any thread
+        void QuitRenderThread();
+
+        std::thread::id m_render_thread_id;
+        std::atomic_bool m_request_render = false;
+        std::atomic_bool m_presented = false;
+        std::atomic_bool m_quit_mainloop = false;
+        std::atomic_bool m_begin_mainloop = false;
+        std::atomic_bool m_is_data_released = true;
 
         void DebugOutput(
             GLenum source,

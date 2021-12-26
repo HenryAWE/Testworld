@@ -12,6 +12,7 @@
 #include FT_FREETYPE_H
 #include <fmt/format.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
 #include "../window/window.hpp"
 
 
@@ -20,7 +21,6 @@ namespace awe::graphic
     namespace detailed
     {
         FT_Library ftlib = nullptr;
-        std::optional<opengl3::ShaderProgram> text_shader;
     }
 
     void Initialize(const AppInitData& initdata)
@@ -41,18 +41,6 @@ namespace awe::graphic
     {
         FT_Done_FreeType(detailed::ftlib);
         detailed::ftlib = nullptr;
-    }
-
-    void LoadResource()
-    {
-        ShaderBuilder shbuilder;
-        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/opengl3/text.vs");
-        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/opengl3/text.fs");
-        detailed::text_shader.emplace(shbuilder.Build().first);
-    }
-    void UnloadResource() noexcept
-    {
-        detailed::text_shader.reset();
     }
 
     Renderer::Renderer(window::Window& window)
@@ -79,16 +67,16 @@ namespace awe::graphic
     {
         return SDL_GL_GetSwapInterval() != 0;
     }
-    void Renderer::Present()
-    {
-        SDL_GL_SwapWindow(m_window.GetHandle());
-    }
 
     void Renderer::InitImGuiImpl()
     {
         if(!ImGui_ImplOpenGL3_Init("#version 330 core"))
         {
             throw std::runtime_error("ImGui_ImplOpenGL3_Init() failed");
+        }
+        if(!ImGui_ImplSDL2_InitForOpenGL(m_window.GetHandle(), SDL_GL_GetCurrentContext()))
+        {
+            throw std::runtime_error("ImGui_ImplSDL2_InitForOpenGL() failed");
         }
     }
     void Renderer::ShutdownImGuiImpl()
@@ -105,35 +93,6 @@ namespace awe::graphic
         glm::ivec2 size;
         SDL_GL_GetDrawableSize(m_window.GetHandle(), &size[0], &size[1]);
         return size;
-    }
-    std::string Renderer::RendererInfo()
-    {
-        using namespace std;
-        stringstream ss;
-
-        ss << "OpenGL Information" << endl;
-        ss
-            << "  Vendor: " << glGetString(GL_VENDOR) << endl
-            << "  Renderer: " << glGetString(GL_RENDERER) << endl
-            << "  Version: " << glGetString(GL_VERSION) << endl
-            << "  Shading Language: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
-
-        ss << "Driver Support" << endl;
-        ss
-            << "  Max Texture Size: " << opengl3::GetInteger(GL_MAX_TEXTURE_SIZE) << endl
-            << "  Max Texture Image Unit: " << opengl3::GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) << endl;
-
-        ss << "Context" << endl;
-        GLint flags = 0;
-        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-        ss
-            << "  Flags: " << fmt::format("0x{0:08X} (0b{0:b})", flags) << endl;
-
-        ss << "Extensions" << endl;
-        ss
-            << "  ARB_debug_output = " << GLAD_GL_ARB_debug_output;
-
-        return ss.str();
     }
 }
 

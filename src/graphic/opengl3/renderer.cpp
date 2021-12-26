@@ -3,7 +3,11 @@
 
 #include "renderer.hpp"
 #include <iostream>
+#include <sstream>
+#include <future>
+#include <thread>
 #include <fmt/format.h>
+#include <imgui_impl_opengl3.h>
 #include "../../window/window.hpp"
 
 
@@ -35,25 +39,41 @@ namespace awe::graphic::opengl3
         if(IsInitialized())
             return true;
 
-        CreateContext(m_debug);
-        if(m_debug)
-        {
-            AttachDebugCallback();
-        }
-
-        m_initialized = true;
-        return true;
+        m_initialized = DetachThread();;
+        return m_initialized;
     }
     void Renderer::Deinitialize() noexcept
     {
         if(!IsInitialized())
             return;
-        DestroyContext();
+        m_quit_mainloop = true;
+        while(!m_is_data_released)
+            std::this_thread::yield();
         m_initialized = false;
     }
     bool Renderer::IsInitialized() noexcept
     {
         return m_initialized;
+    }
+
+    void Renderer::BeginMainloop()
+    {
+        m_begin_mainloop = true;
+    }
+    void Renderer::QuitMainloop()
+    {
+        m_quit_mainloop = true;
+    }
+    void Renderer::Present()
+    {
+        {
+            std::lock_guard lock(GetMutex());
+            m_request_render = true;
+            m_presented = false;
+        }
+        while(!m_presented)
+            std::this_thread::yield();
+        m_presented = false;
     }
 
     void Renderer::CreateContext(bool debug)
@@ -82,6 +102,36 @@ namespace awe::graphic::opengl3
         assert(m_context);
         SDL_GL_DeleteContext(m_context);
         m_context = nullptr;
+    }
+
+    std::string Renderer::RendererInfo()
+    {
+        using namespace std;
+        stringstream ss;
+
+        ss << "OpenGL Information" << endl;
+        ss
+            << "  Vendor: " << glGetString(GL_VENDOR) << endl
+            << "  Renderer: " << glGetString(GL_RENDERER) << endl
+            << "  Version: " << glGetString(GL_VERSION) << endl
+            << "  Shading Language: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+
+        ss << "Driver Support" << endl;
+        ss
+            << "  Max Texture Size: " << opengl3::GetInteger(GL_MAX_TEXTURE_SIZE) << endl
+            << "  Max Texture Image Unit: " << opengl3::GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) << endl;
+
+        ss << "Context" << endl;
+        GLint flags = 0;
+        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+        ss
+            << "  Flags: " << fmt::format("0x{0:08X} (0b{0:b})", flags) << endl;
+
+        ss << "Extensions" << endl;
+        ss
+            << "  ARB_debug_output = " << GLAD_GL_ARB_debug_output;
+
+        return ss.str();
     }
 
     std::string Renderer::GetRendererName()
@@ -137,6 +187,70 @@ namespace awe::graphic::opengl3
             return false;
 
         return true;
+    }
+
+    bool Renderer::DetachThread()
+    {
+        std::promise<bool> init_result_promise;
+        auto init_result = init_result_promise.get_future();
+        // Launch render thread
+        std::thread([this, result = std::move(init_result_promise)] () mutable {
+            m_render_thread_id = std::this_thread::get_id();
+            CreateContext(m_debug);
+            SDL_LogInfo(
+                SDL_LOG_CATEGORY_APPLICATION,
+                RendererInfo().c_str()
+            );
+            if(m_debug)
+            {
+                AttachDebugCallback();
+            }
+            InitImGuiImpl();
+            result.set_value(true);
+
+            RendererMain();
+
+            ShutdownImGuiImpl();
+            DestroyContext();
+        }).detach();
+
+        return init_result.get();
+    }
+    void Renderer::RendererMain()
+    {
+        while(!m_begin_mainloop)
+        {
+            if(m_quit_mainloop) return;
+            std::this_thread::yield();
+        }
+        //Begin mainloop in rendering thread
+        ImGui_ImplOpenGL3_CreateDeviceObjects();
+
+        while(!m_quit_mainloop)
+        {
+            // Prepare for rendering next frame
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            while(!m_request_render)
+            {
+                if(m_quit_mainloop) return;
+                std::this_thread::yield();
+            }
+            // Rendering is requested
+            {
+                std::lock_guard lock(GetMutex());
+                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                SDL_GL_SwapWindow(m_window.GetHandle());
+                m_request_render = false;
+                m_presented = true;
+            }
+
+            std::this_thread::yield();
+        }
+    }
+    void Renderer::QuitRenderThread()
+    {
+        m_quit_mainloop = true;
     }
 
     void Renderer::DebugOutput(

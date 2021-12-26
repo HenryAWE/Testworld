@@ -23,17 +23,6 @@ namespace awe::res
         ~ResourceManager();
 
         static ResourceManager& Instance();
-
-        graphic::Texture& AddTexture(
-            const std::string& name,
-            graphic::Texture&& tex
-        );
-        /* Will return nullptr when required texture cannot be found */
-        graphic::Texture* GetTexturePtr(const std::string& name);
-        std::map<std::string, graphic::Texture>& GetTextures();
-
-    private:
-        std::map<std::string, graphic::Texture> m_tex;
     };
 }
 

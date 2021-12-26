@@ -33,21 +33,9 @@ namespace awe
             SDL_WINDOW_MAXIMIZED | SDL_WINDOW_RESIZABLE
         );
 
+        m_imgui_ctx = ImGui::CreateContext();
         m_renderer = graphic::CreateRenderer(initdata, *m_window);
         m_renderer->Initialize();
-        SDL_LogInfo(
-            SDL_LOG_CATEGORY_APPLICATION,
-            m_renderer->RendererInfo().c_str()
-        );
-        m_renderer->SetVSync();
-
-        m_imgui_ctx = ImGui::CreateContext();
-        if(!ImGui_ImplSDL2_InitForOpenGL(m_window->GetHandle(), SDL_GL_GetCurrentContext()))
-        {
-            throw std::runtime_error("ImGui_ImplSDL2_InitForOpenGL() failed");
-        }
-        m_renderer->InitImGuiImpl();
-
         auto& io = ImGui::GetIO();
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
@@ -63,7 +51,6 @@ namespace awe
         // Create ImGui window
         m_console = std::make_unique<imgui::Console>();
         m_editor = std::make_unique<Editor>();
-        m_console->Write(m_renderer->RendererInfo());
         m_console->Write("Testworld Angelscript Console");
 
         // ImGui fonts
@@ -82,7 +69,7 @@ namespace awe
         m_editor.reset();
         m_console.reset();
 
-        m_renderer->ShutdownImGuiImpl();
+        m_renderer->Deinitialize();
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext(m_imgui_ctx);
         m_imgui_ctx = nullptr;
@@ -118,20 +105,11 @@ namespace awe
         if(EditorBeginMainloop) EditorBeginMainloop();
         auto EditorNewFrame = script::GenCallerByDecl<void()>(testworld, "void EditorNewFrame()", main_ctx);
 
-        graphic::ShaderBuilder shbuilder;
-        shbuilder.AddShaderFromVfs(GL_VERTEX_SHADER, "shader/opengl3/rect2D.vs");
-        shbuilder.AddShaderFromVfs(GL_FRAGMENT_SHADER, "shader/opengl3/screen.fs");
-        graphic::opengl3::ShaderProgram screen_sh = shbuilder.Build().first;
-        shbuilder.Clear();
-
-        graphic::opengl3::Texture tex;
-        tex.LoadFile(R"(C:\Users\Henry\Pictures\Default.jpg)");
-
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         bool quit = false;
-        ImGui_ImplOpenGL3_CreateDeviceObjects();
+        m_renderer->BeginMainloop();
         while(!quit)
         {
             // Event processing
@@ -163,27 +141,11 @@ namespace awe
             if(EditorNewFrame) EditorNewFrame();
 
             // Rendering
-            auto drawsize = m_renderer->GetDrawableSize();
-            for(int i : { 0, 1 })
-                io.DisplayFramebufferScale[i] = float(drawsize[i]) / io.DisplaySize[i];
             ImGui::Render();
 
-            glViewport(0, 0, drawsize[0], drawsize[1]);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            m_renderer->ImGuiImplRenderDrawData();
             m_renderer->Present();
-            int err = glGetError();
-            if(err != GL_NO_ERROR)
-            {
-                SDL_LogError(
-                    SDL_LOG_CATEGORY_APPLICATION,
-                    "GL Error (%x): ",
-                    err
-                );
-            }
-            assert(glGetError() == GL_NO_ERROR);
         }
+        m_renderer->QuitMainloop();
 
         main_ctx->Release();
 

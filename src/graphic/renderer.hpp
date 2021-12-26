@@ -6,15 +6,13 @@
 
 #include <glad/glad.h>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <SDL.h>
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
-#include "opengl3/glutil.hpp"
-#include "opengl3/buffer.hpp"
 #include "shaderbuilder.hpp"
 #include "fontbuilder.hpp"
-#include "opengl3/texture.hpp"
 
 
 namespace awe::window
@@ -23,16 +21,8 @@ namespace awe::window
 }
 namespace awe::graphic
 {
-    using opengl3::Texture;
-    using opengl3::Buffer;
-    using opengl3::Framebuffer;
-    using opengl3::Renderbuffer;
-
     void Initialize(const AppInitData& initdata);
     void Deinitialize();
-
-    void LoadResource();
-    void UnloadResource() noexcept;
 
     /* OpenGL Renderer */
     class Renderer
@@ -54,7 +44,13 @@ namespace awe::graphic
         */
         bool SetVSync(bool enable = true);
         bool IsVSyncEnabled() noexcept;
-        void Present();
+
+        // Synchronization
+        virtual void BeginMainloop() = 0;
+        virtual void QuitMainloop() = 0;
+        [[nodiscard]]
+        constexpr std::mutex& GetMutex() noexcept { return m_mutex; }
+        virtual void Present() = 0;
 
         // ImGui helpers
 
@@ -65,11 +61,11 @@ namespace awe::graphic
         // Information of renderer
 
         glm::ivec2 GetDrawableSize() const;
-        std::string RendererInfo();
         virtual std::string GetRendererName() = 0;
 
     protected:
         window::Window& m_window;
+        std::mutex m_mutex;
     };
 }
 
