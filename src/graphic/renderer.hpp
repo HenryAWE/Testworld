@@ -13,7 +13,6 @@
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
 #include "shaderbuilder.hpp"
-#include "fontbuilder.hpp"
 
 
 namespace awe::window
