@@ -4,11 +4,12 @@
 #ifndef TESTWORLD_GRAPHIC_RENDERER_HPP
 #define TESTWORLD_GRAPHIC_RENDERER_HPP
 
-#include <glad/glad.h>
 #include <functional>
 #include <mutex>
 #include <string>
 #include <SDL.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
 #include "shaderbuilder.hpp"
@@ -21,9 +22,6 @@ namespace awe::window
 }
 namespace awe::graphic
 {
-    void Initialize(const AppInitData& initdata);
-    void Deinitialize();
-
     /* OpenGL Renderer */
     class Renderer
     {
@@ -31,19 +29,9 @@ namespace awe::graphic
         Renderer(window::Window& window);
         virtual ~Renderer() noexcept;
 
-        virtual bool Initialize() = 0;
-        virtual void Deinitialize() noexcept = 0;
+        virtual bool Initialize();
+        virtual void Deinitialize() noexcept;
         virtual bool IsInitialized() noexcept = 0;
-
-
-        // Display controlling
-
-        /*
-            Enable or disable the vertical synchronization
-            return false if the underlying function fails
-        */
-        bool SetVSync(bool enable = true);
-        bool IsVSyncEnabled() noexcept;
 
         // Synchronization
         virtual void BeginMainloop() = 0;
@@ -52,20 +40,21 @@ namespace awe::graphic
         constexpr std::mutex& GetMutex() noexcept { return m_mutex; }
         virtual void Present() = 0;
 
-        // ImGui helpers
-
-        void InitImGuiImpl();
-        void ShutdownImGuiImpl();
-        void ImGuiImplRenderDrawData();
-
         // Information of renderer
 
         glm::ivec2 GetDrawableSize() const;
         virtual std::string GetRendererName() = 0;
 
+        // Data
+        [[nodiscard]]
+        constexpr FT_Library GetFtLib() noexcept { return m_ftlib; }
+
     protected:
         window::Window& m_window;
         std::mutex m_mutex;
+
+    private:
+        FT_Library m_ftlib = nullptr;
     };
 }
 

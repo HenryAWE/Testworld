@@ -14,7 +14,8 @@ namespace awe::graphic
 {
     namespace detailed
     {
-        extern FT_Library ftlib;
+        // TODO: Fix
+        FT_Library ftlib;
 
         void UpdateTexture(glm::uvec2 size, std::byte* data)
         {

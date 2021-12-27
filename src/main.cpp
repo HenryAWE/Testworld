@@ -54,7 +54,6 @@ int SDL_main(int argc, char* argv[])
         cli.Exists("opengl-debug") // ogl_debug
     );
     window::Initialize(initdata);
-    graphic::Initialize(initdata);
     res::Initialize(initdata);
     std::string lang = cli.Exists("language") ?
         cli.GetVal<std::string>("language") :
@@ -69,7 +68,6 @@ int SDL_main(int argc, char* argv[])
     app.Deinitialize();
 
     res::Deinitialize();
-    graphic::Deinitialize();
     window::Deinitialize();
 
     return 0;

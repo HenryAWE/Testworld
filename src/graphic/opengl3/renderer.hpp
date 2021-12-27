@@ -7,8 +7,6 @@
 #include <glad/glad.h>
 #include "../renderer.hpp"
 #include <atomic>
-#include <condition_variable>
-#include <boost/lockfree/queue.hpp>
 #include "../../sys/init.hpp"
 #include "glutil.hpp"
 
@@ -19,6 +17,8 @@ namespace awe::graphic::opengl3
     class Renderer : public graphic::Renderer
     {
     public:
+        typedef graphic::Renderer Super;
+
         Renderer(
             window::Window& window,
             const AppInitData& initdata
@@ -38,14 +38,6 @@ namespace awe::graphic::opengl3
             return m_context;
         }
 
-        bool IsDebugContext();
-        void AttachDebugCallback();
-        bool DefaultDebugOutputFilter(
-            GLenum source,
-            GLenum type,
-            GLuint id,
-            GLenum severity
-        );
         // Return true to ignore the current debug output message
         std::function<bool(
             GLenum source,
@@ -64,6 +56,11 @@ namespace awe::graphic::opengl3
 
         void CreateContext(bool debug = false);
         void DestroyContext() noexcept;
+
+        // ImGui helpers
+        void InitImGuiImpl();
+        void ShutdownImGuiImpl();
+        void ImGuiImplRenderDrawData();
 
         std::string RendererInfo();
 
@@ -84,6 +81,13 @@ namespace awe::graphic::opengl3
         std::atomic_bool m_begin_mainloop = false;
         std::atomic_bool m_is_data_released = true;
 
+        void AttachDebugCallback();
+        bool DefaultDebugOutputFilter(
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity
+        );
         void DebugOutput(
             GLenum source,
             GLenum type,

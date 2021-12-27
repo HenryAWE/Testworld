@@ -8,6 +8,7 @@
 #include <thread>
 #include <fmt/format.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
 #include "../../window/window.hpp"
 
 
@@ -39,7 +40,9 @@ namespace awe::graphic::opengl3
         if(IsInitialized())
             return true;
 
-        m_initialized = DetachThread();;
+        bool result = Super::Initialize();
+        result = DetachThread();
+        m_initialized = result;
         return m_initialized;
     }
     void Renderer::Deinitialize() noexcept
@@ -49,6 +52,7 @@ namespace awe::graphic::opengl3
         m_quit_mainloop = true;
         while(!m_is_data_released)
             std::this_thread::yield();
+        Super::Deinitialize();
         m_initialized = false;
     }
     bool Renderer::IsInitialized() noexcept
@@ -104,6 +108,27 @@ namespace awe::graphic::opengl3
         m_context = nullptr;
     }
 
+    void Renderer::InitImGuiImpl()
+    {
+        if(!ImGui_ImplOpenGL3_Init("#version 330 core"))
+        {
+            throw std::runtime_error("ImGui_ImplOpenGL3_Init() failed");
+        }
+        if(!ImGui_ImplSDL2_InitForOpenGL(m_window.GetHandle(), SDL_GL_GetCurrentContext()))
+        {
+            throw std::runtime_error("ImGui_ImplSDL2_InitForOpenGL() failed");
+        }
+    }
+    void Renderer::ShutdownImGuiImpl()
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+    }
+    void Renderer::ImGuiImplRenderDrawData()
+    {
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+
+
     std::string Renderer::RendererInfo()
     {
         using namespace std;
@@ -137,56 +162,6 @@ namespace awe::graphic::opengl3
     std::string Renderer::GetRendererName()
     {
         return "opengl3";
-    }
-
-    bool Renderer::IsDebugContext()
-    {
-        int flags = 0;
-        SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &flags);
-        return flags & SDL_GL_CONTEXT_DEBUG_FLAG;
-    }
-    void Renderer::AttachDebugCallback()
-    {
-        // The debug extension is not supported by driver or context
-        if(!GLAD_GL_ARB_debug_output || !IsDebugContext())
-            return;
-
-        GLDEBUGPROCARB debugproc = [](
-            GLenum source,
-            GLenum type,
-            GLuint id,
-            GLenum severity, 
-            GLsizei length,
-            const GLchar *message,
-            const void *user
-        ) {
-         try {
-                Renderer* renderer = (Renderer*)user;
-                renderer->DebugOutput(
-                    source,
-                    type,
-                    id,
-                    severity,
-                    std::string_view(message, length)
-                );
-            } catch(...) {}
-        };
-        glDebugMessageCallbackARB(
-            debugproc,
-            this
-        );
-    }
-    bool Renderer::DefaultDebugOutputFilter(
-        GLenum source,
-        GLenum type,
-        GLuint id,
-        GLenum severity
-    ) {
-        if(severity == GL_DEBUG_SEVERITY_HIGH_ARB ||
-            severity == GL_DEBUG_SEVERITY_MEDIUM_ARB)
-            return false;
-
-        return true;
     }
 
     bool Renderer::DetachThread()
@@ -253,6 +228,51 @@ namespace awe::graphic::opengl3
         m_quit_mainloop = true;
     }
 
+    void Renderer::AttachDebugCallback()
+    {
+        int flags = 0;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &flags);
+        // The debug extension is not supported by driver or context
+        if(!GLAD_GL_ARB_debug_output || !(flags & SDL_GL_CONTEXT_DEBUG_FLAG))
+            return;
+
+        GLDEBUGPROCARB debugproc = [](
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity, 
+            GLsizei length,
+            const GLchar *message,
+            const void *user
+        ) {
+         try {
+                Renderer* renderer = (Renderer*)user;
+                renderer->DebugOutput(
+                    source,
+                    type,
+                    id,
+                    severity,
+                    std::string_view(message, length)
+                );
+            } catch(...) {}
+        };
+        glDebugMessageCallbackARB(
+            debugproc,
+            this
+        );
+    }
+    bool Renderer::DefaultDebugOutputFilter(
+        GLenum source,
+        GLenum type,
+        GLuint id,
+        GLenum severity
+    ) {
+        if(severity == GL_DEBUG_SEVERITY_HIGH_ARB ||
+            severity == GL_DEBUG_SEVERITY_MEDIUM_ARB)
+            return false;
+
+        return true;
+    }
     void Renderer::DebugOutput(
         GLenum source,
         GLenum type,
