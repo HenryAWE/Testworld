@@ -39,6 +39,11 @@ namespace awe::graphic
         m_ftlib = nullptr;
     }
 
+    std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
+    {
+        return std::unique_ptr<Mesh>(NewMesh(dynamic));
+    }
+
     glm::ivec2 Renderer::GetDrawableSize() const
     {
         glm::ivec2 size;

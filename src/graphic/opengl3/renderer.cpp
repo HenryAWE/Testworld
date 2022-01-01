@@ -80,6 +80,22 @@ namespace awe::graphic::opengl3
         m_presented = false;
     }
 
+    std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
+    {
+        return std::unique_ptr<Mesh>(NewMesh(dynamic));
+    }
+
+    void Renderer::PushClearCommand(std::function<void()> func)
+    {
+        std::lock_guard lock(m_clear_cmd_mutex);
+        m_clear_cmd.push(std::move(func));
+    }
+
+    Mesh* Renderer::NewMesh(bool dynamic)
+    {
+        return new Mesh(*this, dynamic);
+    }
+
     void Renderer::CreateContext(bool debug)
     {
         assert(!m_context);
@@ -219,6 +235,7 @@ namespace awe::graphic::opengl3
                 m_request_render = false;
                 m_presented = true;
             }
+            ExecuteClearCommand();
 
             std::this_thread::yield();
         }
@@ -330,5 +347,15 @@ namespace awe::graphic::opengl3
             << ":\n"
             << message
             << std::endl;
+    }
+
+    void Renderer::ExecuteClearCommand()
+    {
+        std::lock_guard lock(m_clear_cmd_mutex);
+        while(!m_clear_cmd.empty())
+        {
+            m_clear_cmd.front()();
+            m_clear_cmd.pop();
+        }
     }
 }

@@ -7,8 +7,10 @@
 #include <glad/glad.h>
 #include "../renderer.hpp"
 #include <atomic>
+#include <queue>
 #include "../../sys/init.hpp"
 #include "glutil.hpp"
+#include "mesh.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -50,6 +52,14 @@ namespace awe::graphic::opengl3
         void QuitMainloop() override;
 
         void Present() override;
+
+        // Resources generator
+        std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
+
+        void PushClearCommand(std::function<void()> func);
+
+    protected:
+        Mesh* NewMesh(bool dynamic) override;
 
     private:
         bool m_initialized = false;
@@ -95,6 +105,11 @@ namespace awe::graphic::opengl3
             GLenum severity, 
             std::string_view message
         );
+
+        void ExecuteClearCommand();
+
+        std::mutex m_clear_cmd_mutex;
+        std::queue<std::function<void()>> m_clear_cmd;
     };
 }
 

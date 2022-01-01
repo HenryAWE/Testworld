@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <mutex>
+#include <memory>
 #include <string>
 #include <SDL.h>
 #include <ft2build.h>
@@ -13,6 +14,7 @@
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
 #include "shaderbuilder.hpp"
+#include "mesh.hpp"
 
 
 namespace awe::window
@@ -39,6 +41,8 @@ namespace awe::graphic
         constexpr std::mutex& GetMutex() noexcept { return m_mutex; }
         virtual void Present() = 0;
 
+        std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
+
         // Information of renderer
 
         glm::ivec2 GetDrawableSize() const;
@@ -51,6 +55,8 @@ namespace awe::graphic
     protected:
         window::Window& m_window;
         std::mutex m_mutex;
+
+        virtual Mesh* Renderer::NewMesh(bool dynamic) = 0;
 
     private:
         FT_Library m_ftlib = nullptr;
