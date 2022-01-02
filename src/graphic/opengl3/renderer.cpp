@@ -14,6 +14,33 @@
 
 namespace awe::graphic::opengl3
 {
+    namespace detailed
+    {
+        template <typename T, typename Func>
+        class TaskImpl : public Task
+        {
+            Func m_func;
+            std::promise<T> m_result;
+        public:
+            TaskImpl(std::promise<T>&& result, Func&& func)
+                : m_result(std::move(result)), m_func(std::move(func)) {}
+
+            void Invoke() override
+            {
+                m_result.set_value(m_func());
+            }
+        };
+
+        template <typename T, typename Func>
+        std::unique_ptr<Task> GenerateTask(std::promise<T>&& result_promise, Func&& func)
+        {
+            return std::make_unique<TaskImpl<T, Func>>(
+                std::move(result_promise),
+                std::move(func)
+            );
+        }
+    }
+
     Renderer::Renderer(
             window::Window& window,
             const AppInitData& initdata
@@ -78,6 +105,17 @@ namespace awe::graphic::opengl3
         while(!m_presented)
             std::this_thread::yield();
         m_presented = false;
+    }
+
+    std::future<std::string> Renderer::QueryRendererInfo()
+    {
+        std::promise<std::string> info_promise;
+        std::future<std::string> info_result = info_promise.get_future();
+        PushQueryCommand(detailed::GenerateTask<std::string>(
+            std::move(info_promise),
+            std::bind(&Renderer::RendererInfo, this)
+        ));
+        return std::move(info_result);
     }
 
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
@@ -188,19 +226,18 @@ namespace awe::graphic::opengl3
         std::thread([this, result = std::move(init_result_promise)] () mutable {
             m_render_thread_id = std::this_thread::get_id();
             CreateContext(m_debug);
-            SDL_LogInfo(
-                SDL_LOG_CATEGORY_APPLICATION,
-                RendererInfo().c_str()
-            );
             if(m_debug)
             {
                 AttachDebugCallback();
             }
             InitImGuiImpl();
+            ExecuteQueryCommand();
             result.set_value(true);
 
             RendererMain();
 
+            ExecuteQueryCommand();
+            ExecuteClearCommand();
             ShutdownImGuiImpl();
             DestroyContext();
         }).detach();
@@ -211,6 +248,7 @@ namespace awe::graphic::opengl3
     {
         while(!m_begin_mainloop)
         {
+            ExecuteQueryCommand();
             if(m_quit_mainloop) return;
             std::this_thread::yield();
         }
@@ -224,6 +262,7 @@ namespace awe::graphic::opengl3
 
             while(!m_request_render)
             {
+                ExecuteQueryCommand();
                 if(m_quit_mainloop) return;
                 std::this_thread::yield();
             }
@@ -235,6 +274,7 @@ namespace awe::graphic::opengl3
                 m_request_render = false;
                 m_presented = true;
             }
+            ExecuteQueryCommand();
             ExecuteClearCommand();
 
             std::this_thread::yield();
@@ -357,5 +397,20 @@ namespace awe::graphic::opengl3
             m_clear_cmd.front()();
             m_clear_cmd.pop();
         }
+    }
+    void Renderer::ExecuteQueryCommand()
+    {
+        std::lock_guard lock(m_query_cmd_mutex);
+        while(!m_query_cmd.empty())
+        {
+            m_query_cmd.front()->Invoke();
+            m_query_cmd.pop();
+        }
+    }
+
+    void Renderer::PushQueryCommand(std::unique_ptr<detailed::Task>&& task)
+    {
+        std::lock_guard lock(m_query_cmd_mutex);
+        m_query_cmd.push(std::move(task));
     }
 }

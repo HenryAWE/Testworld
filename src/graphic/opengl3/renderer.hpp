@@ -15,11 +15,26 @@
 
 namespace awe::graphic::opengl3
 {
+    namespace detailed
+    {
+        class Task
+        {
+        public:
+            virtual void Invoke() = 0;
+        };
+    }
+
     /* OpenGL 3 Renderer */
     class Renderer : public graphic::Renderer
     {
     public:
         typedef graphic::Renderer Super;
+        template <typename T>
+        struct Task
+        {
+            std::promise<T> result;
+            std::function<void(std::promise<T>&)> func;
+        };
 
         Renderer(
             window::Window& window,
@@ -52,6 +67,8 @@ namespace awe::graphic::opengl3
         void QuitMainloop() override;
 
         void Present() override;
+
+        std::future<std::string> QueryRendererInfo() override;
 
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
@@ -107,9 +124,14 @@ namespace awe::graphic::opengl3
         );
 
         void ExecuteClearCommand();
+        void ExecuteQueryCommand();
+
+        void PushQueryCommand(std::unique_ptr<detailed::Task>&& task);
 
         std::mutex m_clear_cmd_mutex;
         std::queue<std::function<void()>> m_clear_cmd;
+        std::mutex m_query_cmd_mutex;
+        std::queue<std::unique_ptr<detailed::Task>> m_query_cmd;
     };
 }
 

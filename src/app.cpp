@@ -36,6 +36,7 @@ namespace awe
         m_imgui_ctx = ImGui::CreateContext();
         m_renderer = graphic::CreateRenderer(initdata, *m_window);
         m_renderer->Initialize();
+        auto renderer_info = m_renderer->QueryRendererInfo();
         auto& io = ImGui::GetIO();
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
@@ -46,6 +47,11 @@ namespace awe
             IMGUI_VERSION, IMGUI_VERSION_NUM,
             io.BackendPlatformName,
             io.BackendRendererName
+        );
+        SDL_LogInfo(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "Renderer Information:\n%s",
+            renderer_info.get().c_str()
         );
 
         // Create ImGui window

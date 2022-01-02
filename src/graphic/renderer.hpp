@@ -5,6 +5,7 @@
 #define TESTWORLD_GRAPHIC_RENDERER_HPP
 
 #include <functional>
+#include <future>
 #include <mutex>
 #include <memory>
 #include <string>
@@ -40,6 +41,8 @@ namespace awe::graphic
         [[nodiscard]]
         constexpr std::mutex& GetMutex() noexcept { return m_mutex; }
         virtual void Present() = 0;
+
+        virtual std::future<std::string> QueryRendererInfo() = 0;
 
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
 
