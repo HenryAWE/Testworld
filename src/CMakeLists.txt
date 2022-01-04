@@ -77,6 +77,7 @@ target_link_libraries(testworld PRIVATE glm)
 target_link_libraries(testworld PRIVATE imgui)
 target_link_libraries(testworld PRIVATE rapidjson)
 target_link_libraries(testworld PRIVATE stb)
+target_link_libraries(testworld PRIVATE utf8_h)
 
 set_target_properties(
     testworld
