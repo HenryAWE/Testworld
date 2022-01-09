@@ -46,7 +46,7 @@ namespace awe::graphic::opengl3
                 glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &desc.border_color[0]);
         }
         void TexImage(
-            const common::Image<4>& image,
+            const common::Image2D<4>& image,
             const TexDescription& desc
         ) {
             glTexImage2D(
@@ -104,7 +104,7 @@ namespace awe::graphic::opengl3
             bool gen_mipmap,
             TexDescription desc
     ) {
-        common::Image image;
+        common::Image2D image;
         if(!image.Load(file))
         {
             SDL_LogError(
@@ -141,7 +141,7 @@ namespace awe::graphic::opengl3
             bool gen_mipmap,
             TexDescription desc
     ) {
-        common::Image image;
+        common::Image2D image;
         if(!image.Load(vfs::GetData(file)))
         {
             SDL_LogError(

@@ -48,7 +48,7 @@ namespace awe::graphic::common
     }
 
     template <uint8_t Channel = 4>
-    class Image : public detailed::ImageBase
+    class Image2D : public detailed::ImageBase
     {
     public:
         typedef std::byte DataType;
