@@ -44,6 +44,9 @@ list(APPEND testworld_src ${testworld_cli_src})
 # User interface
 aux_source_directory(ui testworld_ui_src)
 list(APPEND testworld_src ${testworld_ui_src})
+# Utilities
+aux_source_directory(util testworld_util_src)
+list(APPEND testworld_src ${testworld_util_src})
 # Window
 aux_source_directory(window testworld_window_src)
 list(APPEND testworld_src ${testworld_window_src})
