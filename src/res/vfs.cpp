@@ -89,4 +89,54 @@ namespace awe::vfs
     {
         return PHYSFS_exists(path.c_str());
     }
+
+    FileBuf* FileBuf::Open(const std::string& filename, FileMode mode)
+    {
+        PHYSFS_File* f = nullptr;
+        switch(mode)
+        {
+        case FileMode::READ:
+            f = PHYSFS_openRead(filename.c_str());
+            break;
+        case FileMode::WRITE:
+            f = PHYSFS_openWrite(filename.c_str());
+            break;
+        case FileMode::APPEND:
+            f = PHYSFS_openAppend(filename.c_str());
+            break;
+        }
+
+        if(f == nullptr)
+        {
+            return nullptr;
+        }
+
+        Close();
+        m_file = f;
+        m_mode = mode;
+
+        return this;
+    }
+    FileBuf* FileBuf::Close()
+    {
+        if(!m_file)
+            return nullptr;
+        int err = PHYSFS_close(m_file);
+        if(err != 0)
+        {
+            return nullptr;
+        }
+        m_file = nullptr;
+        m_mode = static_cast<FileMode>(0);
+        return this;
+    }
+
+    FileBuf::int_type FileBuf::underflow()
+    {
+        if(!m_file)
+            return traits_type::eof();
+        PHYSFS_sint64 read = PHYSFS_readBytes(m_file, m_read_buf, BUFSIZ);
+        setg(m_read_buf, m_read_buf, m_read_buf + read);
+        return traits_type::to_int_type(*gptr());
+    }
 }

@@ -4,6 +4,7 @@
 #ifndef TESTWORLD_RES_VFS_HPP
 #define TESTWORLD_RES_VFS_HPP
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <physfs.h>
@@ -11,6 +12,13 @@
 
 namespace awe::vfs
 {
+    enum class FileMode
+    {
+        READ,
+        WRITE,
+        APPEND
+    };
+
     class VfsFile
     {
     public:
@@ -63,6 +71,21 @@ namespace awe::vfs
     }
 
     bool Exists(const std::string& path);
+
+    class FileBuf : public std::streambuf
+    {
+    public:
+    
+        FileBuf* Open(const std::string& filename, FileMode mode = FileMode::READ);
+        FileBuf* Close();
+
+        int_type underflow() override;
+
+    private:
+        PHYSFS_File* m_file = nullptr;
+        FileMode m_mode = static_cast<FileMode>(0);
+        char_type m_read_buf[BUFSIZ];
+    };
 }
 
 #endif
