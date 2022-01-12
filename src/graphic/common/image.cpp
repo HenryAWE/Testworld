@@ -54,6 +54,46 @@ namespace awe::graphic::common
 
             return true;
         }
+        bool ImageBase::LoadStream(
+            std::istream& is,
+            int desired_channels,
+            int* channel
+        ) {
+            if(!is.good())
+                return false;
+
+            stbi_io_callbacks cb;
+            cb.read = [](void* user, char* data, int size)->int
+            {
+                return static_cast<int>(
+                    static_cast<std::istream*>(user)->readsome(data, size)
+                );
+            };
+            cb.skip = [](void* user, int n)
+            {
+                static_cast<std::istream*>(user)->seekg(n, std::ios_base::cur);
+            };
+            cb.eof = [](void* user)->int
+            {
+                return static_cast<std::istream*>(user)->eof();
+            };
+
+            glm::ivec2 size(0);
+            stbi_uc* tmp = stbi_load_from_callbacks(
+                &cb, &is,
+                &size[0], &size[1], channel, desired_channels
+            );
+            if(!tmp)
+            {
+                return false;
+            }
+
+            Release();
+            m_raw_data = tmp;
+            m_size = size;
+
+            return true;
+        }
         void ImageBase::Release() noexcept
         {
             stbi_image_free(m_raw_data);

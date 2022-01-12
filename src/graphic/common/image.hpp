@@ -5,6 +5,7 @@
 #define TESTWORLD_GRAPHIC_COMMON_IMAGE_HPP
 
 #include <filesystem>
+#include <iosfwd>
 #include <utility>
 #include <glm/vec2.hpp>
 
@@ -36,6 +37,11 @@ namespace awe::graphic::common
                 int desired_channels,
                 int* channel = nullptr
             );
+            bool LoadStream(
+                std::istream& is,
+                int desired_channels,
+                int* channel = nullptr
+            );
             void Release() noexcept;
 
             [[nodiscard]]
@@ -64,17 +70,32 @@ namespace awe::graphic::common
         {
             return LoadMemory(data.data(), data.size(), Channel);
         }
+        bool Load(std::istream& is)
+        {
+            return LoadStream(is, Channel);
+        }
 
+        [[nodiscard]]
         DataType& operator[](glm::uvec2 coord)
         {
-            const std::size_t idx = CHANNEL * (coord[1] * Size()[0] + coord[0]);
-            return Data()[idx];
+            return Data()[Index(coord)];
+        }
+        [[nodiscard]]
+        ConstDataType& operator[](glm::uvec2 coord) const
+        {
+            return Data()[Index(coord)];
         }
 
         [[nodiscard]]
         ConstDataType* Data() const noexcept
         {
             return static_cast<ConstDataType*>(RawData());
+        }
+
+    private:
+        std::size_t Index(glm::uvec2 coord)
+        {
+            return CHANNEL * (coord[1] * Size()[0] + coord[0]);
         }
     };
 }
