@@ -64,7 +64,7 @@ namespace awe::graphic::opengl3
 
     bool Renderer::Initialize()
     {
-        if(IsInitialized())
+        if(m_initialized)
             return true;
 
         bool result = Super::Initialize();
@@ -74,8 +74,9 @@ namespace awe::graphic::opengl3
     }
     void Renderer::Deinitialize() noexcept
     {
-        if(!IsInitialized())
+        if(!m_initialized)
             return;
+
         m_quit_mainloop = true;
         while(!m_is_data_released)
             std::this_thread::yield();
@@ -84,7 +85,7 @@ namespace awe::graphic::opengl3
     }
     bool Renderer::IsInitialized() noexcept
     {
-        return m_initialized;
+        return m_initialized && Super::IsInitialized();
     }
 
     void Renderer::BeginMainloop()
@@ -116,6 +117,13 @@ namespace awe::graphic::opengl3
             std::bind(&Renderer::RendererInfo, this)
         ));
         return std::move(info_result);
+    }
+
+    glm::ivec2 Renderer::GetDrawableSize() const
+    {
+        glm::ivec2 size;
+        SDL_GL_GetDrawableSize(m_window.GetHandle(), &size[0], &size[1]);
+        return size;
     }
 
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
@@ -232,10 +240,12 @@ namespace awe::graphic::opengl3
             }
             InitImGuiImpl();
             ExecuteQueryCommand();
+            NewData();
             result.set_value(true);
 
             RendererMain();
 
+            DeleteData();
             ExecuteQueryCommand();
             ExecuteClearCommand();
             ShutdownImGuiImpl();

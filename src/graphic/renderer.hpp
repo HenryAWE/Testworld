@@ -33,7 +33,7 @@ namespace awe::graphic
 
         virtual bool Initialize();
         virtual void Deinitialize() noexcept;
-        virtual bool IsInitialized() noexcept = 0;
+        virtual bool IsInitialized() noexcept;
 
         // Synchronization
         virtual void BeginMainloop() = 0;
@@ -48,7 +48,7 @@ namespace awe::graphic
 
         // Information of renderer
 
-        glm::ivec2 GetDrawableSize() const;
+        virtual glm::ivec2 GetDrawableSize() const;
         virtual std::string GetRendererName() = 0;
 
         // Data
@@ -61,7 +61,15 @@ namespace awe::graphic
 
         virtual Mesh* Renderer::NewMesh(bool dynamic) = 0;
 
+        // Call this after derived class is initialized to allocate data of
+        // of renderer in correct order
+        virtual void NewData();
+        // Call this before derived class is deinitialized to release data
+        // of renderer in correct order
+        virtual void DeleteData();
+
     private:
+        bool m_initialized = false;
         FT_Library m_ftlib = nullptr;
     };
 }

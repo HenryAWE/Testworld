@@ -19,6 +19,9 @@ namespace awe::graphic
 
     bool Renderer::Initialize()
     {
+        if(m_initialized)
+            return;
+
         FT_Error err;
         err = FT_Init_FreeType(&m_ftlib);
         if(err)
@@ -31,12 +34,21 @@ namespace awe::graphic
             return false;
         }
 
-        return true;
+        m_initialized = true;
+        return m_initialized;
     }
     void Renderer::Deinitialize() noexcept
     {
+        if(!m_initialized)
+            return;
         FT_Done_FreeType(m_ftlib);
         m_ftlib = nullptr;
+
+        m_initialized = false;
+    }
+    bool Renderer::IsInitialized() noexcept
+    {
+        return m_initialized;
     }
 
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
@@ -46,10 +58,11 @@ namespace awe::graphic
 
     glm::ivec2 Renderer::GetDrawableSize() const
     {
-        glm::ivec2 size;
-        SDL_GL_GetDrawableSize(m_window.GetHandle(), &size[0], &size[1]);
-        return size;
+        return m_window.GetSize();
     }
+
+    void Renderer::NewData() {}
+    void Renderer::DeleteData() noexcept {}
 }
 
 // Prefer high-performance graphic cards on Windows

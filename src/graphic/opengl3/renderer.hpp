@@ -70,6 +70,8 @@ namespace awe::graphic::opengl3
 
         std::future<std::string> QueryRendererInfo() override;
 
+        glm::ivec2 GetDrawableSize() const override;
+
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
 
