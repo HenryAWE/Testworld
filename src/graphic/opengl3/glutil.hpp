@@ -5,10 +5,12 @@
 #define TESTWORLD_GRAPHIC_OPENGL3_GLUTIL_HPP
 
 #include <glad/glad.h>
+#include "../datatype.hpp"
 
 
 namespace awe::graphic::opengl3
 {
+    GLenum GetGLType(DataType type);
     GLint GetInteger(GLenum pname);
 }
 

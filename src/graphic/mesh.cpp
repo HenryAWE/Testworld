@@ -7,20 +7,6 @@
 
 namespace awe::graphic
 {
-    std::size_t SizeOf(VertexDataType type) noexcept
-    {
-        switch(type)
-        {
-        case VertexDataType::FLOAT: return sizeof(float);
-        case VertexDataType::BYTE: return sizeof(int8_t);
-        case VertexDataType::UBYTE: return sizeof(uint8_t);
-        case VertexDataType::SHORT: return sizeof(uint16_t);
-        case VertexDataType::USHORT: return sizeof(uint16_t);
-        case VertexDataType::INT: return sizeof(int32_t);
-        case VertexDataType::UINT: return sizeof(uint32_t);
-        default: assert(false); return 0;
-        }
-    }
 
     std::size_t VertexAttribData::Size() const noexcept
     {

@@ -20,7 +20,7 @@ namespace awe::graphic
     bool Renderer::Initialize()
     {
         if(m_initialized)
-            return;
+            return false;
 
         FT_Error err;
         err = FT_Init_FreeType(&m_ftlib);

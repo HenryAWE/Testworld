@@ -5,6 +5,7 @@
 #define TESTWORLD_GRAPHIC_OPENGL3_HPP
 
 #include <glad/glad.h>
+#include "glutil.hpp"
 #include "../mesh.hpp"
 
 

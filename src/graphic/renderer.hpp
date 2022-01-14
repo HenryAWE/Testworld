@@ -66,7 +66,7 @@ namespace awe::graphic
         virtual void NewData();
         // Call this before derived class is deinitialized to release data
         // of renderer in correct order
-        virtual void DeleteData();
+        virtual void DeleteData() noexcept;
 
     private:
         bool m_initialized = false;
