@@ -44,7 +44,7 @@ namespace awe::graphic::opengl3
     Renderer::Renderer(
             window::Window& window,
             const AppInitData& initdata
-        ) : graphic::Renderer(window),
+        ) : Super(window),
         m_debug(initdata.ogl_debug) {
             namespace ph = std::placeholders;
             DebugOutputFilter = std::bind(

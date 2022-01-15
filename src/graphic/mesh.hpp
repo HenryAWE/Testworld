@@ -13,7 +13,7 @@
 
 namespace awe::graphic
 {
-    class Renderer;
+    class IRenderer;
 
     struct VertexAttribData
     {
@@ -39,10 +39,11 @@ namespace awe::graphic
         std::vector<unsigned int> indices;
     };
 
-    class Mesh
+    class IMesh
     {
     public:
-        Mesh(Renderer& renderer, bool dynamic = false);
+        IMesh(IRenderer& renderer, bool dynamic = false);
+        virtual ~IMesh() noexcept;
 
         // Thread safety: Can only be called in rendering thread
         virtual void Submit() = 0;
@@ -50,7 +51,7 @@ namespace awe::graphic
         virtual void Draw() = 0;
 
         [[nodiscard]]
-        constexpr Renderer& GetRenderer() noexcept { return m_renderer; }
+        constexpr IRenderer& GetRenderer() noexcept { return m_renderer; }
         [[nodiscard]]
         constexpr bool IsDynamic() const noexcept { return m_is_dynamic; }
         [[nodiscard]]
@@ -106,7 +107,7 @@ namespace awe::graphic
         [[nodiscard]]
         std::optional<Data>& NewData();
 
-        Renderer& m_renderer;
+        IRenderer& m_renderer;
         std::optional<Data> m_data;
         bool m_is_dynamic = false;
         bool m_is_submitted = false;

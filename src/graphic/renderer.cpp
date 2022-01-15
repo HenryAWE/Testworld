@@ -12,12 +12,12 @@
 
 namespace awe::graphic
 {
-    Renderer::Renderer(window::Window& window)
+    IRenderer::IRenderer(window::Window& window)
         : m_window(window) {}
 
-    Renderer::~Renderer() noexcept = default;
+    IRenderer::~IRenderer() noexcept = default;
 
-    bool Renderer::Initialize()
+    bool IRenderer::Initialize()
     {
         if(m_initialized)
             return false;
@@ -37,7 +37,7 @@ namespace awe::graphic
         m_initialized = true;
         return m_initialized;
     }
-    void Renderer::Deinitialize() noexcept
+    void IRenderer::Deinitialize() noexcept
     {
         if(!m_initialized)
             return;
@@ -46,23 +46,23 @@ namespace awe::graphic
 
         m_initialized = false;
     }
-    bool Renderer::IsInitialized() noexcept
+    bool IRenderer::IsInitialized() noexcept
     {
         return m_initialized;
     }
 
-    std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
+    std::unique_ptr<IMesh> IRenderer::CreateMesh(bool dynamic)
     {
-        return std::unique_ptr<Mesh>(NewMesh(dynamic));
+        return std::unique_ptr<IMesh>(NewMesh(dynamic));
     }
 
-    glm::ivec2 Renderer::GetDrawableSize() const
+    glm::ivec2 IRenderer::GetDrawableSize() const
     {
         return m_window.GetSize();
     }
 
-    void Renderer::NewData() {}
-    void Renderer::DeleteData() noexcept {}
+    void IRenderer::NewData() {}
+    void IRenderer::DeleteData() noexcept {}
 }
 
 // Prefer high-performance graphic cards on Windows

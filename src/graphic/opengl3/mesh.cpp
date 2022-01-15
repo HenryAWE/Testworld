@@ -29,7 +29,11 @@ namespace awe::graphic::opengl3
     }
 
     Mesh::Mesh(Renderer& renderer, bool dynamic)
-        : Super::Mesh(renderer, dynamic) {}
+        : Super(renderer, dynamic) {}
+    Mesh::~Mesh() noexcept
+    {
+        Deinitialize();
+    }
 
     void Mesh::Submit()
     {
@@ -105,7 +109,7 @@ namespace awe::graphic::opengl3
 
         m_init = true;
     }
-    void Mesh::Deinitialize()
+    void Mesh::Deinitialize() noexcept
     {
         if(!m_init)
             return;

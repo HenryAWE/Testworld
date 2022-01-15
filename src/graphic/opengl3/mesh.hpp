@@ -13,12 +13,13 @@ namespace awe::graphic::opengl3
 {
     class Renderer;
 
-    class Mesh : public graphic::Mesh
+    class Mesh : public IMesh
     {
     public:
-        typedef graphic::Mesh Super;
+        typedef IMesh Super;
 
         Mesh(Renderer& renderer, bool dynamic = false);
+        ~Mesh() noexcept;
 
         void Submit() override;
         void Draw() override;
@@ -28,7 +29,7 @@ namespace awe::graphic::opengl3
 
     private:
         void Initialize();
-        void Deinitialize();
+        void Deinitialize() noexcept;
 
         bool m_init = false;
         struct GLData

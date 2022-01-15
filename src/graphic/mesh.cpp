@@ -7,7 +7,6 @@
 
 namespace awe::graphic
 {
-
     std::size_t VertexAttribData::Size() const noexcept
     {
         return SizeOf(type) * component;
@@ -32,16 +31,17 @@ namespace awe::graphic
         return offset;
     }
 
-    Mesh::Mesh(Renderer& renderer, bool dynamic)
+    IMesh::IMesh(IRenderer& renderer, bool dynamic)
         : m_renderer(renderer), m_is_dynamic(dynamic) {}
+    IMesh::~IMesh() noexcept = default;
 
-    void Mesh::AddVertexAttrib(VertexAttribData desc)
+    void IMesh::AddVertexAttrib(VertexAttribData desc)
     {
         auto& attrs = NewData()->descriptor.attributes;
         attrs.push_back(desc);
     }
 
-    void Mesh::DataSubmitted()
+    void IMesh::DataSubmitted()
     {
         m_is_submitted = true;
         if(!IsDynamic())
@@ -53,7 +53,7 @@ namespace awe::graphic
         }
     }
 
-    std::optional<Mesh::Data>& Mesh::NewData()
+    std::optional<IMesh::Data>& IMesh::NewData()
     {
         if(!m_data.has_value())
             m_data.emplace();

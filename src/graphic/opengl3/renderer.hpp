@@ -25,10 +25,10 @@ namespace awe::graphic::opengl3
     }
 
     /* OpenGL 3 Renderer */
-    class Renderer : public graphic::Renderer
+    class Renderer : public graphic::IRenderer
     {
     public:
-        typedef graphic::Renderer Super;
+        typedef IRenderer Super;
         template <typename T>
         struct Task
         {

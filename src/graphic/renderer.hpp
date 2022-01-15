@@ -25,11 +25,11 @@ namespace awe::window
 namespace awe::graphic
 {
     /* OpenGL Renderer */
-    class Renderer
+    class IRenderer
     {
     public:
-        Renderer(window::Window& window);
-        virtual ~Renderer() noexcept;
+        IRenderer(window::Window& window);
+        virtual ~IRenderer() noexcept;
 
         virtual bool Initialize();
         virtual void Deinitialize() noexcept;
@@ -44,7 +44,7 @@ namespace awe::graphic
 
         virtual std::future<std::string> QueryRendererInfo() = 0;
 
-        std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
+        std::unique_ptr<IMesh> CreateMesh(bool dynamic = false);
 
         // Information of renderer
 
@@ -59,7 +59,7 @@ namespace awe::graphic
         window::Window& m_window;
         std::mutex m_mutex;
 
-        virtual Mesh* Renderer::NewMesh(bool dynamic) = 0;
+        virtual IMesh* IRenderer::NewMesh(bool dynamic) = 0;
 
         // Call this after derived class is initialized to allocate data of
         // of renderer in correct order
