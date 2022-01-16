@@ -125,10 +125,18 @@ namespace awe::graphic::opengl3
         SDL_GL_GetDrawableSize(m_window.GetHandle(), &size[0], &size[1]);
         return size;
     }
+    bool Renderer::IsRuntimeShaderCompilationSupported() const
+    {
+        return true;
+    }
 
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
     {
         return std::unique_ptr<Mesh>(NewMesh(dynamic));
+    }
+    std::unique_ptr<ShaderProgram> Renderer::CreateShaderProgram()
+    {
+        return std::unique_ptr<ShaderProgram>(NewShaderProgram());
     }
 
     void Renderer::PushClearCommand(std::function<void()> func)
@@ -140,6 +148,10 @@ namespace awe::graphic::opengl3
     Mesh* Renderer::NewMesh(bool dynamic)
     {
         return new Mesh(*this, dynamic);
+    }
+    ShaderProgram* Renderer::NewShaderProgram()
+    {
+        return new ShaderProgram(*this);
     }
 
     void Renderer::CreateContext(bool debug)

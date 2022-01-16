@@ -9,6 +9,7 @@
 #include <type_traits>
 #include <vector>
 #include "datatype.hpp"
+#include "interface.hpp"
 
 
 namespace awe::graphic
@@ -39,19 +40,19 @@ namespace awe::graphic
         std::vector<unsigned int> indices;
     };
 
-    class IMesh
+    class IMesh : public InterfaceBase
     {
     public:
+        typedef InterfaceBase Super;
+
         IMesh(IRenderer& renderer, bool dynamic = false);
-        virtual ~IMesh() noexcept;
+        ~IMesh() noexcept;
 
         // Thread safety: Can only be called in rendering thread
         virtual void Submit() = 0;
         // Thread safety: Can only be called in rendering thread
         virtual void Draw() = 0;
 
-        [[nodiscard]]
-        constexpr IRenderer& GetRenderer() noexcept { return m_renderer; }
         [[nodiscard]]
         constexpr bool IsDynamic() const noexcept { return m_is_dynamic; }
         [[nodiscard]]
@@ -82,8 +83,12 @@ namespace awe::graphic
                 indices.resize(indices.size() + sizeof(T));
                 std::memcpy(indices.data() + indices.size() - sizeof(T), &*it, sizeof(T));
             }
+        }
 
-            NewData()->indices_type = GetVertexDataType<T>();
+        template <typename T>
+        void SetIndexType()
+        {
+            NewData()->indices_type = GetDataType<T>();
         }
 
         void AddVertexAttrib(VertexAttribData desc);
@@ -95,7 +100,7 @@ namespace awe::graphic
             std::vector<std::byte> vertices;
             VertexDescriptor descriptor;
             std::vector<std::byte> indices;
-            DataType indices_type;
+            DataType indices_type = DataType::UINT;
         };
 
         [[nodiscard]]
@@ -107,7 +112,6 @@ namespace awe::graphic
         [[nodiscard]]
         std::optional<Data>& NewData();
 
-        IRenderer& m_renderer;
         std::optional<Data> m_data;
         bool m_is_dynamic = false;
         bool m_is_submitted = false;

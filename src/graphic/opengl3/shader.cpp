@@ -6,11 +6,31 @@
 #include <sstream>
 #include <SDL.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "../../res/vfs.hpp"
+#include "renderer.hpp"
 
 
 namespace awe::graphic::opengl3
 {
+    namespace detailed
+    {
+        GLenum GetGLShaderType(ShaderType type)
+        {
+            switch(type)
+            {
+                case ShaderType::VERTEX: return GL_VERTEX_SHADER;
+                case ShaderType::FRAGMENT: return GL_FRAGMENT_SHADER;
+                default: assert(false); return GL_INVALID_ENUM;
+            }
+        }
+
+        std::string ReadStream(std::istream& is)
+        {
+            std::stringstream ss;
+            ss << is.rdbuf();
+            return ss.str();
+        }
+    }
+
     Shader::~Shader() noexcept
     {
         Destroy();
@@ -72,22 +92,55 @@ namespace awe::graphic::opengl3
         );
     }
 
+    ShaderProgram::ShaderProgram(IRenderer& renderer)
+        : Super(renderer) {}
+
     ShaderProgram::~ShaderProgram()
     {
-        Destroy();
+        Deinitialize();
     }
 
-    void ShaderProgram::Generate()
+    void ShaderProgram::Submit()
+    {
+        std::vector<Shader> shaders;
+        for(std::size_t i = 0; i < ShaderSrcCount(); ++i)
+        {
+            auto& [type, is] = GetSrc(i);
+            
+            Shader sh;
+            sh.Generate(detailed::GetGLShaderType(type));
+            sh.Compile(detailed::ReadStream(*is));
+            shaders.emplace_back(std::move(sh));
+        }
+        Link(shaders.data(), shaders.size());
+
+        DataSubmitted();
+    }
+
+    GLint ShaderProgram::UniLoc(const char* name)
+    {
+        return glGetUniformLocation(m_handle, name);
+    }
+
+    Renderer& ShaderProgram::GetRenderer() noexcept
+    {
+        assert(dynamic_cast<Renderer*>(&Super::GetRenderer()));
+        return static_cast<Renderer&>(Super::GetRenderer());
+    }
+
+    void ShaderProgram::Initialize()
     {
         if(m_handle)
             return;
         m_handle = glCreateProgram();
     }
-    void ShaderProgram::Destroy() noexcept
+    void ShaderProgram::Deinitialize() noexcept
     {
         if(!m_handle)
             return;
-        glDeleteProgram(m_handle);
+        GetRenderer().PushClearCommand([handle = m_handle]{
+            glDeleteProgram(handle);
+        });
         m_handle = 0;
     }
 
@@ -98,7 +151,7 @@ namespace awe::graphic::opengl3
     ) {
         assert(shaders);
         if(!m_handle)
-            Generate();
+            Initialize();
         for(size_t i = 0; i < count; ++i)
             glAttachShader(m_handle, shaders[i]);
         glLinkProgram(m_handle);
@@ -116,74 +169,6 @@ namespace awe::graphic::opengl3
         }
 
         return true;
-    }
-
-    bool ShaderProgram::Compile(
-        std::string_view vssrc,
-        std::string_view fssrc
-    ) {
-        Shader shaders[2]; // Vertex and fragment shaders
-        shaders[0].Generate(GL_VERTEX_SHADER);
-        if(std::string log; !shaders[0].Compile(vssrc, &log))
-        {
-            SDL_LogError(
-                SDL_LOG_CATEGORY_APPLICATION,
-                "Vertex shader error:\n%s",
-                log.c_str()
-            );
-            return false;
-        }
-        shaders[1].Generate(GL_FRAGMENT_SHADER);
-        if(std::string log; !shaders[1].Compile(fssrc, &log))
-        {
-            SDL_LogError(
-                SDL_LOG_CATEGORY_APPLICATION,
-                "Fragment shader error:\n%s",
-                log.c_str()
-            );
-            return false;
-        }
-
-        if(!m_handle)
-            Generate();
-        return Link(shaders, 2);
-    }
-    bool ShaderProgram::LoadVfs(
-        const std::string& vspath,
-        const std::string& fspath
-    ) {
-        return Compile(
-            vfs::GetString(vspath).c_str(),
-            vfs::GetString(fspath).c_str()
-        );
-    }
-    bool ShaderProgram::Load(
-        const std::filesystem::path& vspath,
-        const std::filesystem::path& fspath
-    ) {
-        using namespace std;
-
-        auto read = [](const filesystem::path& srcpath)
-        {
-            ifstream ifs(srcpath);
-            if(!ifs)
-                return string();
-
-            stringstream ss;
-            ss << ifs.rdbuf();
-
-            return ss.str();
-        };
-
-        return Compile(
-            read(vspath).c_str(),
-            read(fspath).c_str()
-        );
-    }
-
-    GLint ShaderProgram::UniLoc(const char* name)
-    {
-        return glGetUniformLocation(m_handle, name);
     }
 
     void ShaderProgram::GetLog(std::string* log)

@@ -55,10 +55,19 @@ namespace awe::graphic
     {
         return std::unique_ptr<IMesh>(NewMesh(dynamic));
     }
+    std::unique_ptr<IShaderProgram> IRenderer::CreateShaderProgram()
+    {
+        return std::unique_ptr<IShaderProgram>(NewShaderProgram());
+    }
 
     glm::ivec2 IRenderer::GetDrawableSize() const
     {
         return m_window.GetSize();
+    }
+
+    bool IRenderer::IsRuntimeShaderCompilationSupported() const
+    {
+        return false;
     }
 
     void IRenderer::NewData() {}

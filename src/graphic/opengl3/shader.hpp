@@ -8,10 +8,13 @@
 #include <filesystem>
 #include <utility>
 #include <glm/matrix.hpp>
+#include "../shader.hpp"
 
 
 namespace awe::graphic::opengl3
 {
+    class Renderer;
+
     class Shader
     {
     public:
@@ -48,43 +51,25 @@ namespace awe::graphic::opengl3
         void GetLog(std::string* log);
     };
 
-    class ShaderProgram
+    class ShaderProgram final : public IShaderProgram
     {
     public:
+        typedef IShaderProgram Super;
         typedef GLuint handle;
 
-        ShaderProgram() = default;
-        ShaderProgram(ShaderProgram&& move) noexcept
-            : m_handle(std::exchange(move.m_handle, 0)) {}
+        ShaderProgram(IRenderer& renderer);
         ShaderProgram(const ShaderProgram&) = delete;
 
         ~ShaderProgram() noexcept;
 
-        void Generate();
-        void Destroy() noexcept;
-
-        bool Link(
-            Shader* shaders,
-            size_t count = 1,
-            std::string* log = nullptr
-        );
-
-        bool Compile(
-            std::string_view vssrc,
-            std::string_view fssrc
-        );
-        bool LoadVfs(
-            const std::string& vspath,
-            const std::string& fspath
-        );
-        bool Load(
-            const std::filesystem::path& vspath,
-            const std::filesystem::path& fspath
-        );
+        void Submit() override;
 
         [[nodiscard]]
         // uniform location
         GLint UniLoc(const char* name);
+
+        [[nodiscard]]
+        Renderer& GetRenderer() noexcept;
 
         [[nodiscard]]
         constexpr handle GetHandle() const noexcept { return m_handle; }
@@ -93,6 +78,15 @@ namespace awe::graphic::opengl3
 
     private:
         handle m_handle = 0;
+
+        void Initialize();
+        void Deinitialize() noexcept;
+
+        bool Link(
+            Shader* shaders,
+            size_t count = 1,
+            std::string* log = nullptr
+        );
 
         void GetLog(std::string* log);
     };

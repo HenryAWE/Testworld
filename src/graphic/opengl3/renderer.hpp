@@ -11,6 +11,7 @@
 #include "../../sys/init.hpp"
 #include "glutil.hpp"
 #include "mesh.hpp"
+#include "shader.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -71,14 +72,17 @@ namespace awe::graphic::opengl3
         std::future<std::string> QueryRendererInfo() override;
 
         glm::ivec2 GetDrawableSize() const override;
+        bool IsRuntimeShaderCompilationSupported() const override;
 
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
+        std::unique_ptr<ShaderProgram> CreateShaderProgram();
 
         void PushClearCommand(std::function<void()> func);
 
     protected:
         Mesh* NewMesh(bool dynamic) override;
+        ShaderProgram* NewShaderProgram() override;
 
     private:
         bool m_initialized = false;
