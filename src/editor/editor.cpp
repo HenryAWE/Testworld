@@ -21,9 +21,6 @@ namespace awe
             SDL_PushEvent((SDL_Event*)&quit);
         });
         auto& window = m_titlebar.AddMenu("Window");
-        window.AddMenuItem("Image Viewer").Connect([this]{
-            GetPixelPainter().Show();
-        });
         auto& help = m_titlebar.AddMenu("Help");
         help.AddMenuItem("Information").Connect([this]{
             m_infowin = true;
@@ -55,17 +52,8 @@ namespace awe
         }
         ImGui::End();
 
-        if(m_img_painter)
-            m_img_painter->NewFrame();
         if(m_infowin)
             InfoWin();
-    }
-
-    ImageViewer& Editor::GetPixelPainter()
-    {
-        if(!m_img_painter)
-            m_img_painter = std::make_unique<ImageViewer>();
-        return *m_img_painter;
     }
 
     void Editor::ShowInfo()
