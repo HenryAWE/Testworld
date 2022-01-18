@@ -138,6 +138,10 @@ namespace awe::graphic::opengl3
     {
         return std::unique_ptr<ShaderProgram>(NewShaderProgram());
     }
+    std::unique_ptr<Texture2D> Renderer::CreateTexture2D()
+    {
+        return std::unique_ptr<Texture2D>(NewTexture2D());
+    }
 
     void Renderer::PushClearCommand(std::function<void()> func)
     {
@@ -152,6 +156,10 @@ namespace awe::graphic::opengl3
     ShaderProgram* Renderer::NewShaderProgram()
     {
         return new ShaderProgram(*this);
+    }
+    Texture2D* Renderer::NewTexture2D()
+    {
+        return new Texture2D(*this);
     }
 
     void Renderer::CreateContext(bool debug)

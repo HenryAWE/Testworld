@@ -16,6 +16,7 @@
 #include "../sys/init.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 
 namespace awe::window
@@ -46,6 +47,7 @@ namespace awe::graphic
 
         std::unique_ptr<IMesh> CreateMesh(bool dynamic = false);
         std::unique_ptr<IShaderProgram> CreateShaderProgram();
+        std::unique_ptr<ITexture2D> CreateTexture2D();
 
         // Information of renderer
 
@@ -63,6 +65,7 @@ namespace awe::graphic
 
         virtual IMesh* IRenderer::NewMesh(bool dynamic) = 0;
         virtual IShaderProgram* IRenderer::NewShaderProgram() = 0;
+        virtual ITexture2D* NewTexture2D() = 0;
 
         // Call this after derived class is initialized to allocate data of
         // of renderer in correct order

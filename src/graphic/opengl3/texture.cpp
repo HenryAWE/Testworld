@@ -4,202 +4,132 @@
 #include "texture.hpp"
 #include <SDL.h>
 #include <stb_image.h>
-#include "../../res/vfs.hpp"
+#include "renderer.hpp"
 
 
 namespace awe::graphic::opengl3
 {
     namespace detailed
     {
-        GLenum TranslateDesc(TexDescription::Filter filter, bool gen_mipmap) noexcept
+        GLenum TranslateFilter(TextureFilter filter, bool gen_mipmap) noexcept
         {
             switch(filter)
             {
                 default:
-                case TexDescription::LINEAR:
+                case TextureFilter::LINEAR:
                     return gen_mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
-                case TexDescription::NEAREST:
+                case TextureFilter::NEAREST:
                     return gen_mipmap ? GL_NEAREST_MIPMAP_LINEAR : GL_LINEAR;
             }
         }
-        GLenum TranslateDesc(TexDescription::Wrapping wrap) noexcept
+        GLenum TranslateWrapping(TextureWrapping wrap) noexcept
         {
             switch(wrap)
             {
-                default:
-                case TexDescription::REPEAT: return GL_REPEAT;
-                case TexDescription::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
-                case TexDescription::CLAMP_TO_EDGE: return GL_CLAMP_TO_EDGE;
-                case TexDescription::CLAMP_TO_BORDER: return GL_CLAMP_TO_BORDER;
+                case TextureWrapping::REPEAT: return GL_REPEAT;
+                case TextureWrapping::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
+                case TextureWrapping::CLAMP_TO_EDGE: return GL_CLAMP_TO_EDGE;
+                case TextureWrapping::CLAMP_TO_BORDER: return GL_CLAMP_TO_BORDER;
+                default: assert(false); return GL_INVALID_ENUM;
+            }
+        }
+        GLenum TranslateFormat(TextureFormat format) noexcept
+        {
+            switch(format)
+            {
+                case TextureFormat::RED: return GL_RED;
+                case TextureFormat::RGB: return GL_RGB;
+                case TextureFormat::RGBA: return GL_RGBA;
+                default: assert(false); return GL_INVALID_ENUM;
             }
         }
 
-        void ApplyDesc(const TexDescription& desc, bool gen_mipmap) noexcept
+        void ApplyDesc(const TextureDescription& desc) noexcept
         {
-            auto wrap_s = TranslateDesc(desc.s);
-            auto wrap_t = TranslateDesc(desc.t);
+            bool gen_mipmap = desc.IsMipmapRequired();
+            auto wrap_s = TranslateWrapping(desc.wrapping[0]);
+            auto wrap_t = TranslateWrapping(desc.wrapping[1]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TranslateDesc(desc.min, gen_mipmap));
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, TranslateDesc(desc.mag, false));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TranslateFilter(desc.filter[0], gen_mipmap));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, TranslateFilter(desc.filter[1], false)); // Never use mipmap filter on magnification
             if(wrap_s == GL_CLAMP_TO_BORDER || wrap_t == GL_CLAMP_TO_BORDER)
-                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &desc.border_color[0]);
+            {
+                glm::vec4 color;
+                for(auto i : { 0, 1, 2, 3 })
+                    color[i] = static_cast<float>(desc.border_color[i]) / 256.0f;
+                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &color[0]);
+            }
         }
+        template <uint8_t Channel>
         void TexImage(
-            const common::Image2D<4>& image,
-            const TexDescription& desc
+            const common::Image2D<Channel>& image,
+            const TextureDescription& desc
         ) {
             glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
-                desc.format,
+                TranslateFormat(desc.internal_format),
                 image.Size()[0],
                 image.Size()[1],
                 0,
-                desc.type,
+                TranslateFormat(GetDefaultFormat(image.CHANNEL)),
                 GL_UNSIGNED_BYTE,
                 image.Data()
             );
         }
-
-        TexDescription DefaultDesc() noexcept
-        {
-            TexDescription default_desc;
-            default_desc.s = TexDescription::REPEAT;
-            default_desc.t = TexDescription::REPEAT;
-            default_desc.min = TexDescription::LINEAR;
-            default_desc.mag = TexDescription::LINEAR;
-            return default_desc;
-        }
     }
 
-    Texture::~Texture() noexcept
+    Texture2D::Texture2D(Renderer& renderer)
+        : Super(renderer) {}
+
+    Texture2D::~Texture2D() noexcept
     {
-        Destroy();
+        Deinitialize();
     }
 
-    void Texture::Generate()
+    void Texture2D::Submit()
+    {
+        if(!m_handle)
+            Initialize();
+
+        auto& data = GetTextureData();
+        glBindTexture(GL_TEXTURE_2D, m_handle);
+        detailed::ApplyDesc(data.desc);
+        std::visit(
+            [&data](auto&& arg){ detailed::TexImage(arg, data.desc); },
+            data.image_data
+        );
+        if(data.desc.IsMipmapRequired())
+            glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        DataSubmitted();
+    }
+
+    glm::ivec2 Texture2D::GetSize() const
+    {
+        return m_size;
+    }
+    Renderer& Texture2D::GetRenderer() noexcept
+    {
+        assert(dynamic_cast<Renderer*>(&Super::GetRenderer()));
+        return static_cast<Renderer&>(Super::GetRenderer());
+    }
+
+    void Texture2D::Initialize()
     {
         if(m_handle)
             return;
         glGenTextures(1, &m_handle);
     }
-    void Texture::Destroy() noexcept
+    void Texture2D::Deinitialize() noexcept
     {
         if(!m_handle)
             return;
-        glDeleteTextures(1, &m_handle);
+        GetRenderer().PushClearCommand([handle = m_handle]{
+            glDeleteTextures(1, &handle);
+        });
         m_handle = 0;
-        m_size = glm::ivec2(0);
-    }
-
-    bool Texture::LoadFile(
-            const std::filesystem::path& file,
-            bool gen_mipmap
-    ) {
-        return LoadFileEx(file, gen_mipmap, detailed::DefaultDesc());
-    }
-    bool Texture::LoadFileEx(
-            const std::filesystem::path& file,
-            bool gen_mipmap,
-            TexDescription desc
-    ) {
-        common::Image2D image;
-        if(!image.Load(file))
-        {
-            SDL_LogError(
-                SDL_LOG_CATEGORY_APPLICATION,
-                "Load texture \"%s\" failed: %s",
-                file.u8string().c_str(),
-                stbi_failure_reason()
-            );
-            return false;
-        }
-
-        if(!m_handle)
-            Generate();
-
-        glBindTexture(GL_TEXTURE_2D, m_handle);
-        detailed::ApplyDesc(desc, gen_mipmap);
-        detailed::TexImage(image, desc);
-        if(gen_mipmap)
-            glGenerateMipmap(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        m_size = image.Size();
-
-        return true;
-    }
-    bool Texture::LoadVfs(
-            const std::string& file,
-            bool gen_mipmap
-    ) {
-        return LoadVfsEx(file, gen_mipmap, detailed::DefaultDesc());
-    }
-    bool Texture::LoadVfsEx(
-            const std::string& file,
-            bool gen_mipmap,
-            TexDescription desc
-    ) {
-        common::Image2D image;
-        if(!image.Load(vfs::GetData(file)))
-        {
-            SDL_LogError(
-                SDL_LOG_CATEGORY_APPLICATION,
-                "Load texture \"%s\" failed: %s",
-                file.c_str(),
-                stbi_failure_reason()
-            );
-            return false;
-        }
-
-        if(!m_handle)
-            Generate();
-
-        glBindTexture(GL_TEXTURE_2D, m_handle);
-        detailed::ApplyDesc(desc, gen_mipmap);
-        detailed::TexImage(image, desc);
-        if(gen_mipmap)
-            glGenerateMipmap(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        m_size = image.Size();
-
-        return true;
-    }
-    bool Texture::LoadFramebuffer(
-        glm::ivec2 size,
-        TexDescription desc,
-        GLenum attachment,
-        GLenum format
-    ) {
-        if(!m_handle)
-            Generate();
-
-        glBindTexture(GL_TEXTURE_2D, m_handle);
-        detailed::ApplyDesc(desc, false);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            desc.format,
-            size[0],
-            size[1],
-            0,
-            format,
-            GL_UNSIGNED_BYTE,
-            nullptr
-        );
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            attachment,
-            GL_TEXTURE_2D,
-            m_handle,
-            0
-        );
-
-        m_size = size;
-
-        return true;
     }
 }

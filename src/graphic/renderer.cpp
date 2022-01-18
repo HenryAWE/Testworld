@@ -59,6 +59,10 @@ namespace awe::graphic
     {
         return std::unique_ptr<IShaderProgram>(NewShaderProgram());
     }
+    std::unique_ptr<ITexture2D> IRenderer::CreateTexture2D()
+    {
+        return std::unique_ptr<ITexture2D>(NewTexture2D());
+    }
 
     glm::ivec2 IRenderer::GetDrawableSize() const
     {

@@ -10,9 +10,31 @@ namespace awe::graphic::common
 {
     namespace detailed
     {
+        ImageBase::ImageBase() noexcept = default;
+        ImageBase::ImageBase(ImageBase&& move) noexcept
+            : m_size(std::exchange(move.m_size, glm::ivec2(0))),
+            m_raw_data(std::exchange(move.m_raw_data, nullptr)) {}
+
         ImageBase::~ImageBase() noexcept
         {
             Release();
+        }
+
+        void ImageBase::Copy(ImageBase& src, int channel)
+        {
+            if(!src.m_raw_data)
+                return;
+            std::size_t bufsize = src.m_size[0] * src.m_size[1] * channel;
+            m_raw_data = malloc(bufsize);
+            if(!m_raw_data)
+                return;
+            memcpy(m_raw_data, src.m_raw_data, bufsize);
+            m_size = src.m_size;
+        }
+        void ImageBase::Swap(ImageBase& other) noexcept
+        {
+            std::swap(m_raw_data, other.m_raw_data);
+            std::swap(m_size, other.m_size);
         }
 
         bool ImageBase::LoadFile(const char* file, int desired_channels, int* channel)

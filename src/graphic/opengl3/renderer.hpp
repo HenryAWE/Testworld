@@ -12,6 +12,7 @@
 #include "glutil.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -77,12 +78,14 @@ namespace awe::graphic::opengl3
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
         std::unique_ptr<ShaderProgram> CreateShaderProgram();
+        std::unique_ptr<Texture2D> CreateTexture2D();
 
         void PushClearCommand(std::function<void()> func);
 
     protected:
         Mesh* NewMesh(bool dynamic) override;
         ShaderProgram* NewShaderProgram() override;
+        Texture2D* NewTexture2D() override;
 
     private:
         bool m_initialized = false;

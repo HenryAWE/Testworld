@@ -9,93 +9,40 @@
 #include <utility>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
-#include "../common/image.hpp"
+#include "../texture.hpp"
 
 
 namespace awe::graphic::opengl3
 {
-    struct TexDescription
+    class Renderer;
+
+    class Texture2D : public ITexture2D
     {
-        enum Wrapping : int
-        {
-            REPEAT,
-            MIRRORED_REPEAT,
-            CLAMP_TO_EDGE,
-            CLAMP_TO_BORDER
-        };
-        enum Filter : int
-        {
-            LINEAR,
-            NEAREST,
-        };
-
-        Wrapping s = REPEAT;
-        Wrapping t = REPEAT;
-        glm::vec4 border_color = glm::vec4(0.0f);
-        Filter min = LINEAR;
-        Filter mag = LINEAR;
-
-        GLint format = GL_RGBA; // internal format
-        GLint type = GL_RGBA; // data format
-    };
-
-    class Texture
-    {
+        typedef ITexture2D Super;
     public:
         typedef GLuint handle;
 
-        Texture() = default;
-        Texture(Texture&& move) noexcept
-            : m_handle(std::exchange(move.m_handle, 0)),
-            m_size(std::exchange(move.m_size, glm::ivec2(0))) {}
-        Texture(const Texture&) = delete;
+        Texture2D(Renderer& renderer);
+        Texture2D(const Texture2D&) = delete;
 
-        ~Texture() noexcept;
-
-        Texture& operator=(Texture&& move) noexcept
-        {
-            m_handle = std::exchange(move.m_handle, 0);
-            m_size = std::exchange(move.m_size, glm::ivec2(0));
-            return *this;
-        }
-
-        void Generate();
-        void Destroy() noexcept;
-
-        bool LoadFile(
-            const std::filesystem::path& file,
-            bool gen_mipmap = true
-        );
-        bool LoadFileEx(
-            const std::filesystem::path& file,
-            bool gen_mipmap,
-            TexDescription desc
-        );
-        bool LoadVfs(
-            const std::string& file,
-            bool gen_mipmap = true
-        );
-        bool LoadVfsEx(
-            const std::string& file,
-            bool gen_mipmap,
-            TexDescription desc
-        );
-        bool LoadFramebuffer(
-            glm::ivec2 size,
-            TexDescription desc,
-            GLenum attachment = GL_COLOR_ATTACHMENT0,
-            GLenum format = GL_RGB
-        );
+        ~Texture2D() noexcept;
 
         [[nodiscard]]
         constexpr handle GetHandle() const noexcept { return m_handle; }
         [[nodiscard]]
         constexpr operator handle() const noexcept { return m_handle; }
 
+        void Submit() override;
+
         [[nodiscard]]
-        constexpr glm::ivec2 GetSize() const noexcept { return m_size; }
+        glm::ivec2 GetSize() const override;
+        [[nodiscard]]
+        Renderer& GetRenderer() noexcept;
 
     private:
+        void Initialize();
+        void Deinitialize() noexcept;
+
         handle m_handle = 0;
         glm::ivec2 m_size = glm::ivec2(0);
     };
