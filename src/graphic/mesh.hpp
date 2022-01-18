@@ -34,18 +34,12 @@ namespace awe::graphic
         std::size_t Offset(std::size_t idx) const;
     };
 
-    class VertexData
-    {
-        std::vector<float> vertices;
-        std::vector<unsigned int> indices;
-    };
-
     class IMesh : public InterfaceBase
     {
-    public:
         typedef InterfaceBase Super;
-
+    public:
         IMesh(IRenderer& renderer, bool dynamic = false);
+
         ~IMesh() noexcept;
 
         // Thread safety: Can only be called in rendering thread

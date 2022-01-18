@@ -53,8 +53,8 @@ namespace awe::graphic::opengl3
 
     class ShaderProgram final : public IShaderProgram
     {
-    public:
         typedef IShaderProgram Super;
+    public:
         typedef GLuint handle;
 
         ShaderProgram(IRenderer& renderer);

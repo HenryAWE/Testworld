@@ -15,10 +15,10 @@ namespace awe::graphic::opengl3
 
     class Mesh : public IMesh
     {
-    public:
         typedef IMesh Super;
-
+    public:
         Mesh(Renderer& renderer, bool dynamic = false);
+
         ~Mesh() noexcept;
 
         void Submit() override;

@@ -152,9 +152,12 @@ namespace awe::graphic::opengl3
         assert(shaders);
         if(!m_handle)
             Initialize();
-        for(size_t i = 0; i < count; ++i)
+        for(std::size_t i = 0; i < count; ++i)
             glAttachShader(m_handle, shaders[i]);
         glLinkProgram(m_handle);
+        for(std::size_t i = 0; i < count; ++i)
+            glDetachShader(m_handle, shaders[i]);
+
         int status = 0;
         glGetProgramiv(m_handle, GL_LINK_STATUS, &status);
         if(std::string log; !status)

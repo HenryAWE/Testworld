@@ -25,7 +25,7 @@ namespace awe::window
 }
 namespace awe::graphic
 {
-    /* OpenGL Renderer */
+    /* Renderer interface */
     class IRenderer
     {
     public:
@@ -63,8 +63,8 @@ namespace awe::graphic
         window::Window& m_window;
         std::mutex m_mutex;
 
-        virtual IMesh* IRenderer::NewMesh(bool dynamic) = 0;
-        virtual IShaderProgram* IRenderer::NewShaderProgram() = 0;
+        virtual IMesh* NewMesh(bool dynamic) = 0;
+        virtual IShaderProgram* NewShaderProgram() = 0;
         virtual ITexture2D* NewTexture2D() = 0;
 
         // Call this after derived class is initialized to allocate data of

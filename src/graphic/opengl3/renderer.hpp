@@ -29,15 +29,8 @@ namespace awe::graphic::opengl3
     /* OpenGL 3 Renderer */
     class Renderer : public graphic::IRenderer
     {
-    public:
         typedef IRenderer Super;
-        template <typename T>
-        struct Task
-        {
-            std::promise<T> result;
-            std::function<void(std::promise<T>&)> func;
-        };
-
+    public:
         Renderer(
             window::Window& window,
             const AppInitData& initdata

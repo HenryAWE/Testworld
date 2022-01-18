@@ -33,6 +33,7 @@ namespace awe::graphic
 
     IMesh::IMesh(IRenderer& renderer, bool dynamic)
         : Super(renderer), m_is_dynamic(dynamic) {}
+
     IMesh::~IMesh() noexcept = default;
 
     void IMesh::AddVertexAttrib(VertexAttribData desc)

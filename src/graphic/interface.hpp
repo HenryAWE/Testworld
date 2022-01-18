@@ -12,6 +12,7 @@ namespace awe::graphic
     {
     public:
         InterfaceBase(IRenderer& renderer) noexcept;
+        InterfaceBase(const InterfaceBase&) = delete;
 
         virtual ~InterfaceBase() noexcept;
 

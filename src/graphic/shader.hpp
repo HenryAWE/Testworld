@@ -23,10 +23,10 @@ namespace awe::graphic
 
     class IShaderProgram : public InterfaceBase
     {
-    public:
         typedef InterfaceBase Super;
-
+    public:
         IShaderProgram(IRenderer& renderer);
+
         ~IShaderProgram() noexcept;
 
         void AddShaderSrc(
