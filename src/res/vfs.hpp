@@ -5,6 +5,7 @@
 #define TESTWORLD_RES_VFS_HPP
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <physfs.h>
@@ -12,48 +13,17 @@
 
 namespace awe::vfs
 {
-    enum class FileMode
-    {
-        READ,
-        WRITE,
-        APPEND
-    };
-
-    class VfsFile
+    class VfsError : public std::runtime_error
     {
     public:
-        enum Mode
-        {
-            READ,
-            WRITE,
-            APPEND
-        };
+        VfsError(PHYSFS_ErrorCode code);
+    };
 
-        VfsFile();
-        VfsFile(const VfsFile&) = delete;
-        VfsFile(VfsFile&& move) noexcept
-            : m_handle(std::exchange(move.m_handle, nullptr)),
-            m_good(std::exchange(move.m_good, false)) {}
-        VfsFile(const std::string& filename, Mode mode = READ);
-
-        ~VfsFile() noexcept;
-
-        void Open(const std::string& filename, Mode mode = READ);
-        void Close() noexcept;
-
-        std::size_t Read(void* buf, std::size_t count);
-
-        PHYSFS_Stat Stat();
-
-        [[nodiscard]]
-        constexpr PHYSFS_File* GetHandle() noexcept { return m_handle; }
-        [[nodiscard]]
-        operator bool() noexcept { return m_good; }
-
-    private:
-        std::string m_filename;
-        PHYSFS_File* m_handle = nullptr;
-        bool m_good = false;
+    enum class FileMode
+    {
+        READ = 1,
+        WRITE,
+        APPEND
     };
 
     std::vector<std::byte> GetData(const std::string& filename);
@@ -75,16 +45,47 @@ namespace awe::vfs
     class FileBuf : public std::streambuf
     {
     public:
-    
         FileBuf* Open(const std::string& filename, FileMode mode = FileMode::READ);
         FileBuf* Close();
 
+        [[nodiscard]]
+        std::size_t FileSize() const noexcept;
+        [[nodiscard]]
+        const PHYSFS_Stat& Stat() const noexcept;
+
+    protected:
+        pos_type seekoff(
+            off_type off,
+            std::ios_base::seekdir dir,
+            std::ios_base::openmode mode
+        ) override;
+        pos_type seekpos(
+            pos_type pos,
+            std::ios_base::openmode mode
+        ) override;
         int_type underflow() override;
 
     private:
         PHYSFS_File* m_file = nullptr;
+        PHYSFS_Stat m_stat{};
         FileMode m_mode = static_cast<FileMode>(0);
-        char_type m_read_buf[BUFSIZ];
+        char_type m_buffer[BUFSIZ];
+    };
+
+    class InputStream : public std::istream
+    {
+    public:
+        InputStream();
+        InputStream(const std::string& filename, FileMode mode = FileMode::READ);
+
+        bool Open(const std::string& filename, FileMode mode = FileMode::READ);
+        void Close() noexcept;
+
+        [[nodiscard]]
+        std::size_t FileSize() noexcept;
+
+    private:
+        FileBuf m_buf;
     };
 }
 

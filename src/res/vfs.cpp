@@ -4,85 +4,44 @@
 #include "vfs.hpp"
 #include <stdexcept>
 #include <physfs.h>
+#include <fmt/format.h>
 
 
 namespace awe::vfs
 {
-    VfsFile::VfsFile() = default;
-    VfsFile::VfsFile(const std::string& filename, Mode mode)
+    namespace detailed
     {
-        Open(filename, mode);
-    }
-
-    VfsFile::~VfsFile() noexcept
-    {
-        Close();
-    }
-
-    void VfsFile::Open(const std::string& filename, Mode mode)
-    {
-        PHYSFS_file* f = nullptr;
-        switch(mode)
+        static const char* GetError(PHYSFS_ErrorCode code) noexcept
         {
-        case READ:
-            f = PHYSFS_openRead(filename.c_str());
-            break;
-        case WRITE:
-            f = PHYSFS_openWrite(filename.c_str());
-            break;
-        case APPEND:
-            f = PHYSFS_openAppend(filename.c_str());
-            break;
-        }
-
-        if(f)
-        {
-            Close();
-            m_filename = filename;
-            m_handle = f;
-            m_good = true;
+            const char* str = PHYSFS_getErrorByCode(code);
+            return str ? str : "";
         }
     }
-    void VfsFile::Close() noexcept
-    {
-        if(!m_handle)
-            return;
-        PHYSFS_close(m_handle);
-        m_filename.clear();
-        m_handle = nullptr;
-        m_good = false;
-    }
 
-    std::size_t VfsFile::Read(void* buf, std::size_t count)
-    {
-        return PHYSFS_readBytes(m_handle, buf, (PHYSFS_uint32)count);
-    }
-
-    PHYSFS_Stat VfsFile::Stat()
-    {
-        PHYSFS_Stat stat{};
-        PHYSFS_stat(m_filename.c_str(), &stat);
-        return stat;
-    }
+    VfsError::VfsError(PHYSFS_ErrorCode code)
+        : runtime_error(detailed::GetError(code)) {}
 
     std::vector<std::byte> GetData(const std::string& filename)
     {
-        VfsFile file(filename, VfsFile::READ);
-        if(!file)
-            throw std::runtime_error(PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
-        auto size = file.Stat().filesize;
+        InputStream is(filename);
+        if(!is)
+            throw std::runtime_error(fmt::format("Failed to get data from \"{}\"", filename));
+        auto size = is.FileSize();
         std::vector<std::byte> buf;
-        buf.resize(size, std::byte(0));
-        file.Read(buf.data(), buf.size());
+        buf.resize(size);
+        is.read((char*)buf.data(), size);
         return std::move(buf);
     }
     std::string GetString(const std::string& filename)
     {
-        auto data = GetData(filename);
-        return std::string(
-            (const char*)data.data(),
-            data.size()
-        );
+        InputStream is(filename);
+        if(!is)
+            throw std::runtime_error(fmt::format("Failed to get data from \"{}\"", filename));
+        auto size = is.FileSize();
+        std::string buf;
+        buf.resize(size);
+        is.read((char*)buf.data(), size);
+        return std::move(buf);
     }
 
     bool Exists(const std::string& path)
@@ -110,10 +69,18 @@ namespace awe::vfs
         {
             return nullptr;
         }
+        
+        PHYSFS_Stat stat{};
+        int stat_result = PHYSFS_stat(filename.c_str(), &stat);
+        
 
         Close();
         m_file = f;
         m_mode = mode;
+        if(stat_result)
+            std::memcpy(&m_stat, &stat, sizeof(PHYSFS_Stat));
+        else
+            std::memset(&m_stat, 0, sizeof(m_stat));
 
         return this;
     }
@@ -131,12 +98,114 @@ namespace awe::vfs
         return this;
     }
 
+    std::size_t FileBuf::FileSize() const noexcept
+    {
+        if(!m_file)
+            return 0;
+        return PHYSFS_fileLength(m_file);
+    }
+    const PHYSFS_Stat& FileBuf::Stat() const noexcept
+    {
+        return m_stat;
+    }
+
+    FileBuf::pos_type FileBuf::seekoff(
+            off_type off,
+            std::ios_base::seekdir dir,
+            std::ios_base::openmode mode
+    ) {
+        if(!m_file)
+            return pos_type(off_type(-1)); // Default error behavior
+
+        switch (dir)
+        {
+        case std::ios_base::beg:
+            PHYSFS_seek(m_file, off);
+            break;
+        case std::ios_base::cur:
+            // Subtract characters currently in buffer from seek position
+            PHYSFS_seek(m_file, (PHYSFS_tell(m_file) + off) - (egptr() - gptr()));
+            break;
+        case std::ios_base::end:
+            PHYSFS_seek(m_file, PHYSFS_fileLength(m_file) + off);
+            break;
+        default: // Error
+            return pos_type(off_type(-1));
+        }
+        if (mode & std::ios_base::in)
+        {
+            setg(egptr(), egptr(), egptr());
+        }
+        if (mode & std::ios_base::out)
+        {
+            setp(m_buffer, m_buffer);
+        }
+
+        return PHYSFS_tell(m_file);
+    }
+    FileBuf::pos_type FileBuf::seekpos(
+            pos_type pos,
+            std::ios_base::openmode mode
+    ) {
+        if(!m_file)
+            return pos_type(off_type(-1)); // Default error behavior
+
+        PHYSFS_seek(m_file, pos);
+        if (mode & std::ios_base::in)
+        {
+            setg(egptr(), egptr(), egptr());
+        }
+        if (mode & std::ios_base::out)
+        {
+            setp(m_buffer, m_buffer);
+        }
+
+        return PHYSFS_tell(m_file);
+    }
     FileBuf::int_type FileBuf::underflow()
     {
         if(!m_file)
             return traits_type::eof();
-        PHYSFS_sint64 read = PHYSFS_readBytes(m_file, m_read_buf, BUFSIZ);
-        setg(m_read_buf, m_read_buf, m_read_buf + read);
+        PHYSFS_sint64 read = PHYSFS_readBytes(m_file, m_buffer, BUFSIZ);
+        if(read < BUFSIZ)
+        {
+            if(read == 0)
+                return traits_type::eof();
+            else if(read == -1)
+                throw std::runtime_error(PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        }
+        setg(m_buffer, m_buffer, m_buffer + read);
         return traits_type::to_int_type(*gptr());
+    }
+
+    InputStream::InputStream()
+        : std::istream(&m_buf) {}
+    InputStream::InputStream(const std::string& filename, FileMode mode)
+        : InputStream()
+    {
+        Open(filename, mode);
+    }
+
+    bool InputStream::Open(const std::string& filename, FileMode mode)
+    {
+        if(mode != FileMode::READ)
+        {
+            throw std::invalid_argument("invalid argument");
+        }
+        bool result = m_buf.Open(filename, mode) != nullptr;
+        if(!result)
+        {
+            setstate(failbit);
+        }
+        return result;
+    }
+    void InputStream::Close() noexcept
+    {
+        m_buf.Close();
+    }
+
+    std::size_t InputStream::FileSize() noexcept
+    {
+        return m_buf.FileSize();
     }
 }
