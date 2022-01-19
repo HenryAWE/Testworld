@@ -7,21 +7,6 @@
 
 namespace awe::graphic
 {
-    std::size_t SizeOf(VertexDataType type) noexcept
-    {
-        switch(type)
-        {
-        case VertexDataType::FLOAT: return sizeof(float);
-        case VertexDataType::BYTE: return sizeof(int8_t);
-        case VertexDataType::UBYTE: return sizeof(uint8_t);
-        case VertexDataType::SHORT: return sizeof(uint16_t);
-        case VertexDataType::USHORT: return sizeof(uint16_t);
-        case VertexDataType::INT: return sizeof(int32_t);
-        case VertexDataType::UINT: return sizeof(uint32_t);
-        default: assert(false); return 0;
-        }
-    }
-
     std::size_t VertexAttribData::Size() const noexcept
     {
         return SizeOf(type) * component;
@@ -46,16 +31,18 @@ namespace awe::graphic
         return offset;
     }
 
-    Mesh::Mesh(Renderer& renderer, bool dynamic)
-        : m_renderer(renderer), m_is_dynamic(dynamic) {}
+    IMesh::IMesh(IRenderer& renderer, bool dynamic)
+        : Super(renderer), m_is_dynamic(dynamic) {}
 
-    void Mesh::AddVertexAttrib(VertexAttribData desc)
+    IMesh::~IMesh() noexcept = default;
+
+    void IMesh::AddVertexAttrib(VertexAttribData desc)
     {
         auto& attrs = NewData()->descriptor.attributes;
         attrs.push_back(desc);
     }
 
-    void Mesh::DataSubmitted()
+    void IMesh::DataSubmitted()
     {
         m_is_submitted = true;
         if(!IsDynamic())
@@ -67,7 +54,7 @@ namespace awe::graphic
         }
     }
 
-    std::optional<Mesh::Data>& Mesh::NewData()
+    std::optional<IMesh::Data>& IMesh::NewData()
     {
         if(!m_data.has_value())
             m_data.emplace();

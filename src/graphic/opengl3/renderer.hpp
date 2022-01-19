@@ -11,6 +11,8 @@
 #include "../../sys/init.hpp"
 #include "glutil.hpp"
 #include "mesh.hpp"
+#include "shader.hpp"
+#include "texture.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -25,17 +27,10 @@ namespace awe::graphic::opengl3
     }
 
     /* OpenGL 3 Renderer */
-    class Renderer : public graphic::Renderer
+    class Renderer : public graphic::IRenderer
     {
+        typedef IRenderer Super;
     public:
-        typedef graphic::Renderer Super;
-        template <typename T>
-        struct Task
-        {
-            std::promise<T> result;
-            std::function<void(std::promise<T>&)> func;
-        };
-
         Renderer(
             window::Window& window,
             const AppInitData& initdata
@@ -70,13 +65,20 @@ namespace awe::graphic::opengl3
 
         std::future<std::string> QueryRendererInfo() override;
 
+        glm::ivec2 GetDrawableSize() const override;
+        bool IsRuntimeShaderCompilationSupported() const override;
+
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
+        std::unique_ptr<ShaderProgram> CreateShaderProgram();
+        std::unique_ptr<Texture2D> CreateTexture2D();
 
         void PushClearCommand(std::function<void()> func);
 
     protected:
         Mesh* NewMesh(bool dynamic) override;
+        ShaderProgram* NewShaderProgram() override;
+        Texture2D* NewTexture2D() override;
 
     private:
         bool m_initialized = false;

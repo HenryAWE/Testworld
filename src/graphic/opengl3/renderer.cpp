@@ -44,7 +44,7 @@ namespace awe::graphic::opengl3
     Renderer::Renderer(
             window::Window& window,
             const AppInitData& initdata
-        ) : graphic::Renderer(window),
+        ) : Super(window),
         m_debug(initdata.ogl_debug) {
             namespace ph = std::placeholders;
             DebugOutputFilter = std::bind(
@@ -64,7 +64,7 @@ namespace awe::graphic::opengl3
 
     bool Renderer::Initialize()
     {
-        if(IsInitialized())
+        if(m_initialized)
             return true;
 
         bool result = Super::Initialize();
@@ -74,8 +74,9 @@ namespace awe::graphic::opengl3
     }
     void Renderer::Deinitialize() noexcept
     {
-        if(!IsInitialized())
+        if(!m_initialized)
             return;
+
         m_quit_mainloop = true;
         while(!m_is_data_released)
             std::this_thread::yield();
@@ -84,7 +85,7 @@ namespace awe::graphic::opengl3
     }
     bool Renderer::IsInitialized() noexcept
     {
-        return m_initialized;
+        return m_initialized && Super::IsInitialized();
     }
 
     void Renderer::BeginMainloop()
@@ -118,9 +119,28 @@ namespace awe::graphic::opengl3
         return std::move(info_result);
     }
 
+    glm::ivec2 Renderer::GetDrawableSize() const
+    {
+        glm::ivec2 size;
+        SDL_GL_GetDrawableSize(m_window.GetHandle(), &size[0], &size[1]);
+        return size;
+    }
+    bool Renderer::IsRuntimeShaderCompilationSupported() const
+    {
+        return true;
+    }
+
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
     {
         return std::unique_ptr<Mesh>(NewMesh(dynamic));
+    }
+    std::unique_ptr<ShaderProgram> Renderer::CreateShaderProgram()
+    {
+        return std::unique_ptr<ShaderProgram>(NewShaderProgram());
+    }
+    std::unique_ptr<Texture2D> Renderer::CreateTexture2D()
+    {
+        return std::unique_ptr<Texture2D>(NewTexture2D());
     }
 
     void Renderer::PushClearCommand(std::function<void()> func)
@@ -132,6 +152,14 @@ namespace awe::graphic::opengl3
     Mesh* Renderer::NewMesh(bool dynamic)
     {
         return new Mesh(*this, dynamic);
+    }
+    ShaderProgram* Renderer::NewShaderProgram()
+    {
+        return new ShaderProgram(*this);
+    }
+    Texture2D* Renderer::NewTexture2D()
+    {
+        return new Texture2D(*this);
     }
 
     void Renderer::CreateContext(bool debug)
@@ -232,10 +260,12 @@ namespace awe::graphic::opengl3
             }
             InitImGuiImpl();
             ExecuteQueryCommand();
+            NewData();
             result.set_value(true);
 
             RendererMain();
 
+            DeleteData();
             ExecuteQueryCommand();
             ExecuteClearCommand();
             ShutdownImGuiImpl();

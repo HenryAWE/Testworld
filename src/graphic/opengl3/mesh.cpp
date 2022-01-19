@@ -10,21 +10,6 @@ namespace awe::graphic::opengl3
 {
     namespace detailed
     {
-        GLenum GetGLType(VertexDataType type)
-        {
-            switch(type)
-            {
-            case VertexDataType::FLOAT: return GL_FLOAT;
-            case VertexDataType::BYTE: return GL_BYTE;
-            case VertexDataType::UBYTE: return GL_UNSIGNED_BYTE;
-            case VertexDataType::SHORT: return GL_SHORT;
-            case VertexDataType::USHORT: return GL_UNSIGNED_SHORT;
-            case VertexDataType::INT: return GL_INT;
-            case VertexDataType::UINT: return GL_UNSIGNED_INT;
-            default: assert(false); return GL_INVALID_ENUM;
-            }
-        }
-
         void ApplyVertexAttrib(
             GLuint idx,
             const VertexAttribData& attr,
@@ -44,7 +29,11 @@ namespace awe::graphic::opengl3
     }
 
     Mesh::Mesh(Renderer& renderer, bool dynamic)
-        : Super::Mesh(renderer, dynamic) {}
+        : Super(renderer, dynamic) {}
+    Mesh::~Mesh() noexcept
+    {
+        Deinitialize();
+    }
 
     void Mesh::Submit()
     {
@@ -84,7 +73,7 @@ namespace awe::graphic::opengl3
 
         m_drawcfg.mode = GL_TRIANGLES;
         m_drawcfg.count = static_cast<GLsizei>(data.indices.size() / SizeOf(data.indices_type));
-        m_drawcfg.type = detailed::GetGLType(data.indices_type);
+        m_drawcfg.type = GetGLType(data.indices_type);
 
         DataSubmitted();
     }
@@ -120,7 +109,7 @@ namespace awe::graphic::opengl3
 
         m_init = true;
     }
-    void Mesh::Deinitialize()
+    void Mesh::Deinitialize() noexcept
     {
         if(!m_init)
             return;

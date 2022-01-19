@@ -5,6 +5,7 @@
 #define TESTWORLD_GRAPHIC_OPENGL3_HPP
 
 #include <glad/glad.h>
+#include "glutil.hpp"
 #include "../mesh.hpp"
 
 
@@ -12,12 +13,13 @@ namespace awe::graphic::opengl3
 {
     class Renderer;
 
-    class Mesh : public graphic::Mesh
+    class Mesh : public IMesh
     {
+        typedef IMesh Super;
     public:
-        typedef graphic::Mesh Super;
-
         Mesh(Renderer& renderer, bool dynamic = false);
+
+        ~Mesh() noexcept;
 
         void Submit() override;
         void Draw() override;
@@ -27,7 +29,7 @@ namespace awe::graphic::opengl3
 
     private:
         void Initialize();
-        void Deinitialize();
+        void Deinitialize() noexcept;
 
         bool m_init = false;
         struct GLData

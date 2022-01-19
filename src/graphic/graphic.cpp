@@ -7,7 +7,7 @@
 
 namespace awe::graphic
 {
-    std::unique_ptr<Renderer> CreateRenderer(
+    std::unique_ptr<IRenderer> CreateRenderer(
         const AppInitData& initdata,
         window::Window& window
     ) {

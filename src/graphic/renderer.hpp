@@ -14,8 +14,9 @@
 #include FT_FREETYPE_H
 #include <glm/matrix.hpp>
 #include "../sys/init.hpp"
-#include "shaderbuilder.hpp"
 #include "mesh.hpp"
+#include "shader.hpp"
+#include "texture.hpp"
 
 
 namespace awe::window
@@ -24,16 +25,16 @@ namespace awe::window
 }
 namespace awe::graphic
 {
-    /* OpenGL Renderer */
-    class Renderer
+    /* Renderer interface */
+    class IRenderer
     {
     public:
-        Renderer(window::Window& window);
-        virtual ~Renderer() noexcept;
+        IRenderer(window::Window& window);
+        virtual ~IRenderer() noexcept;
 
         virtual bool Initialize();
         virtual void Deinitialize() noexcept;
-        virtual bool IsInitialized() noexcept = 0;
+        virtual bool IsInitialized() noexcept;
 
         // Synchronization
         virtual void BeginMainloop() = 0;
@@ -44,12 +45,15 @@ namespace awe::graphic
 
         virtual std::future<std::string> QueryRendererInfo() = 0;
 
-        std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
+        std::unique_ptr<IMesh> CreateMesh(bool dynamic = false);
+        std::unique_ptr<IShaderProgram> CreateShaderProgram();
+        std::unique_ptr<ITexture2D> CreateTexture2D();
 
         // Information of renderer
 
-        glm::ivec2 GetDrawableSize() const;
+        virtual glm::ivec2 GetDrawableSize() const;
         virtual std::string GetRendererName() = 0;
+        virtual bool IsRuntimeShaderCompilationSupported() const;
 
         // Data
         [[nodiscard]]
@@ -59,9 +63,19 @@ namespace awe::graphic
         window::Window& m_window;
         std::mutex m_mutex;
 
-        virtual Mesh* Renderer::NewMesh(bool dynamic) = 0;
+        virtual IMesh* NewMesh(bool dynamic) = 0;
+        virtual IShaderProgram* NewShaderProgram() = 0;
+        virtual ITexture2D* NewTexture2D() = 0;
+
+        // Call this after derived class is initialized to allocate data of
+        // of renderer in correct order
+        virtual void NewData();
+        // Call this before derived class is deinitialized to release data
+        // of renderer in correct order
+        virtual void DeleteData() noexcept;
 
     private:
+        bool m_initialized = false;
         FT_Library m_ftlib = nullptr;
     };
 }

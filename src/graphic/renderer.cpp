@@ -12,13 +12,16 @@
 
 namespace awe::graphic
 {
-    Renderer::Renderer(window::Window& window)
+    IRenderer::IRenderer(window::Window& window)
         : m_window(window) {}
 
-    Renderer::~Renderer() noexcept = default;
+    IRenderer::~IRenderer() noexcept = default;
 
-    bool Renderer::Initialize()
+    bool IRenderer::Initialize()
     {
+        if(m_initialized)
+            return false;
+
         FT_Error err;
         err = FT_Init_FreeType(&m_ftlib);
         if(err)
@@ -31,25 +34,48 @@ namespace awe::graphic
             return false;
         }
 
-        return true;
+        m_initialized = true;
+        return m_initialized;
     }
-    void Renderer::Deinitialize() noexcept
+    void IRenderer::Deinitialize() noexcept
     {
+        if(!m_initialized)
+            return;
         FT_Done_FreeType(m_ftlib);
         m_ftlib = nullptr;
+
+        m_initialized = false;
+    }
+    bool IRenderer::IsInitialized() noexcept
+    {
+        return m_initialized;
     }
 
-    std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
+    std::unique_ptr<IMesh> IRenderer::CreateMesh(bool dynamic)
     {
-        return std::unique_ptr<Mesh>(NewMesh(dynamic));
+        return std::unique_ptr<IMesh>(NewMesh(dynamic));
+    }
+    std::unique_ptr<IShaderProgram> IRenderer::CreateShaderProgram()
+    {
+        return std::unique_ptr<IShaderProgram>(NewShaderProgram());
+    }
+    std::unique_ptr<ITexture2D> IRenderer::CreateTexture2D()
+    {
+        return std::unique_ptr<ITexture2D>(NewTexture2D());
     }
 
-    glm::ivec2 Renderer::GetDrawableSize() const
+    glm::ivec2 IRenderer::GetDrawableSize() const
     {
-        glm::ivec2 size;
-        SDL_GL_GetDrawableSize(m_window.GetHandle(), &size[0], &size[1]);
-        return size;
+        return m_window.GetSize();
     }
+
+    bool IRenderer::IsRuntimeShaderCompilationSupported() const
+    {
+        return false;
+    }
+
+    void IRenderer::NewData() {}
+    void IRenderer::DeleteData() noexcept {}
 }
 
 // Prefer high-performance graphic cards on Windows

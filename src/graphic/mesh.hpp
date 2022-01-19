@@ -8,46 +8,18 @@
 #include <optional>
 #include <type_traits>
 #include <vector>
+#include "datatype.hpp"
+#include "interface.hpp"
 
 
 namespace awe::graphic
 {
-    class Renderer;
-
-    enum class VertexDataType : int
-    {
-        FLOAT,
-        BYTE,
-        UBYTE,
-        SHORT,
-        USHORT,
-        INT,
-        UINT
-    };
-
-    template <typename T>
-    VertexDataType GetVertexDataType() = delete;
-    template <>
-    constexpr VertexDataType GetVertexDataType<float>() noexcept { return VertexDataType::FLOAT; }
-    template <>
-    constexpr VertexDataType GetVertexDataType<signed char>() noexcept { return VertexDataType::BYTE; }
-    template <>
-    constexpr VertexDataType GetVertexDataType<unsigned char>() noexcept { return VertexDataType::UBYTE; }
-    template <>
-    constexpr VertexDataType GetVertexDataType<short>() noexcept { return VertexDataType::SHORT; }
-    template <>
-    constexpr VertexDataType GetVertexDataType<unsigned short>() noexcept { return VertexDataType::USHORT; }
-    template <>
-    constexpr VertexDataType GetVertexDataType<int>() noexcept { return VertexDataType::INT; }
-    template <>
-    constexpr VertexDataType GetVertexDataType<unsigned int>() noexcept { return VertexDataType::UINT; }
-
-    std::size_t SizeOf(VertexDataType type) noexcept;
+    class IRenderer;
 
     struct VertexAttribData
     {
         int component;
-        VertexDataType type;
+        DataType type;
 
         std::size_t Size() const noexcept;
     };
@@ -62,24 +34,19 @@ namespace awe::graphic
         std::size_t Offset(std::size_t idx) const;
     };
 
-    class VertexData
+    class IMesh : public InterfaceBase
     {
-        std::vector<float> vertices;
-        std::vector<unsigned int> indices;
-    };
-
-    class Mesh
-    {
+        typedef InterfaceBase Super;
     public:
-        Mesh(Renderer& renderer, bool dynamic = false);
+        IMesh(IRenderer& renderer, bool dynamic = false);
+
+        ~IMesh() noexcept;
 
         // Thread safety: Can only be called in rendering thread
         virtual void Submit() = 0;
         // Thread safety: Can only be called in rendering thread
         virtual void Draw() = 0;
 
-        [[nodiscard]]
-        constexpr Renderer& GetRenderer() noexcept { return m_renderer; }
         [[nodiscard]]
         constexpr bool IsDynamic() const noexcept { return m_is_dynamic; }
         [[nodiscard]]
@@ -110,8 +77,12 @@ namespace awe::graphic
                 indices.resize(indices.size() + sizeof(T));
                 std::memcpy(indices.data() + indices.size() - sizeof(T), &*it, sizeof(T));
             }
+        }
 
-            NewData()->indices_type = GetVertexDataType<T>();
+        template <typename T>
+        void SetIndexType()
+        {
+            NewData()->indices_type = GetDataType<T>();
         }
 
         void AddVertexAttrib(VertexAttribData desc);
@@ -123,7 +94,7 @@ namespace awe::graphic
             std::vector<std::byte> vertices;
             VertexDescriptor descriptor;
             std::vector<std::byte> indices;
-            VertexDataType indices_type;
+            DataType indices_type = DataType::UINT;
         };
 
         [[nodiscard]]
@@ -135,7 +106,6 @@ namespace awe::graphic
         [[nodiscard]]
         std::optional<Data>& NewData();
 
-        Renderer& m_renderer;
         std::optional<Data> m_data;
         bool m_is_dynamic = false;
         bool m_is_submitted = false;
