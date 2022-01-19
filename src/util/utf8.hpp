@@ -9,9 +9,9 @@ namespace awe::util
 {
     class ConstUtf8Iterator
     {
-        char* m_ptr = nullptr;
+        char8_t* m_ptr = nullptr;
     public:
-        ConstUtf8Iterator(char* u8str) noexcept : m_ptr(u8str) {}
+        ConstUtf8Iterator(char8_t* u8str) noexcept : m_ptr(u8str) {}
 
         // Iterate to next codepoint and return the current one
         char32_t Next();

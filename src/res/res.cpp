@@ -46,7 +46,7 @@ namespace awe::res
         namespace fs = std::filesystem;
         detailed::InitPhysfs(initdata.argv[0]);
         PHYSFS_mount(
-            fs::current_path().u8string().c_str(),
+            (const char*)fs::current_path().u8string().c_str(),
             "app",
             true
         );

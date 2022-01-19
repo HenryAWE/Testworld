@@ -20,7 +20,7 @@ namespace awe
             if(!fs::exists(pakpath))
                 return false;
             int r = PHYSFS_mount(
-                pakpath.u8string().c_str(),
+                (const char*)pakpath.u8string().c_str(),
                 ("lang/" + pakname).c_str(),
                 1
             );
