@@ -35,48 +35,6 @@ namespace awe::graphic::opengl3
         Deinitialize();
     }
 
-    void Mesh::Submit()
-    {
-        if(IsSubmitted() || !GetData())
-            return;
-
-        if(!m_init)
-            Initialize();
-        auto& data = *GetData();
-        glBindVertexArray(m_gldata.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, m_gldata.vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            data.vertices.size(),
-            data.vertices.data(),
-            IsDynamic() ? GL_DYNAMIC_DRAW : GL_STATIC_READ
-        );
-        const std::size_t stride = data.descriptor.Stride();
-        for(std::size_t i = 0; i < data.descriptor.attributes.size(); ++i)
-        {
-            detailed::ApplyVertexAttrib(
-                static_cast<GLuint>(i),
-                data.descriptor.attributes[i],
-                static_cast<GLsizei>(stride),
-                data.descriptor.Offset(i)
-            );
-        }
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_gldata.ebo);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            data.indices.size(),
-            data.indices.data(),
-            IsDynamic() ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW
-        );
-        glBindVertexArray(0);
-
-        m_drawcfg.mode = GL_TRIANGLES;
-        m_drawcfg.count = static_cast<GLsizei>(data.indices.size() / SizeOf(data.indices_type));
-        m_drawcfg.type = GetGLType(data.indices_type);
-
-        DataSubmitted();
-    }
     void Mesh::Draw()
     {
         Submit();
@@ -121,5 +79,46 @@ namespace awe::graphic::opengl3
         });
         std::memset(&m_gldata, 0, sizeof(GLData));
         m_init = false;
+    }
+
+    void Mesh::UpdateData(
+            std::span<std::byte> vertices,
+            const VertexDescriptor& descriptor,
+            std::span<std::byte> indices,
+            DataType indices_type
+    ) {
+        if(!m_init)
+            Initialize();
+        glBindVertexArray(m_gldata.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, m_gldata.vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertices.size(),
+            vertices.data(),
+            IsDynamic() ? GL_DYNAMIC_DRAW : GL_STATIC_READ
+        );
+        const std::size_t stride = descriptor.Stride();
+        for(std::size_t i = 0; i < descriptor.attributes.size(); ++i)
+        {
+            detailed::ApplyVertexAttrib(
+                static_cast<GLuint>(i),
+                descriptor.attributes[i],
+                static_cast<GLsizei>(stride),
+                descriptor.Offset(i)
+            );
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_gldata.ebo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            indices.size(),
+            indices.data(),
+            IsDynamic() ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW
+        );
+        glBindVertexArray(0);
+
+        m_drawcfg.mode = GL_TRIANGLES;
+        m_drawcfg.count = static_cast<GLsizei>(indices.size() / SizeOf(indices_type));
+        m_drawcfg.type = GetGLType(indices_type);
     }
 }

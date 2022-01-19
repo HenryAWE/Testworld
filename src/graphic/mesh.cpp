@@ -42,13 +42,28 @@ namespace awe::graphic
         attrs.push_back(desc);
     }
 
+    void IMesh::Submit()
+    {
+        if(IsSubmitted() || !m_data)
+            return;
+
+        auto& data = *m_data;
+        UpdateData(
+            data.vertices,
+            data.descriptor,
+            data.indices,
+            data.indices_type
+        );
+        DataSubmitted();
+    }
+
     void IMesh::DataSubmitted()
     {
         m_is_submitted = true;
         if(!IsDynamic())
-            GetData().reset();
+            m_data.reset();
         else
-        {
+        { // Do not free memory
             m_data->vertices.clear();
             m_data->indices.clear();
         }

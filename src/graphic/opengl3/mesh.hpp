@@ -21,7 +21,6 @@ namespace awe::graphic::opengl3
 
         ~Mesh() noexcept;
 
-        void Submit() override;
         void Draw() override;
 
         [[nodiscard]]
@@ -30,6 +29,13 @@ namespace awe::graphic::opengl3
     private:
         void Initialize();
         void Deinitialize() noexcept;
+
+        void UpdateData(
+            std::span<std::byte> vertices,
+            const VertexDescriptor& descriptor,
+            std::span<std::byte> indices,
+            DataType indices_type
+        ) override;
 
         bool m_init = false;
         struct GLData

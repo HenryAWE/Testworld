@@ -8,6 +8,7 @@
 #include <optional>
 #include <type_traits>
 #include <vector>
+#include <span>
 #include "datatype.hpp"
 #include "interface.hpp"
 
@@ -43,7 +44,7 @@ namespace awe::graphic
         ~IMesh() noexcept;
 
         // Thread safety: Can only be called in rendering thread
-        virtual void Submit() = 0;
+        void Submit();
         // Thread safety: Can only be called in rendering thread
         virtual void Draw() = 0;
 
@@ -97,9 +98,15 @@ namespace awe::graphic
             DataType indices_type = DataType::UINT;
         };
 
-        [[nodiscard]]
-        constexpr std::optional<Data>& GetData() noexcept { return m_data; }
-        // Call this after successfully submitting data to renderer
+        // Send data to renderer
+        virtual void UpdateData(
+            std::span<std::byte> vertices,
+            const VertexDescriptor& descriptor,
+            std::span<std::byte> indices,
+            DataType indices_type = DataType::UINT
+        ) = 0;
+
+        // Call this after successfully sending data to renderer
         void DataSubmitted();
 
     private:
