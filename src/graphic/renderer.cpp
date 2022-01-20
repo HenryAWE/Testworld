@@ -63,6 +63,10 @@ namespace awe::graphic
     {
         return std::unique_ptr<ITexture2D>(NewTexture2D());
     }
+    std::unique_ptr<IDrawCall> IRenderer::CreateDrawCall()
+    {
+        return std::unique_ptr<IDrawCall>(NewDrawCall());
+    }
 
     glm::ivec2 IRenderer::GetDrawableSize() const
     {
@@ -72,6 +76,10 @@ namespace awe::graphic
     bool IRenderer::IsRuntimeShaderCompilationSupported() const
     {
         return false;
+    }
+    std::size_t IRenderer::MaxTextureUnit() const
+    {
+        return 16;
     }
 
     void IRenderer::NewData() {}

@@ -13,6 +13,7 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "drawcall.hpp"
 
 
 namespace awe::graphic::opengl3
@@ -72,6 +73,7 @@ namespace awe::graphic::opengl3
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
         std::unique_ptr<ShaderProgram> CreateShaderProgram();
         std::unique_ptr<Texture2D> CreateTexture2D();
+        std::unique_ptr<DrawCall> CreateDrawCall();
 
         void PushClearCommand(std::function<void()> func);
 
@@ -79,6 +81,7 @@ namespace awe::graphic::opengl3
         Mesh* NewMesh(bool dynamic) override;
         ShaderProgram* NewShaderProgram() override;
         Texture2D* NewTexture2D() override;
+        DrawCall* NewDrawCall() override;
 
     private:
         bool m_initialized = false;

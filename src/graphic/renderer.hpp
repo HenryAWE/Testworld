@@ -17,6 +17,7 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "drawcall.hpp"
 
 
 namespace awe::window
@@ -48,12 +49,14 @@ namespace awe::graphic
         std::unique_ptr<IMesh> CreateMesh(bool dynamic = false);
         std::unique_ptr<IShaderProgram> CreateShaderProgram();
         std::unique_ptr<ITexture2D> CreateTexture2D();
+        std::unique_ptr<IDrawCall> CreateDrawCall();
 
         // Information of renderer
 
         virtual glm::ivec2 GetDrawableSize() const;
         virtual std::string GetRendererName() = 0;
         virtual bool IsRuntimeShaderCompilationSupported() const;
+        virtual std::size_t MaxTextureUnit() const;
 
         // Data
         [[nodiscard]]
@@ -66,6 +69,7 @@ namespace awe::graphic
         virtual IMesh* NewMesh(bool dynamic) = 0;
         virtual IShaderProgram* NewShaderProgram() = 0;
         virtual ITexture2D* NewTexture2D() = 0;
+        virtual IDrawCall* NewDrawCall() = 0;
 
         // Call this after derived class is initialized to allocate data of
         // of renderer in correct order

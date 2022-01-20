@@ -197,6 +197,14 @@ namespace awe::graphic::opengl3
     {
         glUniform1f(loc, v);
     }
+    void Uniform(GLint loc, const glm::vec3& v)
+    {
+        glUniform3fv(loc, 1, glm::value_ptr(v));
+    }
+    void Uniform(GLint loc, const glm::vec4& v)
+    {
+        glUniform4fv(loc, 1, glm::value_ptr(v));
+    }
     void Uniform(GLint loc, const glm::mat4& m)
     {
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));

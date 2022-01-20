@@ -142,6 +142,10 @@ namespace awe::graphic::opengl3
     {
         return std::unique_ptr<Texture2D>(NewTexture2D());
     }
+    std::unique_ptr<DrawCall> Renderer::CreateDrawCall()
+    {
+        return std::unique_ptr<DrawCall>(NewDrawCall());
+    }
 
     void Renderer::PushClearCommand(std::function<void()> func)
     {
@@ -160,6 +164,10 @@ namespace awe::graphic::opengl3
     Texture2D* Renderer::NewTexture2D()
     {
         return new Texture2D(*this);
+    }
+    DrawCall* Renderer::NewDrawCall()
+    {
+        return new DrawCall(*this);
     }
 
     void Renderer::CreateContext(bool debug)

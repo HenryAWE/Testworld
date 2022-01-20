@@ -93,6 +93,8 @@ namespace awe::graphic::opengl3
 
     void Uniform(GLint loc, GLint v);
     void Uniform(GLint loc, GLfloat v);
+    void Uniform(GLint loc, const glm::vec3& v);
+    void Uniform(GLint loc, const glm::vec4& v);
     void Uniform(GLint loc, const glm::mat4& m);
 }
 

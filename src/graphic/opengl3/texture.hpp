@@ -35,6 +35,8 @@ namespace awe::graphic::opengl3
         void Submit() override;
 
         [[nodiscard]]
+        constexpr GLenum GetTarget() const noexcept { return GL_TEXTURE_2D; }
+        [[nodiscard]]
         glm::ivec2 GetSize() const override;
         [[nodiscard]]
         Renderer& GetRenderer() noexcept;
