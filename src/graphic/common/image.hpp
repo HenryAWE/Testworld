@@ -37,7 +37,7 @@ namespace awe::graphic::common
             void Swap(ImageBase& other) noexcept;
 
             bool LoadFile(
-                const char* file,
+                const char8_t* file,
                 int desired_channels,
                 int* channel = nullptr
             );

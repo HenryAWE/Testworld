@@ -37,11 +37,11 @@ namespace awe::graphic::common
             std::swap(m_size, other.m_size);
         }
 
-        bool ImageBase::LoadFile(const char* file, int desired_channels, int* channel)
+        bool ImageBase::LoadFile(const char8_t* file, int desired_channels, int* channel)
         {
             stbi_set_flip_vertically_on_load(true);
             glm::ivec2 size(0);
-            void* tmp = stbi_load(file, &size[0], &size[1], channel, desired_channels);
+            void* tmp = stbi_load((const char*)file, &size[0], &size[1], channel, desired_channels);
             if(!tmp)
             {
                 return false;
