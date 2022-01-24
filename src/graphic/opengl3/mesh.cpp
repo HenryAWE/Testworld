@@ -20,7 +20,7 @@ namespace awe::graphic::opengl3
                 idx,
                 attr.component,
                 GetGLType(attr.type),
-                GL_FALSE,
+                attr.transpose,
                 stride,
                 reinterpret_cast<const void*>(offset)
             );
@@ -82,9 +82,9 @@ namespace awe::graphic::opengl3
     }
 
     void Mesh::UpdateData(
-            std::span<std::byte> vertices,
+            std::span<const std::byte> vertices,
             const VertexDescriptor& descriptor,
-            std::span<std::byte> indices,
+            std::span<const std::byte> indices,
             DataType indices_type
     ) {
         if(!m_init)
@@ -120,5 +120,32 @@ namespace awe::graphic::opengl3
         m_drawcfg.mode = GL_TRIANGLES;
         m_drawcfg.count = static_cast<GLsizei>(indices.size() / SizeOf(indices_type));
         m_drawcfg.type = GetGLType(indices_type);
+    }
+    void Mesh::UpdateData(
+        std::span<const std::byte> vertices,
+        std::span<const std::byte> indices
+    ) {
+        if(!m_init)
+            Initialize();
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_gldata.vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertices.size(),
+            vertices.data(),
+            IsDynamic() ? GL_DYNAMIC_DRAW : GL_STATIC_READ
+        );
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_gldata.ebo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            indices.size(),
+            indices.data(),
+            IsDynamic() ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW
+        );
+        glBindVertexArray(0);
+
+        m_drawcfg.mode = GL_TRIANGLES;
+        m_drawcfg.count = static_cast<GLsizei>(indices.size() / SizeOf(GetIndexType()));
     }
 }

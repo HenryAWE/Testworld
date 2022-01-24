@@ -116,6 +116,16 @@ namespace awe::graphic::common
 
             return true;
         }
+        bool ImageBase::Allocate(glm::ivec2 size, int channel)
+        {
+            const std::size_t length = size.x * size.y * channel;
+            void* tmp = std::malloc(length);
+            if(!tmp)
+                return false;
+            Release();
+            m_raw_data = tmp;
+            return true;
+        }
         void ImageBase::Release() noexcept
         {
             stbi_image_free(m_raw_data);

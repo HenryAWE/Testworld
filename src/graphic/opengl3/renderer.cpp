@@ -129,6 +129,10 @@ namespace awe::graphic::opengl3
     {
         return true;
     }
+    bool Renderer::IsDataTransposeSupported() const
+    {
+        return true;
+    }
 
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
     {
@@ -168,6 +172,21 @@ namespace awe::graphic::opengl3
     DrawCall* Renderer::NewDrawCall()
     {
         return new DrawCall(*this);
+    }
+
+    void Renderer::NewData()
+    {
+        Super::NewData();
+
+        SetImGuiRenderer(std::make_unique<OpenGL3ImGuiRenderer>(*this));
+        GetImGuiRenderer()->CreateDeviceObjects();
+    }
+    void Renderer::DeleteData() noexcept
+    {
+        GetImGuiRenderer()->DestroyDeviceObjects();
+        SetImGuiRenderer(nullptr);
+
+        Super::DeleteData();
     }
 
     void Renderer::CreateContext(bool debug)
@@ -307,7 +326,7 @@ namespace awe::graphic::opengl3
             // Rendering is requested
             {
                 std::lock_guard lock(GetMutex());
-                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                GetImGuiRenderer()->Draw(ImGui::GetDrawData());
                 SDL_GL_SwapWindow(m_window.GetHandle());
                 m_request_render = false;
                 m_presented = true;
@@ -450,5 +469,45 @@ namespace awe::graphic::opengl3
     {
         std::lock_guard lock(m_query_cmd_mutex);
         m_query_cmd.push(std::move(task));
+    }
+
+    OpenGL3ImGuiRenderer::OpenGL3ImGuiRenderer(Renderer& renderer)
+        : Super(renderer) {}
+
+    OpenGL3ImGuiRenderer::~OpenGL3ImGuiRenderer() noexcept = default;
+
+    Renderer& OpenGL3ImGuiRenderer::GetRenderer() noexcept
+    {
+        assert(dynamic_cast<Renderer*>(&Super::GetRenderer()));
+        return static_cast<Renderer&>(Super::GetRenderer());
+    }
+
+    void OpenGL3ImGuiRenderer::CreateDeviceObjects()
+    {
+        if(!ImGui_ImplOpenGL3_CreateDeviceObjects())
+        {
+            throw std::runtime_error("ImGui_ImplOpenGL3_CreateDeviceObjects() failed");
+        }
+    }
+    void OpenGL3ImGuiRenderer::DestroyDeviceObjects() noexcept
+    {
+        ImGui_ImplOpenGL3_DestroyDeviceObjects();
+    }
+
+    void OpenGL3ImGuiRenderer::Draw(ImDrawData* drawdata)
+    {
+        ImGui_ImplOpenGL3_RenderDrawData(drawdata);
+    }
+
+    const std::string& OpenGL3ImGuiRenderer::GetName()
+    {
+        auto& io = ImGui::GetIO();
+        return io.BackendRendererName;
+    }
+    ImTextureID OpenGL3ImGuiRenderer::ToImTextureId(const ITexture2D& tex) noexcept
+    {
+        assert(dynamic_cast<const Texture2D*>(&tex));
+        auto handle = static_cast<const Texture2D&>(tex).GetHandle();
+        return reinterpret_cast<void*>(static_cast<std::intptr_t>(handle));
     }
 }

@@ -35,6 +35,20 @@ namespace awe::graphic
         std::string name;
         ArgType arg;
     };
+    class DynShaderUniformArg
+    {
+    public:
+        typedef std::variant<
+            std::int32_t*,
+            float*,
+            glm::vec3*,
+            glm::vec4*,
+            glm::mat4*
+        > ArgType;
+
+        std::string name;
+        ArgType arg;
+    };
 
     enum class Culling
     {
@@ -91,6 +105,12 @@ namespace awe::graphic
             m_args.emplace_back(std::move(name), arg);
         }
 
+        template <typename T>
+        void AddDynUniformArg(const std::string& name, const T* ptr)
+        {
+            m_dynarg.emplace_back(std::move(name), ptr);
+        }
+
     protected:
         virtual void UpdateData(
             IMesh& mesh,
@@ -107,6 +127,7 @@ namespace awe::graphic
         std::vector<ITexture2D*> m_textures;
         IShaderProgram* m_program;
         std::vector<ShaderUniformArg> m_args;
+        std::vector<DynShaderUniformArg> m_dynarg;
         DrawCallSettings m_settings;
 
         bool m_is_submitted = false;

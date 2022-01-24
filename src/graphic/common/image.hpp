@@ -52,6 +52,7 @@ namespace awe::graphic::common
                 int desired_channels,
                 int* channel = nullptr
             );
+            bool Allocate(glm::ivec2 size, int channel);
             void Release() noexcept;
 
             [[nodiscard]]
@@ -99,6 +100,14 @@ namespace awe::graphic::common
         bool Load(std::istream& is)
         {
             return LoadStream(is, Channel);
+        }
+        bool Copy(const std::byte* bytes, glm::ivec2 size)
+        {
+            if(!Allocate(size, Channel))
+                return false;
+            const std::size_t length = size.x * size.y * Channel;
+            std::memcpy(RawData(), bytes, length);
+            return true;
         }
 
         [[nodiscard]]

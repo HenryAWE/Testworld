@@ -31,11 +31,15 @@ namespace awe::graphic::opengl3
         void Deinitialize() noexcept;
 
         void UpdateData(
-            std::span<std::byte> vertices,
+            std::span<const std::byte> vertices,
             const VertexDescriptor& descriptor,
-            std::span<std::byte> indices,
+            std::span<const std::byte> indices,
             DataType indices_type
         ) override;
+        void UpdateData(
+            std::span<const std::byte> vertices,
+            std::span<const std::byte> indices
+        );
 
         bool m_init = false;
         struct GLData

@@ -68,6 +68,7 @@ namespace awe::graphic::opengl3
 
         glm::ivec2 GetDrawableSize() const override;
         bool IsRuntimeShaderCompilationSupported() const override;
+        bool IsDataTransposeSupported() const override;
 
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
@@ -82,6 +83,9 @@ namespace awe::graphic::opengl3
         ShaderProgram* NewShaderProgram() override;
         Texture2D* NewTexture2D() override;
         DrawCall* NewDrawCall() override;
+
+        void NewData() override;
+        void DeleteData() noexcept override;
 
     private:
         bool m_initialized = false;
@@ -137,6 +141,30 @@ namespace awe::graphic::opengl3
         std::queue<std::function<void()>> m_clear_cmd;
         std::mutex m_query_cmd_mutex;
         std::queue<std::unique_ptr<detailed::Task>> m_query_cmd;
+    };
+
+    class OpenGL3ImGuiRenderer : public IImGuiRenderer
+    {
+        typedef IImGuiRenderer Super;
+    public:
+        OpenGL3ImGuiRenderer(Renderer& renderer);
+
+        ~OpenGL3ImGuiRenderer() noexcept;
+
+        // Thread safety: Can only be called in rendering thread
+        void CreateDeviceObjects() override;
+        // Thread safety: Can only be called in rendering thread
+        void DestroyDeviceObjects() noexcept override;
+
+        void Draw(ImDrawData* drawdata) override;
+
+        [[nodiscard]]
+        const std::string& GetName() override;
+        [[nodiscard]]
+        Renderer& GetRenderer() noexcept;
+
+        [[nodiscard]]
+        ImTextureID ToImTextureId(const ITexture2D& tex) noexcept override;
     };
 }
 

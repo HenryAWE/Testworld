@@ -21,6 +21,13 @@ namespace awe::graphic
     {
         int component;
         DataType type;
+        bool transpose;
+
+        VertexAttribData(
+            int component_,
+            DataType type_,
+            bool transpose_ = false
+        ) noexcept;
 
         std::size_t Size() const noexcept;
     };
@@ -45,6 +52,20 @@ namespace awe::graphic
 
         // Thread safety: Can only be called in rendering thread
         void Submit();
+        // Directly submit data (without caching data first)
+        // Thread safety: Can only be called in rendering thread
+        void DirectSubmit(
+            std::span<const std::byte> vertices,
+            const VertexDescriptor& descriptor,
+            std::span<const std::byte> indices,
+            DataType indices_type
+        );
+        // Change vertex and index data
+        // Thread safety: Can only be called in rendering thread
+        void Update(
+            std::span<const std::byte> vertices,
+            std::span<const std::byte> indices
+        );
         // Thread safety: Can only be called in rendering thread
         virtual void Draw() = 0;
 
@@ -80,6 +101,8 @@ namespace awe::graphic
             }
         }
 
+        [[nodiscard]]
+        DataType GetIndexType() const noexcept;
         template <typename T>
         void SetIndexType()
         {
@@ -100,10 +123,14 @@ namespace awe::graphic
 
         // Send data to renderer
         virtual void UpdateData(
-            std::span<std::byte> vertices,
+            std::span<const std::byte> vertices,
             const VertexDescriptor& descriptor,
-            std::span<std::byte> indices,
+            std::span<const std::byte> indices,
             DataType indices_type = DataType::UINT
+        ) = 0;
+        virtual void UpdateData(
+            std::span<const std::byte> vertices,
+            std::span<const std::byte> indices
         ) = 0;
 
         // Call this after successfully sending data to renderer

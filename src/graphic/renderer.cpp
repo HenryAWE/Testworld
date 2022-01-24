@@ -4,9 +4,11 @@
 #include <glad/glad.h>
 #include "renderer.hpp"
 #include <cassert>
+#include <ranges>
 #include <stdexcept>
 #include <sstream>
 #include <fmt/format.h>
+#include <glm/gtc/matrix_transform.hpp>
 #include "../window/window.hpp"
 
 
@@ -77,13 +79,39 @@ namespace awe::graphic
     {
         return false;
     }
+    bool IRenderer::IsDataTransposeSupported() const
+    {
+        return false;
+    }
     std::size_t IRenderer::MaxTextureUnit() const
     {
         return 16;
     }
 
+    void IRenderer::SetImGuiRenderer(std::unique_ptr<IImGuiRenderer> renderer)
+    {
+        m_imgui = std::move(renderer);
+    }
+
     void IRenderer::NewData() {}
     void IRenderer::DeleteData() noexcept {}
+
+    namespace detailed
+    {
+        template <typename T>
+        std::span<const std::byte> GetBytes(const ImVector<T>& vec)
+        {
+            return std::span<const std::byte>(
+                (const std::byte*)vec.Data,
+                vec.size_in_bytes()
+            );
+        }
+    }
+
+    IImGuiRenderer::IImGuiRenderer(IRenderer& renderer)
+        : Super(renderer) {}
+
+    IImGuiRenderer::~IImGuiRenderer() noexcept = default;
 }
 
 // Prefer high-performance graphic cards on Windows

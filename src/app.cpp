@@ -34,10 +34,15 @@ namespace awe
         );
 
         m_imgui_ctx = ImGui::CreateContext();
+        auto& io = ImGui::GetIO();
+        // ImGui fonts
+        auto& fonts = io.Fonts;
+        GetLanguagePak().AddFont();
+        fonts->AddFontDefault();
+        fonts->Build();
         m_renderer = graphic::CreateRenderer(initdata, *m_window);
         m_renderer->Initialize();
         auto renderer_info = m_renderer->QueryRendererInfo();
-        auto& io = ImGui::GetIO();
         SDL_LogInfo(
             SDL_LOG_CATEGORY_APPLICATION,
             "ImGui Information\n"
@@ -58,12 +63,6 @@ namespace awe
         m_console = std::make_unique<imgui::Console>();
         m_editor = std::make_unique<Editor>();
         m_console->Write("Testworld Angelscript Console");
-
-        // ImGui fonts
-        auto& fonts = io.Fonts;
-        GetLanguagePak().AddFont();
-        fonts->AddFontDefault();
-        fonts->Build();
 
         PrepareScriptEnv();
     }

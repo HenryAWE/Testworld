@@ -13,6 +13,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <glm/matrix.hpp>
+#include <imgui.h>
 #include "../sys/init.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
@@ -26,6 +27,8 @@ namespace awe::window
 }
 namespace awe::graphic
 {
+    class IImGuiRenderer;
+
     /* Renderer interface */
     class IRenderer
     {
@@ -56,11 +59,14 @@ namespace awe::graphic
         virtual glm::ivec2 GetDrawableSize() const;
         virtual std::string GetRendererName() = 0;
         virtual bool IsRuntimeShaderCompilationSupported() const;
+        virtual bool IsDataTransposeSupported() const;
         virtual std::size_t MaxTextureUnit() const;
 
         // Data
         [[nodiscard]]
         constexpr FT_Library GetFtLib() noexcept { return m_ftlib; }
+        [[nodiscard]]
+        IImGuiRenderer* GetImGuiRenderer() noexcept { return m_imgui.get(); }
 
     protected:
         window::Window& m_window;
@@ -70,6 +76,8 @@ namespace awe::graphic
         virtual IShaderProgram* NewShaderProgram() = 0;
         virtual ITexture2D* NewTexture2D() = 0;
         virtual IDrawCall* NewDrawCall() = 0;
+
+        void SetImGuiRenderer(std::unique_ptr<IImGuiRenderer> renderer);
 
         // Call this after derived class is initialized to allocate data of
         // of renderer in correct order
@@ -81,6 +89,30 @@ namespace awe::graphic
     private:
         bool m_initialized = false;
         FT_Library m_ftlib = nullptr;
+        std::unique_ptr<IImGuiRenderer> m_imgui;
+    };
+
+    class IImGuiRenderer : public InterfaceBase
+    {
+        typedef InterfaceBase Super;
+    public:
+        IImGuiRenderer(IRenderer& renderer);
+
+        ~IImGuiRenderer() noexcept;
+
+        // Thread safety: Can only be called in rendering thread
+        virtual void CreateDeviceObjects() = 0;
+        // Thread safety: Can only be called in rendering thread
+        virtual void DestroyDeviceObjects() noexcept = 0;
+
+        // Thread safety: Can only be called in rendering thread
+        virtual void Draw(ImDrawData* drawdata) = 0;
+
+        [[nodiscard]]
+        virtual const std::string& GetName() = 0;
+
+        [[nodiscard]]
+        virtual ImTextureID ToImTextureId(const ITexture2D& tex) noexcept = 0;
     };
 }
 
