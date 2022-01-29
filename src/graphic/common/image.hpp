@@ -12,6 +12,12 @@
 
 namespace awe::graphic::common
 {
+    enum class ImageFormat
+    {
+        BMP = 1,
+        PNG
+    };
+
     namespace detailed
     {
         class ImageBase
@@ -32,7 +38,7 @@ namespace awe::graphic::common
             }
 
         protected:
-            void Copy(ImageBase& src, int channel);
+            void Copy(const ImageBase& src, int channel);
 
             void Swap(ImageBase& other) noexcept;
 
@@ -55,6 +61,17 @@ namespace awe::graphic::common
             bool Allocate(glm::ivec2 size, int channel);
             void Release() noexcept;
 
+            bool WriteFile(
+                const char8_t* file,
+                int channel,
+                ImageFormat format
+            );
+            bool WriteStream(
+                std::ostream& os,
+                int channel,
+                ImageFormat format
+            );
+
             [[nodiscard]]
             constexpr void* RawData() const noexcept { return m_raw_data; }
 
@@ -69,7 +86,7 @@ namespace awe::graphic::common
     {
         typedef detailed::ImageBase Super;
     public:
-        typedef std::byte DataType;
+        using DataType = std::byte[Channel];
         typedef const DataType ConstDataType;
 
         Image2D() noexcept = default;
@@ -78,7 +95,7 @@ namespace awe::graphic::common
         Image2D(const Image2D& rhs)
             : ImageBase()
         {
-            Copy(rhs, Channel);
+            Super::Copy(rhs, Channel);
         }
 
         Image2D& operator=(Image2D&& rhs) noexcept
@@ -103,28 +120,50 @@ namespace awe::graphic::common
         }
         bool Copy(const std::byte* bytes, glm::ivec2 size)
         {
-            if(!Allocate(size, Channel))
+            if(!Super::Allocate(size, Channel))
                 return false;
             const std::size_t length = size.x * size.y * Channel;
             std::memcpy(RawData(), bytes, length);
             return true;
         }
+        bool Allocate(glm::ivec2 size)
+        {
+            if(!Super::Allocate(size, Channel))
+                return false;
+            const std::size_t length = size.x * size.y * Channel;
+            std::memset(RawData(), 0, length);
+            return true;
+        }
+
+        bool Write(const std::filesystem::path& file, ImageFormat format = ImageFormat::PNG)
+        {
+            return WriteFile(file.u8string().c_str(), Channel, format);
+        }
+        bool Write(std::ostream& os, ImageFormat format = ImageFormat::PNG)
+        {
+            return WriteStream(os, Channel, format);
+        }
 
         [[nodiscard]]
         DataType& operator[](glm::uvec2 coord)
         {
-            return Data()[Index(coord)];
+            return *(DataType*)(Data() + Index(coord));
         }
         [[nodiscard]]
         ConstDataType& operator[](glm::uvec2 coord) const
         {
-            return Data()[Index(coord)];
+            return *(ConstDataType*)(Data() + Index(coord));
         }
 
         [[nodiscard]]
-        ConstDataType* Data() const noexcept
+        std::byte* Data() noexcept
         {
-            return static_cast<ConstDataType*>(RawData());
+            return static_cast<std::byte*>(RawData());
+        }
+        [[nodiscard]]
+        const std::byte* Data() const noexcept
+        {
+            return static_cast<const std::byte*>(RawData());
         }
 
         void Swap(Image2D& other) noexcept

@@ -20,7 +20,7 @@ namespace awe::graphic::common
             Release();
         }
 
-        void ImageBase::Copy(ImageBase& src, int channel)
+        void ImageBase::Copy(const ImageBase& src, int channel)
         {
             if(!src.m_raw_data)
                 return;
@@ -124,6 +124,7 @@ namespace awe::graphic::common
                 return false;
             Release();
             m_raw_data = tmp;
+            m_size = size;
             return true;
         }
         void ImageBase::Release() noexcept
@@ -131,6 +132,73 @@ namespace awe::graphic::common
             stbi_image_free(m_raw_data);
             m_raw_data = nullptr;
             m_size = glm::ivec2(0);
+        }
+
+        bool ImageBase::WriteFile(
+            const char8_t* file,
+            int channel,
+            ImageFormat format
+        ) {
+            stbi_flip_vertically_on_write(true);
+            switch(format)
+            {
+                case ImageFormat::BMP:
+                    return stbi_write_bmp(
+                        (const char*)file,
+                        m_size[0], m_size[1],
+                        channel,
+                        m_raw_data
+                    );
+
+                case ImageFormat::PNG:
+                    return stbi_write_png(
+                        (const char*)file,
+                        m_size[0], m_size[1],
+                        channel,
+                        m_raw_data,
+                        channel * sizeof(std::byte)
+                    );
+
+                default:
+                    return false;
+            }
+        }
+
+        bool ImageBase::WriteStream(
+            std::ostream& os,
+            int channel,
+            ImageFormat format
+        ) {
+            stbi_write_func* func = [](void* os, void* data, int size)
+            {
+                static_cast<std::ostream*>(os)->write((const char*)data, size);
+            };
+
+            stbi_flip_vertically_on_write(true);
+            switch(format)
+            {
+                case ImageFormat::BMP:
+                    return stbi_write_bmp_to_func(
+                        func,
+                        &os,
+                        m_size[0], m_size[1],
+                        channel,
+                        m_raw_data
+                    );
+
+                case ImageFormat::PNG:
+                    return stbi_write_png_to_func(
+                        func,
+                        &os,
+                        m_size[0], m_size[1],
+                        channel,
+                        m_raw_data,
+                        channel * sizeof(std::byte)
+                    );
+
+                default:
+                    return false;
+            }
         }
     }
 }

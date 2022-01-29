@@ -19,6 +19,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "drawcall.hpp"
+#include "common/font.hpp"
 
 
 namespace awe::window
