@@ -17,7 +17,7 @@ namespace awe::graphic
     IDrawCall::IDrawCall(IRenderer& renderer)
         : Super(renderer)
     {
-        m_textures.reserve(renderer.MaxTextureUnit());
+        m_textures.reserve(renderer.MaxTextureUnits());
     }
 
     void IDrawCall::Submit()
@@ -63,9 +63,9 @@ namespace awe::graphic
     {
         if(m_textures.size() < unit + 1)
         {
-            if(unit > GetRenderer().MaxTextureUnit())
+            if(unit > GetRenderer().MaxTextureUnits())
             {
-                throw std::invalid_argument("unit > renderer.MaxTextureUnit()");
+                throw std::invalid_argument("unit > renderer.MaxTextureUnits()");
             }
             m_textures.resize(unit + 1);
         }

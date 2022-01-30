@@ -114,7 +114,11 @@ namespace awe::graphic::opengl3
         std::future<std::string> info_result = info_promise.get_future();
         PushQueryCommand(detailed::GenerateTask<std::string>(
             std::move(info_promise),
-            std::bind(&Renderer::RendererInfo, this)
+            [this]()
+            {
+                LoadGLInfo();
+                return RendererInfo();
+            }
         ));
         return std::move(info_result);
     }
@@ -132,6 +136,14 @@ namespace awe::graphic::opengl3
     bool Renderer::IsDataTransposeSupported() const
     {
         return true;
+    }
+    glm::uvec2 Renderer::MaxTextureSize() const
+    {
+        return glm::uvec2(m_glinfo.max_texture_size);
+    }
+    std::size_t Renderer::MaxTextureUnits() const
+    {
+        return m_glinfo.max_texture_units;
     }
 
     std::unique_ptr<Mesh> Renderer::CreateMesh(bool dynamic)
@@ -189,6 +201,12 @@ namespace awe::graphic::opengl3
         Super::DeleteData();
     }
 
+    void Renderer::LoadGLInfo()
+    {
+        m_glinfo.max_texture_size = GetInteger(GL_MAX_TEXTURE_SIZE);
+        m_glinfo.max_texture_units = GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS);
+    }
+
     void Renderer::CreateContext(bool debug)
     {
         assert(!m_context);
@@ -238,7 +256,7 @@ namespace awe::graphic::opengl3
     }
 
 
-    std::string Renderer::RendererInfo()
+    std::string Renderer::RendererInfo() const
     {
         using namespace std;
         stringstream ss;
@@ -252,14 +270,12 @@ namespace awe::graphic::opengl3
 
         ss << "Driver Support" << endl;
         ss
-            << "  Max Texture Size: " << opengl3::GetInteger(GL_MAX_TEXTURE_SIZE) << endl
-            << "  Max Texture Image Unit: " << opengl3::GetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) << endl;
+            << "  Max Texture Size: " << m_glinfo.max_texture_size << endl
+            << "  Max Texture Image Unit: " << m_glinfo.max_texture_units << endl;
 
         ss << "Context" << endl;
-        GLint flags = 0;
-        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
         ss
-            << "  Flags: " << fmt::format("0x{0:08X} (0b{0:b})", flags) << endl;
+            << "  Flags: " << fmt::format("0x{0:08X} (0b{0:b})", GetInteger(GL_CONTEXT_FLAGS)) << endl;
 
         ss << "Extensions" << endl;
         ss
@@ -285,6 +301,7 @@ namespace awe::graphic::opengl3
             {
                 AttachDebugCallback();
             }
+            LoadGLInfo();
             InitImGuiImpl();
             ExecuteQueryCommand();
             NewData();

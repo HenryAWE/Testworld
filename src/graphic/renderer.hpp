@@ -61,7 +61,8 @@ namespace awe::graphic
         virtual std::string GetRendererName() = 0;
         virtual bool IsRuntimeShaderCompilationSupported() const;
         virtual bool IsDataTransposeSupported() const;
-        virtual std::size_t MaxTextureUnit() const;
+        virtual glm::uvec2 MaxTextureSize() const;
+        virtual std::size_t MaxTextureUnits() const;
 
         // Data
         [[nodiscard]]

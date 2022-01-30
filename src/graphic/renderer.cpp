@@ -83,7 +83,11 @@ namespace awe::graphic
     {
         return false;
     }
-    std::size_t IRenderer::MaxTextureUnit() const
+    glm::uvec2 IRenderer::MaxTextureSize() const
+    {
+        return glm::uvec2(1024);
+    }
+    std::size_t IRenderer::MaxTextureUnits() const
     {
         return 16;
     }

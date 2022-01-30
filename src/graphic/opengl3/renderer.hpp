@@ -69,6 +69,8 @@ namespace awe::graphic::opengl3
         glm::ivec2 GetDrawableSize() const override;
         bool IsRuntimeShaderCompilationSupported() const override;
         bool IsDataTransposeSupported() const override;
+        glm::uvec2 MaxTextureSize() const override;
+        std::size_t MaxTextureUnits() const override;
 
         // Resources generator
         std::unique_ptr<Mesh> CreateMesh(bool dynamic = false);
@@ -79,6 +81,12 @@ namespace awe::graphic::opengl3
         void PushClearCommand(std::function<void()> func);
 
     protected:
+        struct OpenGLInfo
+        {
+            GLint max_texture_size = 1024;
+            GLint max_texture_units = 16;
+        };
+
         Mesh* NewMesh(bool dynamic) override;
         ShaderProgram* NewShaderProgram() override;
         Texture2D* NewTexture2D() override;
@@ -86,6 +94,9 @@ namespace awe::graphic::opengl3
 
         void NewData() override;
         void DeleteData() noexcept override;
+
+        void LoadGLInfo();
+        OpenGLInfo m_glinfo;
 
     private:
         bool m_initialized = false;
@@ -98,7 +109,7 @@ namespace awe::graphic::opengl3
         void ShutdownImGuiImpl();
         void ImGuiImplRenderDrawData();
 
-        std::string RendererInfo();
+        std::string RendererInfo() const;
 
         SDL_GLContext m_context = nullptr;
         bool m_debug = false;
